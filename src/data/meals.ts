@@ -7,6 +7,8 @@
  *   - category-extra-*.js（moreFatLoss / moreMuscleGain / moreMaintain / moreNutrition）：四大分类二次扩充（共 108 道）
  *   - home-meals/a~f.js（homeDishesA~F）：家常菜六批（每批 50 道，共 300 道）
  *   - therapy-meals.ts / bakery-meals.ts / snack-meals.ts（therapyMeals / bakeryMeals / snackMeals）：食疗食补 / 烘焙 / 小吃（各 50 道，共 150 道）
+ *   - lxj-home-a~c.ts / lxj-extra.ts（lxjHomeA~C / lxjExtra）：收录《老乡鸡菜品溯源报告》整理菜品（家常菜 118 / 小吃 18 / 食疗食补 1 / 营养餐 1，共 138 道）
+ * 全库合计 797 道
  *
  * schema: {
  *   id: string,                    // 唯一标识（全库唯一）
@@ -42,6 +44,10 @@ import { moreNutrition } from './category-extra-nutrition'
 import { therapyMeals } from './therapy-meals'
 import { bakeryMeals } from './bakery-meals'
 import { snackMeals } from './snack-meals'
+import { lxjHomeA } from './lxj-home-a'
+import { lxjHomeB } from './lxj-home-b'
+import { lxjHomeC } from './lxj-home-c'
+import { lxjExtra } from './lxj-extra'
 
 export const meals = [
   /* ---------------- 减脂餐 fat-loss ---------------- */
@@ -889,6 +895,11 @@ export const meals = [
   ...therapyMeals,
   ...bakeryMeals,
   ...snackMeals,
+  /* ---------------- 老乡鸡收录（lxj-home-a~c.ts 118 道 / lxj-extra.ts 20 道，共 138 道） ---------------- */
+  ...lxjHomeA,
+  ...lxjHomeB,
+  ...lxjHomeC,
+  ...lxjExtra,
 ] satisfies Meal[]
 
 /** 分类展示元信息：标签 / 图标 / 卡片渐变色 / 分类徽章配色（纯展示配置，不参与业务逻辑） */
