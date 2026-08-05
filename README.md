@@ -36,6 +36,7 @@
 | [React](https://react.dev/) 18 | UI 组件与状态管理（Hooks 驱动） |
 | [Vite](https://vitejs.dev/) 6 | 开发服务器与构建工具 |
 | [Tailwind CSS](https://tailwindcss.com/) v4 | 原子化样式（`@tailwindcss/vite` 插件） |
+| TypeScript ✓ | 全库静态类型（strict 模式） |
 | 纯前端 SPA | 无后端依赖，509 道食谱数据全部本地打包 |
 
 ## 🚀 快速开始
@@ -147,7 +148,7 @@ EveryDay_Food/
 │   ├── hooks/                  # useMeals / useNutrition / useFamilyTable / useDailyPlan…
 │   ├── lib/                    # nutrition.js 营养算法 / shoppingList.js 购物清单解析
 │   ├── App.jsx                 # 应用入口（首页 / 菜谱库 / 年夜饭 / 我的餐桌 四模块）
-│   ├── main.jsx
+│   ├── main.tsx
 │   └── index.css               # Tailwind v4 + 暗色玻璃拟态主题
 ├── docs/
 │   └── screenshots/            # README 截图
