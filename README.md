@@ -1,6 +1,6 @@
 # 🍜 每日食光 · EveryDay Food
 
-> 深夜食堂风的暗色玻璃拟态中文美食应用 —— 509 道家常菜与营养食谱，热量计算、智能三餐搭配、年夜饭生成器、家庭餐桌与购物清单，一个纯前端 SPA 全搞定。
+> 深夜食堂风的暗色玻璃拟态中文美食应用 —— 659 道家常菜、营养食谱与食疗/烘焙/小吃，热量计算、智能三餐搭配、年夜饭生成器、家庭餐桌与购物清单，一个纯前端 SPA 全搞定。
 
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
@@ -10,8 +10,8 @@
 
 ## ✨ 功能特性
 
-- 📚 **509 道食谱库**：减脂 / 增肌 / 维持 / 营养四大类各 50+ 道，外加 300 道家常菜，每道菜含食材、做法步骤与完整营养数据
-- 🔍 **四维筛选**：分类（减脂 / 增肌 / 维持 / 营养 / 家常）+ 餐次（早 / 午 / 晚）+ 地区菜系（川 / 湘 / 粤 / 鄂 / 鲁 / 苏浙 / 北方）+ 关键词搜索与 kcal / 蛋白质排序，组合过滤即时生效
+- 📚 **659 道食谱库**：减脂 / 增肌 / 维持 / 营养四大类各 50+ 道，外加 300 道家常菜，以及食疗食补 / 烘焙 / 小吃各 50 道，每道菜含食材、做法步骤与完整营养数据
+- 🔍 **四维筛选**：分类（减脂 / 增肌 / 维持 / 营养 / 家常 / 食疗食补 / 烘焙 / 小吃）+ 餐次（早 / 午 / 晚）+ 地区菜系（川 / 湘 / 粤 / 鄂 / 鲁 / 苏浙 / 北方）+ 关键词搜索与 kcal / 蛋白质排序，组合过滤即时生效
 - 🔥 **热量计算器**：输入身体参数 → BMI（中国成人标准）、BMR（Mifflin-St Jeor 公式）、TDEE、目标热量、宏量克数（4-4-9 法则）与三餐热量分配；结果自动持久化到 localStorage，刷新不丢
 - 🍽️ **每日三餐智能搭配**：按「早餐 / 午餐 / 晚餐」餐次从全库抽取，三餐互不重复；热量计算器一键「生成今日搭配」，结果即替换当日计划
 - 🧧 **年夜饭生成器**：凉菜 / 硬菜 / 热菜 / 汤 / 主食 / 甜品六池随机配出一桌 11 道菜（2+3+3+1+1+1），支持整桌重抽与单道「换一道」，配好一键加入家庭餐桌
@@ -37,7 +37,7 @@
 | [Vite](https://vitejs.dev/) 6 | 开发服务器与构建工具 |
 | [Tailwind CSS](https://tailwindcss.com/) v4 | 原子化样式（`@tailwindcss/vite` 插件） |
 | TypeScript ✓ | 全库静态类型（strict 模式） |
-| 纯前端 SPA | 无后端依赖，509 道食谱数据全部本地打包 |
+| 纯前端 SPA | 无后端依赖，659 道食谱数据全部本地打包 |
 
 ## 🚀 快速开始
 
@@ -83,7 +83,7 @@ npx wrangler pages deploy dist --project-name every-day-food
 
 ### 食谱总量与分类
 
-509 道菜全部本地打包（`src/data/` 分批文件合并）：
+659 道菜全部本地打包（`src/data/` 分批文件合并）：
 
 | 分类 | 数量 |
 | --- | --- |
@@ -92,16 +92,19 @@ npx wrangler pages deploy dist --project-name every-day-food
 | 维持餐（maintain） | 52 |
 | 营养餐（nutrition） | 52 |
 | 家常菜（home） | 300 |
-| **合计** | **509** |
+| 食疗食补（therapy） | 50 |
+| 烘焙（bakery） | 50 |
+| 小吃（snack） | 50 |
+| **合计** | **659** |
 
 ### 菜系分布
 
 | 菜系 | 数量 | | 菜系 | 数量 |
 | --- | --- | --- | --- | --- |
-| 家常 generic | 309 | | 苏浙 suzhe | 25 |
-| 北方 bei | 68 | | 鲁菜 lu | 9 |
-| 粤菜 yue | 53 | | 鄂菜 e | 5 |
-| 川菜 chuan | 37 | | 湘菜 xiang | 3 |
+| 家常 generic | 403 | | 苏浙 suzhe | 37 |
+| 北方 bei | 76 | | 鲁菜 lu | 11 |
+| 粤菜 yue | 74 | | 鄂菜 e | 9 |
+| 川菜 chuan | 44 | | 湘菜 xiang | 5 |
 
 ### 数据字段 Schema
 
@@ -111,7 +114,7 @@ npx wrangler pages deploy dist --project-name every-day-food
 | --- | --- | --- |
 | `id` | `string` | 唯一标识（全库唯一） |
 | `name` | `string` | 中文菜名 |
-| `category` | `string` | 分类：`fat-loss` / `muscle-gain` / `maintain` / `nutrition` / `home` |
+| `category` | `string` | 分类：`fat-loss` / `muscle-gain` / `maintain` / `nutrition` / `home` / `therapy` / `bakery` / `snack` |
 | `cuisine` | `string` | 地区菜系：`chuan` / `xiang` / `yue` / `e` / `lu` / `suzhe` / `bei` / `generic` |
 | `emoji` | `string` | 食物图标（渐变底色 + emoji 代替真实图片） |
 | `kcal` | `number` | 每份热量（kcal） |
@@ -140,10 +143,11 @@ EveryDay_Food/
 │   ├── api/
 │   │   └── meals.js            # 数据访问层（模拟异步，可无缝替换为真实接口）
 │   ├── components/             # UI 组件：卡片 / 弹窗 / 计算器 / 年夜饭 / 家庭餐桌…
-│   ├── data/                   # 509 道食谱数据（分批文件合并）
+│   ├── data/                   # 659 道食谱数据（分批文件合并）
 │   │   ├── meals.js            # 合并入口 + 基础菜谱 + 分类展示元信息
 │   │   ├── category-expansion.js
 │   │   ├── category-extra-*.js # 四大分类二次扩充
+│   │   ├── therapy-meals.js / bakery-meals.js / snack-meals.js  # 食疗食补 / 烘焙 / 小吃（各 50 道）
 │   │   └── home-meals/         # a~f 六批家常菜（每批 50 道）
 │   ├── hooks/                  # useMeals / useNutrition / useFamilyTable / useDailyPlan…
 │   ├── lib/                    # nutrition.js 营养算法 / shoppingList.js 购物清单解析

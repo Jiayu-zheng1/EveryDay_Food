@@ -9,8 +9,8 @@
 /** 餐次（支撑「今日三餐搭配」按餐次抽取） */
 export type MealType = 'breakfast' | 'lunch' | 'dinner'
 
-/** 食谱分类 */
-export type Category = 'fat-loss' | 'muscle-gain' | 'maintain' | 'nutrition' | 'home'
+/** 食谱分类（新增食疗食补/烘焙/小吃） */
+export type Category = 'fat-loss' | 'muscle-gain' | 'maintain' | 'nutrition' | 'home' | 'therapy' | 'bakery' | 'snack'
 
 /** 地区菜系 */
 export type Cuisine = 'chuan' | 'xiang' | 'yue' | 'e' | 'lu' | 'suzhe' | 'bei' | 'generic'

@@ -117,7 +117,7 @@ export default function Hero({ mealCount, onNavigate }: HeroProps) {
         </h1>
 
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-mist sm:text-base">
-          四大分类 {mealCount} 道健康食谱，每份热量与三大营养素清清楚楚。
+          八大分类 {mealCount} 道健康食谱，每份热量与三大营养素清清楚楚。
           不用再纠结热量计算，照着做就好。
         </p>
 
@@ -148,7 +148,7 @@ export default function Hero({ mealCount, onNavigate }: HeroProps) {
           </span>
           <span className="size-1 rounded-full bg-white/20" />
           <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-mist">
-            <strong className="text-base font-black text-snow">4</strong> 大分类
+            <strong className="text-base font-black text-snow">8</strong> 大分类
           </span>
           <span className="size-1 rounded-full bg-white/20" />
           <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-mist">

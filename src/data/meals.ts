@@ -6,11 +6,12 @@
  *   - category-expansion.js（moreCategoryMeals）：四大分类扩充（每类 15 道，共 60 道）
  *   - category-extra-*.js（moreFatLoss / moreMuscleGain / moreMaintain / moreNutrition）：四大分类二次扩充（共 108 道）
  *   - home-meals/a~f.js（homeDishesA~F）：家常菜六批（每批 50 道，共 300 道）
+ *   - therapy-meals.ts / bakery-meals.ts / snack-meals.ts（therapyMeals / bakeryMeals / snackMeals）：食疗食补 / 烘焙 / 小吃（各 50 道，共 150 道）
  *
  * schema: {
  *   id: string,                    // 唯一标识（全库唯一）
  *   name: string,                  // 中文菜名（同一 category 内唯一）
- *   category: 'fat-loss' | 'muscle-gain' | 'maintain' | 'nutrition' | 'home',
+ *   category: 'fat-loss' | 'muscle-gain' | 'maintain' | 'nutrition' | 'home' | 'therapy' | 'bakery' | 'snack',
  *   emoji: string,                 // 食物图标（渐变底色 + emoji 代替真实图片）
  *   kcal: number,                  // 每份热量（kcal）
  *   desc: string,                  // 一句话简介
@@ -38,6 +39,9 @@ import { moreFatLoss } from './category-extra-fatloss'
 import { moreMuscleGain } from './category-extra-muscle'
 import { moreMaintain } from './category-extra-maintain'
 import { moreNutrition } from './category-extra-nutrition'
+import { therapyMeals } from './therapy-meals'
+import { bakeryMeals } from './bakery-meals'
+import { snackMeals } from './snack-meals'
 
 export const meals = [
   /* ---------------- 减脂餐 fat-loss ---------------- */
@@ -881,6 +885,10 @@ export const meals = [
   ...homeDishesD,
   ...homeDishesE,
   ...homeDishesF,
+  /* ---------------- 食疗食补 / 烘焙 / 小吃（therapy / bakery / snack-meals.ts，各 50 道） ---------------- */
+  ...therapyMeals,
+  ...bakeryMeals,
+  ...snackMeals,
 ] satisfies Meal[]
 
 /** 分类展示元信息：标签 / 图标 / 卡片渐变色 / 分类徽章配色（纯展示配置，不参与业务逻辑） */
@@ -914,5 +922,23 @@ export const CATEGORY_META = {
     emoji: '🍳',
     gradient: 'from-amber-400/50 via-orange-400/40 to-rose-400/30',
     chip: 'border-amber-400/25 bg-amber-400/10 text-amber-300',
+  },
+  therapy: {
+    label: '食疗食补',
+    emoji: '🍵',
+    gradient: 'from-red-400/50 via-rose-400/40 to-pink-400/30',
+    chip: 'border-red-400/25 bg-red-400/10 text-red-300',
+  },
+  bakery: {
+    label: '烘焙',
+    emoji: '🧁',
+    gradient: 'from-yellow-400/50 via-amber-400/40 to-orange-400/30',
+    chip: 'border-yellow-400/25 bg-yellow-400/10 text-yellow-300',
+  },
+  snack: {
+    label: '小吃',
+    emoji: '🍡',
+    gradient: 'from-fuchsia-400/50 via-pink-400/40 to-rose-400/30',
+    chip: 'border-fuchsia-400/25 bg-fuchsia-400/10 text-fuchsia-300',
   },
 }
