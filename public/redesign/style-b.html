@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 深夜食堂 | 方案 B — 沉浸式暗色实验风</title>
+  <meta name="description" content="每日食光 网站重构视觉 Demo · 方案 B：沉浸式暗色实验风 · kinetic typography + glassmorphism" />
+
+  <!-- Tailwind v4 browser CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Fonts: Space Grotesk (数字/英文) + Noto Sans SC (中文)，font-display swap + 系统字体回退 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ============ 设计令牌 ============ */
+    :root {
+      --bg: #0b0a10;
+      --amber: #f5a524;
+      --purple: #8b7cf6;
+      --glass: rgba(255, 255, 255, 0.04);
+      --stroke: rgba(255, 255, 255, 0.08);
+      --font-en: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-cn: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: clip; }
+
+    body {
+      background: var(--bg);
+      color: rgba(255, 255, 255, 0.88);
+      font-family: var(--font-cn);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(245, 165, 36, 0.35); color: #fff; }
+
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #0b0a10; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(245, 165, 36, 0.5); }
+
+    /* ============ 背景层 ============ */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+      background-size: 56px 56px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 75%);
+    }
+
+    .blob {
+      position: fixed; border-radius: 9999px; z-index: 0; pointer-events: none;
+      filter: blur(130px); will-change: transform;
+    }
+    .blob-1 { width: 46vw; height: 46vw; left: -12vw; top: -14vh; background: rgba(139, 124, 246, 0.22); }
+    .blob-2 { width: 40vw; height: 40vw; right: -14vw; top: 26vh;  background: rgba(245, 165, 36, 0.14); }
+    .blob-3 { width: 38vw; height: 38vw; left: 22vw;  top: 92vh;  background: rgba(139, 124, 246, 0.13); }
+
+    #cursorLight {
+      position: fixed; inset: 0; z-index: 3; pointer-events: none;
+      opacity: 0.06; mix-blend-mode: screen;
+      background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%), #f5a524 0%, #8b7cf6 38%, transparent 68%);
+    }
+
+    /* ============ 玻璃基元 ============ */
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .num { font-family: var(--font-en); font-feature-settings: "tnum" 1; letter-spacing: -0.02em; }
+
+    /* ============ 顶部导航 ============ */
+    #nav {
+      transition: background-color 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+    }
+    #nav.scrolled {
+      background: rgba(11, 10, 16, 0.66);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: ""; position: absolute; left: 0; bottom: -4px; height: 1px; width: 100%;
+      background: linear-gradient(90deg, var(--amber), var(--purple));
+      transform: scaleX(0); transform-origin: left; transition: transform 0.35s ease;
+    }
+    .nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+    .nav-link.active { color: var(--amber); }
+
+    /* ============ Hero 滚动 kinetic 标题 ============ */
+    .kw { display: inline-block; overflow: hidden; vertical-align: bottom; }
+    .kw-in {
+      display: inline-block; will-change: transform, opacity;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    }
+    .hero-title-zh {
+      font-family: var(--font-cn);
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      line-height: 1.06;
+      font-size: clamp(2.6rem, 7.2vw, 5.6rem);
+    }
+    .hero-word-amber { color: var(--amber); }
+    .hero-word-purple { color: var(--purple); }
+
+    .ghost-400 {
+      font-family: var(--font-en); font-weight: 700; line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.09);
+      user-select: none; pointer-events: none;
+    }
+
+    .hero-tag {
+      border: 1px solid var(--stroke);
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* ============ CTA 按钮光晕跟随 ============ */
+    .btn-glow { position: relative; overflow: hidden; isolation: isolate; }
+    .btn-glow::before {
+      content: ""; position: absolute; inset: -60%;
+      background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.5), transparent 70%);
+      opacity: 0; transition: opacity 0.35s ease; z-index: -1; pointer-events: none;
+    }
+    .btn-glow:hover::before { opacity: 1; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--amber), #d98a12);
+      color: #14100a;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, filter 0.3s ease;
+      box-shadow: 0 0 0 rgba(245, 165, 36, 0);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px -12px rgba(245, 165, 36, 0.55); filter: brightness(1.06); }
+    .btn-ghost { transition: border-color 0.3s ease, transform 0.25s ease, background-color 0.3s ease; }
+    .btn-ghost:hover { border-color: rgba(139, 124, 246, 0.65); transform: translateY(-2px); background: rgba(139, 124, 246, 0.08); }
+
+    /* ============ Marquee ============ */
+    .marquee {
+      overflow: hidden; white-space: nowrap;
+      border-top: 1px solid var(--stroke); border-bottom: 1px solid var(--stroke);
+      background: rgba(255, 255, 255, 0.02);
+      transform: rotate(-1.2deg) scale(1.02);
+      margin-left: -2rem; margin-right: -2rem;
+    }
+    .marquee-track {
+      display: flex; width: max-content;
+      animation: marquee-scroll 26s linear infinite;
+      will-change: transform;
+    }
+    .marquee:hover .marquee-track { animation-play-state: paused; }
+    .marquee-seg { display: flex; align-items: center; flex-shrink: 0; }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ============ 滚动入场 ============ */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      transition-delay: var(--d, 0ms);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    /* ============ 卡片 tilt 3D ============ */
+    .tilt-card {
+      transform-style: preserve-3d;
+      transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0px));
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+      will-change: transform;
+    }
+    .tilt-card:hover { border-color: rgba(255, 255, 255, 0.16); box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.75); }
+    .tilt-card .glare {
+      position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
+      background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.10), transparent 65%);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .tilt-card:hover .glare { opacity: 1; }
+    .card-inner { transform: translateZ(34px); }
+
+    .kcal-chip {
+      font-family: var(--font-en);
+      border: 1px solid rgba(245, 165, 36, 0.35);
+      color: var(--amber);
+      background: rgba(245, 165, 36, 0.08);
+    }
+
+    /* ============ Chips ============ */
+    .chip {
+      border: 1px solid var(--stroke); background: var(--glass);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      transition: all 0.3s ease; cursor: pointer;
+    }
+    .chip:hover { border-color: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+    .chip.active { background: var(--amber); border-color: var(--amber); color: #14100a; font-weight: 700; }
+    .chip .chip-cnt { opacity: 0.55; font-family: var(--font-en); font-size: 0.72rem; }
+
+    /* 卡片切换动画 */
+    .recipe-card { transition: opacity 0.4s ease, transform 0.4s ease, scale 0.4s ease; }
+    .recipe-card.hidden-card { opacity: 0; transform: scale(0.94); pointer-events: none; position: absolute; }
+
+    /* ============ 家常菜功能区 ============ */
+    .big-recipe {
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(480px 300px at 82% 18%, rgba(245, 165, 36, 0.16), transparent 70%),
+        radial-gradient(420px 300px at 8% 90%, rgba(139, 124, 246, 0.14), transparent 70%),
+        var(--glass);
+    }
+    .big-recipe .emoji-float { animation: emoji-float 5s ease-in-out infinite; }
+    @keyframes emoji-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-14px) rotate(3deg); }
+    }
+
+    .step-num {
+      font-family: var(--font-en); color: var(--purple);
+      border: 1px solid rgba(139, 124, 246, 0.35);
+      background: rgba(139, 124, 246, 0.08);
+    }
+
+    .see-all-btn {
+      border: 1px solid var(--stroke);
+      transition: all 0.3s ease;
+    }
+    .see-all-btn:hover { border-color: var(--amber); color: var(--amber); transform: translateY(-2px); box-shadow: 0 14px 40px -18px rgba(245, 165, 36, 0.5); }
+
+    /* ============ Footer ============ */
+    .footer-ghost {
+      font-family: var(--font-en); font-weight: 700; line-height: 0.8;
+      color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.06);
+      user-select: none; pointer-events: none;
+    }
+
+    /* ============ 滚动条 / 进度条 ============ */
+    #scrollProgress {
+      position: fixed; top: 0; left: 0; height: 2px; z-index: 60;
+      width: 0%; background: linear-gradient(90deg, var(--amber), var(--purple));
+    }
+
+    /* ============ 无障碍：减少动效 ============ */
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track, .emoji-float { animation: none !important; }
+      .kw-in { transition: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+  <!-- 滚动进度条 -->
+  <div id="scrollProgress"></div>
+
+  <!-- 背景层 -->
+  <div class="bg-grid"></div>
+  <div class="blob blob-1" id="blob1"></div>
+  <div class="blob blob-2" id="blob2"></div>
+  <div class="blob blob-3" id="blob3"></div>
+  <div id="cursorLight" aria-hidden="true"></div>
+
+  <!-- ============ 顶部导航 ============ -->
+  <header id="nav" class="fixed top-0 left-0 right-0 z-50 border-b border-transparent">
+    <nav class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between" aria-label="主导航">
+      <a href="#top" class="flex items-center gap-2.5 group">
+        <span class="text-xl leading-none">🍱</span>
+        <span class="font-black text-lg tracking-wide">每日<span class="text-[#f5a524]">食光</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-7 text-[15px] text-white/60">
+        <a class="nav-link" href="#recipes" data-chip="fat-loss">减脂</a>
+        <a class="nav-link" href="#recipes" data-chip="muscle-gain">增肌</a>
+        <a class="nav-link" href="#recipes" data-chip="maintain">维持</a>
+        <a class="nav-link" href="#recipes" data-chip="nutrition">营养</a>
+        <a class="nav-link" href="#home-style">家常菜</a>
+      </div>
+      <a href="#recipes" class="btn-glow btn-primary num rounded-full px-5 py-2 text-sm font-semibold hidden sm:inline-flex items-center gap-2">
+        今晚吃什么 <span aria-hidden="true">→</span>
+      </a>
+    </nav>
+  </header>
+
+  <main id="top" class="relative z-10">
+    <!-- ============ Hero ============ -->
+    <section class="relative min-h-screen flex flex-col justify-center pt-28 pb-16 overflow-hidden">
+      <!-- 巨型 400 轮廓字（视差背景文字） -->
+      <div class="ghost-400 num absolute -right-8 sm:right-6 top-24 text-[26vw] select-none" id="ghost400" aria-hidden="true">400</div>
+
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 w-full">
+        <div class="grid lg:grid-cols-12 gap-10 items-center">
+          <!-- 标题区 -->
+          <div class="lg:col-span-7 relative z-10">
+            <p class="reveal num inline-flex items-center gap-2 text-sm tracking-[0.3em] uppercase text-white/45 mb-8 border border-white/10 rounded-full px-4 py-1.5 bg-white/[0.03] backdrop-blur-md">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#f5a524] animate-pulse"></span>
+              Late Night Kitchen · 深夜食堂
+            </p>
+
+            <h1 class="hero-title-zh" id="heroTitle">
+              <span class="kw"><span class="kw-in">今天</span></span>
+              <span class="kw"><span class="kw-in">吃</span></span>
+              <span class="kw"><span class="kw-in hero-word-amber">什么</span></span>
+              <span class="kw"><span class="kw-in">，</span></span>
+              <br class="hidden sm:block" />
+              <span class="kw"><span class="kw-in">替你</span></span>
+              <span class="kw"><span class="kw-in">算好了</span></span>
+              <span class="kw"><span class="kw-in">卡路里</span></span>
+            </h1>
+
+            <p class="reveal mt-7 text-white/55 text-lg leading-relaxed max-w-xl" style="--d:120ms">
+              每道菜的热量、营养、搭配都替你算好了——<span class="num text-[#f5a524] font-semibold">400</span> 道家常菜谱，
+              一荤一素一汤，今晚不用再纠结。
+            </p>
+
+            <!-- CTA -->
+            <div class="reveal mt-10 flex flex-wrap items-center gap-4" style="--d:220ms">
+              <a href="#recipes" class="btn-glow btn-primary num rounded-full px-8 py-4 font-bold text-[17px]">
+                🍳 开始今晚的饭
+              </a>
+              <a href="#home-style" class="btn-glow btn-ghost glass rounded-full px-8 py-4 font-medium text-[17px] text-white/85">
+                看看今日推荐 <span aria-hidden="true">↓</span>
+              </a>
+            </div>
+
+            <!-- 数据标签 -->
+            <div class="reveal mt-12 flex flex-wrap gap-3" style="--d:320ms">
+              <span class="hero-tag num rounded-full px-5 py-2.5 text-sm">
+                <strong class="text-[#f5a524] text-lg mr-1">400</strong>道食谱
+              </span>
+              <span class="hero-tag num rounded-full px-5 py-2.5 text-sm">
+                <strong class="text-[#8b7cf6] text-lg mr-1">4</strong>大分类
+              </span>
+              <span class="hero-tag num rounded-full px-5 py-2.5 text-sm">
+                每道菜<span class="text-[#f5a524] font-semibold"> kcal </span>全标注
+              </span>
+            </div>
+          </div>
+
+          <!-- 右侧悬浮菜卡 -->
+          <div class="lg:col-span-5 hidden lg:block relative z-10">
+            <div class="tilt-card glass rounded-3xl p-8" data-tilt>
+              <div class="glare"></div>
+              <div class="card-inner">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <p class="num text-xs tracking-[0.25em] uppercase text-white/40 mb-2">Today's Pick</p>
+                    <h3 class="font-black text-3xl">红烧肉<span class="ml-2">🍖</span></h3>
+                    <p class="mt-2 text-white/55">肥而不腻，入口即化的经典下饭菜</p>
+                  </div>
+                  <span class="kcal-chip num rounded-full px-4 py-1.5 text-sm font-bold">665 kcal</span>
+                </div>
+                <div class="mt-8 rounded-2xl bg-white/[0.04] border border-white/10 p-5 grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <p class="num text-2xl font-bold text-[#f5a524]">28<small class="text-sm">g</small></p>
+                    <p class="text-xs text-white/45 mt-1">蛋白质</p>
+                  </div>
+                  <div>
+                    <p class="num text-2xl font-bold text-[#8b7cf6]">38<small class="text-sm">g</small></p>
+                    <p class="text-xs text-white/45 mt-1">脂肪</p>
+                  </div>
+                  <div>
+                    <p class="num text-2xl font-bold text-white/85">52<small class="text-sm">g</small></p>
+                    <p class="text-xs text-white/45 mt-1">碳水</p>
+                  </div>
+                </div>
+                <p class="mt-5 text-sm text-white/40 leading-relaxed">
+                  慢火炖 90 分钟 · 冰糖上色 · 佐一碗白米饭，今晚就它了。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 滚动提示 -->
+      <div class="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/35" aria-hidden="true">
+        <span class="num text-[11px] tracking-[0.35em] uppercase">Scroll</span>
+        <span class="w-px h-10 bg-gradient-to-b from-white/40 to-transparent"></span>
+      </div>
+    </section>
+
+    <!-- ============ Marquee 标语条 ============ -->
+    <section class="relative z-10 py-10 -my-2" aria-hidden="false">
+      <div class="overflow-hidden">
+        <div class="marquee">
+        <div class="marquee-track" id="marqueeTrack">
+          <div class="marquee-seg" data-seg>
+            <span class="px-6 text-2xl sm:text-3xl font-bold tracking-wide">今晚吃什么</span>
+            <span class="px-6 text-2xl sm:text-3xl num font-semibold text-[#f5a524]">· 400 道家常菜 ·</span>
+            <span class="px-6 text-2xl sm:text-3xl font-bold tracking-wide">一荤一素一汤</span>
+            <span class="px-6 text-2xl sm:text-3xl num font-semibold text-[#8b7cf6]">· kcal 全标注 ·</span>
+            <span class="px-6 text-2xl sm:text-3xl font-bold tracking-wide">减脂 · 增肌 · 维持 · 营养</span>
+            <span class="px-6 text-2xl sm:text-3xl num font-semibold text-[#f5a524]">· 深夜食堂 ·</span>
+          </div>
+          <div class="marquee-seg" data-seg>
+            <span class="px-6 text-2xl sm:text-3xl font-bold tracking-wide">今晚吃什么</span>
+            <span class="px-6 text-2xl sm:text-3xl num font-semibold text-[#f5a524]">· 400 道家常菜 ·</span>
+            <span class="px-6 text-2xl sm:text-3xl font-bold tracking-wide">一荤一素一汤</span>
+            <span class="px-6 text-2xl sm:text-3xl num font-semibold text-[#8b7cf6]">· kcal 全标注 ·</span>
+            <span class="px-6 text-2xl sm:text-3xl font-bold tracking-wide">减脂 · 增肌 · 维持 · 营养</span>
+            <span class="px-6 text-2xl sm:text-3xl num font-semibold text-[#f5a524]">· 深夜食堂 ·</span>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 菜谱库 ============ -->
+    <section id="recipes" class="relative py-24 sm:py-32">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8">
+        <div class="reveal flex flex-wrap items-end justify-between gap-6 mb-12">
+          <div>
+            <p class="num text-sm tracking-[0.3em] uppercase text-white/40 mb-4">
+              <span class="text-[#f5a524]">01</span> / Recipe Library
+            </p>
+            <h2 class="font-black text-4xl sm:text-5xl leading-tight">
+              菜谱<span class="text-[#f5a524]">库</span>
+            </h2>
+          </div>
+          <p class="text-white/50 max-w-md">
+            四大分类 + 家常菜，共 <span class="num text-[#f5a524] font-semibold">400</span> 道，
+            每张卡片的热量都替你算好了。
+          </p>
+        </div>
+
+        <!-- 分类 chips -->
+        <div class="reveal flex flex-wrap gap-3 mb-12" style="--d:100ms" id="chips" role="tablist" aria-label="菜谱分类筛选">
+          <button class="chip num rounded-full px-6 py-2.5 text-sm active" data-cat="all">全部 <span class="chip-cnt ml-1">12</span></button>
+          <button class="chip num rounded-full px-6 py-2.5 text-sm" data-cat="fat-loss">减脂 <span class="chip-cnt ml-1">3</span></button>
+          <button class="chip num rounded-full px-6 py-2.5 text-sm" data-cat="muscle-gain">增肌 <span class="chip-cnt ml-1">3</span></button>
+          <button class="chip num rounded-full px-6 py-2.5 text-sm" data-cat="maintain">维持 <span class="chip-cnt ml-1">3</span></button>
+          <button class="chip num rounded-full px-6 py-2.5 text-sm" data-cat="nutrition">营养 <span class="chip-cnt ml-1">3</span></button>
+        </div>
+
+        <!-- 12 张玻璃卡 -->
+        <div class="relative grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="recipeGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ 家常菜功能区 ============ -->
+    <section id="home-style" class="relative py-24 sm:py-32">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8">
+        <div class="reveal flex flex-wrap items-end justify-between gap-6 mb-12">
+          <div>
+            <p class="num text-sm tracking-[0.3em] uppercase text-white/40 mb-4">
+              <span class="text-[#8b7cf6]">02</span> / Home Style
+            </p>
+            <h2 class="font-black text-4xl sm:text-5xl leading-tight">
+              家常<span class="text-[#8b7cf6]">菜</span>
+            </h2>
+          </div>
+          <button class="see-all-btn num rounded-full px-7 py-3 text-sm font-semibold" data-go-recipes>
+            查看全部 <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div class="grid lg:grid-cols-5 gap-5">
+          <!-- 今日推荐大卡 -->
+          <div class="reveal lg:col-span-3 big-recipe glass rounded-3xl p-8 sm:p-10 flex flex-col justify-between min-h-[430px]" style="--d:100ms">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="num inline-flex items-center gap-2 text-xs tracking-[0.25em] uppercase text-white/45 mb-4">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#f5a524]"></span>今日推荐 · 招牌
+                </p>
+                <h3 class="font-black text-4xl sm:text-5xl leading-tight">红烧肉 <span class="emoji-float inline-block text-5xl sm:text-6xl ml-1">🍖</span></h3>
+                <p class="mt-4 text-white/60 text-lg max-w-md">肥而不腻、入口即化，冰糖炒色慢火 90 分钟——深夜最治愈的一碗。</p>
+              </div>
+              <span class="kcal-chip num rounded-full px-5 py-2 text-base font-bold shrink-0">665 kcal</span>
+            </div>
+
+            <div class="mt-8 grid sm:grid-cols-3 gap-3">
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p class="num text-xs text-white/40 mb-1">步骤 01</p>
+                <p class="text-sm text-white/75">五花肉焯水，冰糖小火炒出琥珀色</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p class="num text-xs text-white/40 mb-1">步骤 02</p>
+                <p class="text-sm text-white/75">加生抽老抽料酒，慢火炖 90 分钟</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p class="num text-xs text-white/40 mb-1">步骤 03</p>
+                <p class="text-sm text-white/75">大火收汁，撒葱花，出锅</p>
+              </div>
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center gap-4">
+              <a href="#recipes" class="btn-glow btn-primary num rounded-full px-7 py-3.5 font-bold text-sm">马上开做 →</a>
+              <span class="num text-sm text-white/45">约 100 分钟 · 2 人份</span>
+            </div>
+          </div>
+
+          <!-- 4 张小卡 -->
+          <div class="lg:col-span-2 grid grid-cols-2 gap-5 content-start">
+            <div class="reveal" style="--d:140ms"><div class="tilt-card glass rounded-3xl p-6 h-full" data-tilt>
+              <div class="glare"></div>
+              <div class="card-inner">
+                <p class="text-4xl mb-3">🥘</p>
+                <h4 class="font-bold text-lg">回锅肉</h4>
+                <p class="text-sm text-white/50 mt-1.5 leading-relaxed">蒜苗香浓，川味家常的灵魂</p>
+                <p class="kcal-chip num inline-block rounded-full px-3 py-1 text-xs font-bold mt-4">663 kcal</p>
+              </div>
+            </div></div>
+            <div class="reveal" style="--d:200ms"><div class="tilt-card glass rounded-3xl p-6 h-full" data-tilt>
+              <div class="glare"></div>
+              <div class="card-inner">
+                <p class="text-4xl mb-3">🌶️</p>
+                <h4 class="font-bold text-lg">麻婆豆腐</h4>
+                <p class="text-sm text-white/50 mt-1.5 leading-relaxed">麻、辣、烫、嫩，一勺拌饭</p>
+                <p class="kcal-chip num inline-block rounded-full px-3 py-1 text-xs font-bold mt-4">320 kcal</p>
+              </div>
+            </div></div>
+            <div class="reveal" style="--d:260ms"><div class="tilt-card glass rounded-3xl p-6 h-full" data-tilt>
+              <div class="glare"></div>
+              <div class="card-inner">
+                <p class="text-4xl mb-3">🍅</p>
+                <h4 class="font-bold text-lg">番茄炒蛋</h4>
+                <p class="text-sm text-white/50 mt-1.5 leading-relaxed">酸甜开胃，最治愈的一盘</p>
+                <p class="kcal-chip num inline-block rounded-full px-3 py-1 text-xs font-bold mt-4">280 kcal</p>
+              </div>
+            </div></div>
+            <div class="reveal" style="--d:320ms"><div class="tilt-card glass rounded-3xl p-6 h-full" data-tilt>
+              <div class="glare"></div>
+              <div class="card-inner">
+                <p class="text-4xl mb-3">🍗</p>
+                <h4 class="font-bold text-lg">可乐鸡翅</h4>
+                <p class="text-sm text-white/50 mt-1.5 leading-relaxed">咸甜焦香，连骨头都入味</p>
+                <p class="kcal-chip num inline-block rounded-full px-3 py-1 text-xs font-bold mt-4">450 kcal</p>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 页脚 ============ -->
+    <footer class="relative z-10 border-t border-white/10 pt-16 pb-10 overflow-hidden">
+      <div class="footer-ghost num absolute -bottom-8 left-1/2 -translate-x-1/2 text-[22vw] select-none" aria-hidden="true">食光</div>
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 relative">
+        <div class="flex flex-wrap justify-between items-start gap-10">
+          <div>
+            <a href="#top" class="flex items-center gap-2.5 mb-4">
+              <span class="text-xl leading-none">🍱</span>
+              <span class="font-black text-lg tracking-wide">每日<span class="text-[#f5a524]">食光</span></span>
+            </a>
+            <p class="text-white/45 max-w-xs text-sm leading-relaxed">
+              一荤一素一汤，每天帮你算好卡路里。深夜食堂，随时营业。
+            </p>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-16 gap-y-8">
+            <div>
+              <p class="num text-xs tracking-[0.25em] uppercase text-white/40 mb-4">分类</p>
+              <ul class="space-y-2.5 text-sm text-white/60">
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#recipes" data-chip="fat-loss">减脂</a></li>
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#recipes" data-chip="muscle-gain">增肌</a></li>
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#recipes" data-chip="maintain">维持</a></li>
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#recipes" data-chip="nutrition">营养</a></li>
+              </ul>
+            </div>
+            <div>
+              <p class="num text-xs tracking-[0.25em] uppercase text-white/40 mb-4">入口</p>
+              <ul class="space-y-2.5 text-sm text-white/60">
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#recipes">菜谱库</a></li>
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#home-style">家常菜</a></li>
+                <li><a class="hover:text-[#f5a524] transition-colors" href="#top">回到顶部</a></li>
+              </ul>
+            </div>
+            <div>
+              <p class="num text-xs tracking-[0.25em] uppercase text-white/40 mb-4">数据</p>
+              <ul class="space-y-2.5 num text-sm text-white/60">
+                <li><span class="text-[#f5a524]">400</span> 道食谱</li>
+                <li><span class="text-[#8b7cf6]">4</span> 大分类</li>
+              </ul>
+            </div>
+            <div>
+              <p class="num text-xs tracking-[0.25em] uppercase text-white/40 mb-4">Demo</p>
+              <ul class="space-y-2.5 text-sm text-white/60">
+                <li>方案 B · 深夜食堂</li>
+                <li class="num">Kinetic × Glass</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="mt-14 pt-6 border-t border-white/8 flex flex-wrap items-center justify-between gap-3 text-xs text-white/35">
+          <p>© <span class="num">2026</span> 每日食光 · 网站重构视觉 Demo</p>
+          <p class="num">Space Grotesk × Noto Sans SC · #f5a524 × #8b7cf6</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ============ 菜谱数据（静态硬编码，无 fetch） ============ */
+    const RECIPES = [
+      { emoji: "🐟", name: "清蒸鲈鱼",   desc: "嫩滑清鲜，原汁原味",             kcal: 280, cat: "fat-loss" },
+      { emoji: "🦐", name: "白灼虾",     desc: "鲜甜弹嫩，蘸汁更妙",             kcal: 203, cat: "fat-loss" },
+      { emoji: "🥔", name: "酸辣土豆丝", desc: "爽脆酸辣，快手又下饭",           kcal: 190, cat: "fat-loss" },
+      { emoji: "🍗", name: "宫保鸡丁",   desc: "鸡丁滑嫩，花生香脆，酸甜微辣",   kcal: 520, cat: "muscle-gain" },
+      { emoji: "🍖", name: "糖醋里脊",   desc: "外酥里嫩，酸甜挂汁",             kcal: 520, cat: "muscle-gain" },
+      { emoji: "🍳", name: "蛋炒饭",     desc: "粒粒分明，蛋香扑鼻",             kcal: 480, cat: "muscle-gain" },
+      { emoji: "🥬", name: "梅菜扣肉",   desc: "咸香软糯，肥瘦相间",             kcal: 562, cat: "maintain" },
+      { emoji: "🥘", name: "土豆炖牛肉", desc: "酥烂浓香，一锅管饱",             kcal: 480, cat: "maintain" },
+      { emoji: "🥬", name: "地三鲜",     desc: "土豆茄子青椒，东北三宝一锅端",   kcal: 260, cat: "maintain" },
+      { emoji: "🍆", name: "红烧茄子",   desc: "软糯酱香，素菜里的米饭杀手",     kcal: 240, cat: "nutrition" },
+      { emoji: "🍲", name: "冬瓜排骨汤", desc: "清润鲜美，一碗暖到胃",           kcal: 260, cat: "nutrition" },
+      { emoji: "🍜", name: "葱油拌面",   desc: "一把葱油，拌出鲜香",             kcal: 420, cat: "nutrition" },
+    ];
+
+    const grid = document.getElementById("recipeGrid");
+
+    function renderRecipes(cat) {
+      const list = RECIPES.filter((r) => cat === "all" || r.cat === cat);
+      grid.innerHTML = list
+        .map(
+          (r, i) => `
+        <div class="reveal in recipe-card" style="--d:${i * 60}ms" data-cat="${r.cat}">
+          <article class="tilt-card glass rounded-3xl p-6 h-full flex flex-col" data-tilt>
+            <div class="glare"></div>
+            <div class="card-inner flex flex-col flex-1">
+              <div class="flex items-start justify-between mb-5">
+                <span class="text-4xl" aria-hidden="true">${r.emoji}</span>
+                <span class="kcal-chip num rounded-full px-3.5 py-1 text-xs font-bold">${r.kcal} kcal</span>
+              </div>
+              <h3 class="font-bold text-xl">${r.name}</h3>
+              <p class="text-sm text-white/50 mt-2 leading-relaxed flex-1">${r.desc}</p>
+              <p class="num mt-5 text-xs text-white/35 tracking-wide flex items-center gap-1.5">
+                查看做法 <span class="text-[#f5a524]" aria-hidden="true">→</span>
+              </p>
+            </div>
+          </article>
+        </div>`
+        )
+        .join("");
+      // 重新绑定 tilt（新 DOM）
+      bindTilt();
+    }
+
+    /* ============ Chips 筛选 ============ */
+    const chips = document.querySelectorAll("#chips .chip");
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        chips.forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        renderRecipes(chip.dataset.cat);
+      });
+    });
+
+    /* 导航 / 页脚链接激活对应 chip */
+    document.querySelectorAll("[data-chip]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        const chipEl = document.querySelector(`#chips .chip[data-cat="${el.dataset.chip}"]`);
+        if (chipEl) {
+          chips.forEach((c) => c.classList.remove("active"));
+          chipEl.classList.add("active");
+          renderRecipes(chipEl.dataset.cat);
+        }
+      });
+    });
+
+    /* 查看全部 → 回到菜谱库并显示全部 */
+    document.querySelectorAll("[data-go-recipes]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const allChip = document.querySelector(`#chips .chip[data-cat="all"]`);
+        if (allChip) {
+          chips.forEach((c) => c.classList.remove("active"));
+          allChip.classList.add("active");
+          renderRecipes("all");
+        }
+        document.getElementById("recipes").scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    /* ============ Card Tilt 3D ============ */
+    function bindTilt() {
+      document.querySelectorAll("[data-tilt]").forEach((card) => {
+        if (card.dataset.tiltBound === "1") return;
+        card.dataset.tiltBound = "1";
+        card.addEventListener("mousemove", (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const y = (e.clientY - rect.top) / rect.height;
+          card.style.setProperty("--rx", ((y - 0.5) * -8).toFixed(2) + "deg");
+          card.style.setProperty("--ry", ((x - 0.5) * 8).toFixed(2) + "deg");
+          card.style.setProperty("--ty", "-6px");
+          card.style.setProperty("--mx", (x * 100).toFixed(1) + "%");
+          card.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+        });
+        card.addEventListener("mouseleave", () => {
+          card.style.setProperty("--rx", "0deg");
+          card.style.setProperty("--ry", "0deg");
+          card.style.setProperty("--ty", "0px");
+        });
+      });
+    }
+    bindTilt();
+
+    /* ============ CTA 按钮光晕跟随 ============ */
+    document.querySelectorAll(".btn-glow").forEach((btn) => {
+      btn.addEventListener("mousemove", (e) => {
+        const rect = btn.getBoundingClientRect();
+        btn.style.setProperty("--mx", (e.clientX - rect.left) + "px");
+        btn.style.setProperty("--my", (e.clientY - rect.top) + "px");
+      });
+    });
+
+    /* ============ 鼠标跟随光源 + 光标样式 ============ */
+    const cursorLight = document.getElementById("cursorLight");
+    let targetX = window.innerWidth / 2, targetY = window.innerHeight / 2;
+    let curX = targetX, curY = targetY;
+    window.addEventListener("mousemove", (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+    });
+    (function lightLoop() {
+      curX += (targetX - curX) * 0.08;
+      curY += (targetY - curY) * 0.08;
+      cursorLight.style.setProperty("--mx", curX + "px");
+      cursorLight.style.setProperty("--my", curY + "px");
+      requestAnimationFrame(lightLoop);
+    })();
+
+    /* ============ 滚动驱动：kinetic 标题 + 视差光斑 + 轮廓字 + 进度条 + 导航 ============ */
+    const heroTitle = document.getElementById("heroTitle");
+    const words = heroTitle.querySelectorAll(".kw-in");
+    const dirs = [1, -1, 1, -1, 1, -1, 1]; // 每词错位方向
+    const ghost400 = document.getElementById("ghost400");
+    const blob1 = document.getElementById("blob1");
+    const blob2 = document.getElementById("blob2");
+    const blob3 = document.getElementById("blob3");
+    const scrollProgress = document.getElementById("scrollProgress");
+    const nav = document.getElementById("nav");
+
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const vh = window.innerHeight;
+        const p = Math.min(1, y / (vh * 0.9)); // 标题滚动进度
+
+        // 1) Hero 标题逐词错位位移
+        words.forEach((w, i) => {
+          const k = dirs[i % dirs.length];
+          w.style.transform = `translate(${(k * p * 26).toFixed(1)}px, ${(-k * p * 34).toFixed(1)}px)`;
+          w.style.opacity = String(Math.max(0.35, 1 - p * 0.75));
+        });
+
+        // 2) 视差光斑
+        blob1.style.transform = `translateY(${y * 0.16}px) translateX(${y * 0.05}px)`;
+        blob2.style.transform = `translateY(${-y * 0.12}px) translateX(${-y * 0.06}px)`;
+        blob3.style.transform = `translateY(${y * 0.08}px)`;
+
+        // 3) 轮廓 400 反向视差
+        ghost400.style.transform = `translateY(${-y * 0.22}px)`;
+
+        // 4) 阅读进度条
+        const max = document.documentElement.scrollHeight - vh;
+        scrollProgress.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
+
+        // 5) 导航吸顶毛玻璃
+        nav.classList.toggle("scrolled", y > 24);
+
+        ticking = false;
+      });
+    });
+
+    /* ============ 滚动入场（IntersectionObserver） ============ */
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
+
+    /* 初次渲染 */
+    renderRecipes("all");
+  </script>
+</body>
+</html>

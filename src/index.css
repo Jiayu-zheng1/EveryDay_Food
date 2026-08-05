@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* ================= 主题变量（Tailwind v4 通过 @theme 注册为工具类） ================= */
+@theme {
+  /* 深紫黑底 + 琥珀橙/暖紫双色体系 */
+  --color-ink: #0b0a10;        /* 页面底色 */
+  --color-ink-2: #16131d;      /* 卡片表面 */
+  --color-ink-3: #201a2e;      /* 更亮的表面（hover） */
+  --color-snow: #f4f1fb;       /* 主文字 */
+  --color-mist: #9b94ab;       /* 次要文字 */
+  --color-grape: #8b7cf6;      /* 暖紫 */
+  --color-berry: #4a3f7d;      /* 深紫辅助色 */
+  --color-tangerine: #f5a524;  /* 琥珀橙 */
+
+  /* 系统字体栈，保证中文渲染 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Noto Sans SC", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+
+  /* 标题展示字体（数字感） */
+  --font-display: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
+
+  /* 自定义动画（keyframes 定义在下方全局区） */
+  --animate-float: float 12s ease-in-out infinite;
+  --animate-float-delayed: float 16s ease-in-out 2s infinite;
+  --animate-pulse-soft: pulse-soft 6s ease-in-out infinite;
+  --animate-grad-shift: grad-shift 6s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-modal-in: modal-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-overlay-in: overlay-in 0.3s ease both;
+}
+
+/* ================= 全局 keyframes ================= */
+@keyframes float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(40px, -36px, 0) scale(1.1); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.9; }
+}
+@keyframes grad-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ================= 基础样式 ================= */
+html {
+  scroll-behavior: smooth; /* 锚点平滑滚动（偏移由各 section 的 scroll-mt-24 负责） */
+}
+body {
+  background-color: var(--color-ink);
+  color: var(--color-snow);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+::selection {
+  background: rgba(139, 124, 246, 0.35);
+}
+
+/* 深色主题细滚动条 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0d0b12; }
+::-webkit-scrollbar-thumb { background: #2e2740; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #453a5e; }
+
+/* ================= 自定义工具类 ================= */
+
+/* 暖紫→琥珀橙渐变文字 */
+@utility text-gradient {
+  background-image: linear-gradient(100deg, #8b7cf6 0%, #f5a524 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 暖紫→琥珀橙渐变背景（流动效果由 animate-grad-shift 提供） */
+@utility bg-gradient-brand {
+  background-image: linear-gradient(120deg, #8b7cf6, #f5a524);
+  background-size: 200% 200%;
+}
+
+/* ================= 滚动渐入动画（配合 Reveal 组件） ================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================= v2 特效 ================= */
+
+/* Hero 细网格纹理（向边缘渐隐） */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 28%, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 28%, black 25%, transparent 78%);
+}
+
+/* Hero 噪点颗粒（feTurbulence 生成的 SVG 纹理） */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+}
+
+/* 渐变标题辉光（filter drop-shadow 作用于渐变文字像素） */
+.title-glow {
+  filter: drop-shadow(0 0 22px rgba(245, 165, 36, 0.3));
+}
+
+/* CTA 光晕跟随：--gx/--gy 由 JS 在 mousemove 时写入 */
+.glow-follow {
+  position: relative;
+  overflow: hidden;
+}
+.glow-follow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120px circle at var(--gx, 50%) var(--gy, 50%),
+    rgba(245, 165, 36, 0.3),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.glow-follow:hover::after {
+  opacity: 1;
+}
+
+/* 卡片顶部渐变光条：hover 时从左到右循环扫过 */
+.light-sweep {
+  opacity: 0;
+  transform: translateX(-200%);
+}
+.group:hover .light-sweep {
+  opacity: 1;
+  animation: light-sweep 1.2s ease-in-out infinite;
+}
+@keyframes light-sweep {
+  0% {
+    transform: translateX(-200%);
+  }
+  60%,
+  100% {
+    transform: translateX(500%);
+  }
+}
+
+/* ================= v3 沉浸式暗色层（方案 B） ================= */
+
+/* 玻璃卡片基类（MealCard / 弹窗 / 大卡共用） */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+
+/* 全屏鼠标跟随光源层（App.jsx 固定层 + mousemove 写 --mx/--my） */
+.cursor-light {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: radial-gradient(
+    600px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(245, 165, 36, 0.07),
+    transparent 60%
+  );
+  mix-blend-mode: screen;
+}
+
+/* 跑马灯标语条（内容复制 2 份实现无缝循环） */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 28s linear infinite;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* kinetic 标题词块（位移由 JS 写 inline transform） */
+.kinetic-word {
+  display: inline-block;
+  will-change: transform;
+}

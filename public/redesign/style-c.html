@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>每日食光 · 鲜食工坊 — 网站重构视觉方案 C</title>
+<link rel="icon" href="data:,">
+<script>document.documentElement.classList.add('js');</script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf6ef; --ink:#201a15;
+    --green:#4f7a3f; --red:#e0452c; --yellow:#eab308; --purple:#7a5aa6; --orange:#f2793b;
+  }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--cream); color:var(--ink); overflow-x:hidden;
+    font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  ::selection{ background:var(--red); color:var(--cream); }
+  a,button,input{ outline:none; }
+  :focus-visible{ outline:3px solid var(--red); outline-offset:3px; border-radius:10px; }
+
+  .font-en-it{ font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif; font-style:italic; letter-spacing:.02em; }
+
+  /* ---------- floating blobs ---------- */
+  @keyframes blobFloat{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    33%    { transform:translate(34px,-42px) scale(1.07); }
+    66%    { transform:translate(-26px,26px) scale(.96); }
+  }
+  .blob{ position:absolute; border-radius:9999px; pointer-events:none; animation:blobFloat 16s ease-in-out infinite; }
+  .blob-2{ animation-duration:20s; animation-delay:-5s; }
+  .blob-3{ animation-duration:24s; animation-delay:-11s; }
+
+  /* ---------- hero emoji float ---------- */
+  @keyframes emojiFloat{
+    0%,100%{ transform:translateY(0) rotate(-4deg); }
+    50%    { transform:translateY(-16px) rotate(4deg); }
+  }
+  .emoji-float  { animation:emojiFloat 6s  ease-in-out infinite; }
+  .emoji-float-2{ animation:emojiFloat 7.5s ease-in-out .8s  infinite; }
+  .emoji-float-3{ animation:emojiFloat 9s  ease-in-out 1.6s infinite; }
+
+  /* ---------- category color blocks ---------- */
+  .cat-green { background-color:var(--green);  color:#fff; }
+  .cat-red   { background-color:var(--red);    color:#fff; }
+  .cat-yellow{ background-color:var(--yellow); color:var(--ink); }
+  .cat-purple{ background-color:var(--purple); color:#fff; }
+  .cat-orange{ background-color:var(--orange); color:#fff; }
+
+  /* ---------- category chips ---------- */
+  .chip{
+    display:inline-flex; align-items:center; gap:.45rem;
+    padding:.8rem 1.5rem; border-radius:9999px; font-weight:800; font-size:1rem;
+    box-shadow:0 10px 24px -14px rgba(32,26,21,.4);
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+  }
+  @media (hover:hover){ .chip:hover{ transform:translateY(-4px); box-shadow:0 16px 34px -14px rgba(32,26,21,.5); } }
+
+  /* ---------- library dish cards ---------- */
+  .dish-card{
+    position:relative; display:flex; flex-direction:column; justify-content:space-between;
+    min-height:17rem; padding:1.75rem; border-radius:2rem; overflow:hidden;
+    box-shadow:0 18px 40px -18px rgba(32,26,21,.35);
+    transition:transform .5s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease, opacity .7s ease var(--d,0s);
+  }
+  .dish-card::after{
+    content:""; position:absolute; right:-3.5rem; bottom:-3.5rem;
+    width:11rem; height:11rem; border-radius:9999px; background:rgba(255,255,255,.09); pointer-events:none;
+  }
+  .cat-yellow::after{ background:rgba(32,26,21,.07); }
+  .dish-card > *{ position:relative; z-index:1; }
+  .dish-card .d-top{ display:flex; align-items:flex-start; justify-content:space-between; }
+  .dish-card .d-emoji{
+    display:grid; place-items:center; width:3.75rem; height:3.75rem; border-radius:1.1rem;
+    font-size:1.9rem; transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .dish-card .kcal{ border-radius:9999px; padding:.3rem .8rem; font-size:.85rem; font-weight:700; }
+  .dish-card h3{ font-size:1.55rem; font-weight:900; }
+  .dish-card .desc{ margin-top:.3rem; font-size:.9rem; line-height:1.55; }
+  .dish-card .tag{ margin-top:.85rem; font-size:.7rem; font-weight:700; letter-spacing:.18em; }
+  .cat-green .d-emoji,.cat-green .kcal{ background:rgba(255,255,255,.16); }
+  .cat-red   .d-emoji,.cat-red   .kcal{ background:rgba(255,255,255,.16); }
+  .cat-purple .d-emoji,.cat-purple .kcal{ background:rgba(255,255,255,.16); }
+  .cat-orange .d-emoji,.cat-orange .kcal{ background:rgba(255,255,255,.16); }
+  .cat-yellow .d-emoji,.cat-yellow .kcal{ background:rgba(32,26,21,.12); }
+  .cat-green .desc{ color:rgba(255,255,255,.92); } .cat-green .tag{ color:rgba(255,255,255,.6); }
+  .cat-red   .desc{ color:rgba(255,255,255,.92); } .cat-red   .tag{ color:rgba(255,255,255,.6); }
+  .cat-purple .desc{ color:rgba(255,255,255,.92); } .cat-purple .tag{ color:rgba(255,255,255,.6); }
+  .cat-orange .desc{ color:rgba(255,255,255,.92); } .cat-orange .tag{ color:rgba(255,255,255,.6); }
+  .cat-yellow .desc{ color:rgba(32,26,21,.85); }   .cat-yellow .tag{ color:rgba(32,26,21,.6); }
+
+  /* ---------- staggered grid: even rows (2nd/4th/6th) shift down ---------- */
+  @media (min-width:1024px){
+    .stagger > *:nth-child(4n+3),
+    .stagger > *:nth-child(4n+4){ transform:translateY(2rem); }
+    @media (hover:hover){
+      .stagger > *:nth-child(4n+1):hover,
+      .stagger > *:nth-child(4n+2):hover{ transform:translateY(-12px) scale(1.03); }
+      .stagger > *:nth-child(4n+3):hover,
+      .stagger > *:nth-child(4n+4):hover{ transform:translateY(calc(2rem - 12px)) scale(1.03); }
+    }
+  }
+  @media (hover:hover){
+    .stagger > *:hover{ box-shadow:0 34px 70px -24px rgba(32,26,21,.5); }
+    .stagger > *:hover .d-emoji{ transform:scale(1.18) rotate(-6deg); }
+  }
+
+  /* ---------- small cards (home band) ---------- */
+  .sm-card{
+    display:flex; flex-direction:column; justify-content:space-between; min-height:10.5rem;
+    border-radius:1.6rem; background:#fff; color:var(--ink); padding:1.4rem;
+    box-shadow:0 14px 30px -18px rgba(32,26,21,.3);
+    transition:transform .45s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, opacity .7s ease var(--d,0s);
+  }
+  .sm-card .e{ font-size:2.2rem; }
+  .sm-card .n{ font-size:1.15rem; font-weight:900; }
+  .sm-card .k{ font-size:.8rem; font-weight:700; color:rgba(32,26,21,.5); }
+  @media (hover:hover){
+    .sm-card:hover{ transform:translateY(-8px) scale(1.02); box-shadow:0 22px 44px -20px rgba(32,26,21,.45); }
+    .sm-card:hover .e{ transform:scale(1.15) rotate(-6deg); display:inline-block; transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+  }
+
+  /* ---------- reveal on scroll (opacity only, keeps stagger transform intact) ---------- */
+  html.js .dish-card{ opacity:0; }
+  html.js .dish-card.in-view{ opacity:1; }
+  html.js .sm-card{ opacity:0; }
+  html.js .sm-card.in-view{ opacity:1; }
+</style>
+</head>
+<body id="top">
+
+<!-- ============ 1. NAV ============ -->
+<nav class="sticky top-0 z-50 border-b border-[#201a15]/10 bg-white/90 backdrop-blur-md">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-6">
+    <a href="#top" class="flex items-center gap-3">
+      <span class="grid h-10 w-10 place-items-center rounded-2xl bg-[#201a15] text-lg font-black text-[#faf6ef]">食</span>
+      <span class="leading-none">
+        <span class="block text-lg font-black tracking-tight">每日食光</span>
+        <span class="font-en-it block text-[11px] text-[#201a15]/50">Daily Food Moments</span>
+      </span>
+    </a>
+    <div class="hidden items-center gap-8 font-bold text-[#201a15]/80 lg:flex">
+      <a href="#loss" class="transition-colors hover:text-[#e0452c]">减脂</a>
+      <a href="#gain" class="transition-colors hover:text-[#e0452c]">增肌</a>
+      <a href="#keep" class="transition-colors hover:text-[#e0452c]">维持</a>
+      <a href="#nutri" class="transition-colors hover:text-[#e0452c]">营养</a>
+      <a href="#home" class="transition-colors hover:text-[#e0452c]">家常菜</a>
+    </div>
+    <a href="#library" class="rounded-full bg-[#201a15] px-5 py-2.5 text-sm font-black text-[#faf6ef] transition-transform duration-300 hover:-translate-y-0.5">去逛逛 →</a>
+  </div>
+</nav>
+
+<!-- ============ 2. HERO ============ -->
+<header class="relative overflow-hidden">
+  <div class="blob"   style="top:-9rem;left:-7rem;width:28rem;height:28rem;background:#f0e2c4;opacity:.75"></div>
+  <div class="blob blob-2" style="top:5rem;right:-11rem;width:34rem;height:34rem;background:#e6edd9;opacity:.8"></div>
+  <div class="blob blob-3" style="bottom:-13rem;left:26%;width:26rem;height:26rem;background:#f8dcc3;opacity:.7"></div>
+
+  <div class="relative mx-auto max-w-7xl px-5 pb-24 pt-16 md:px-6 lg:pt-24 lg:pb-32">
+    <div class="grid items-center gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+
+      <!-- left: title -->
+      <div>
+        <p class="font-en-it text-xl text-[#e0452c] md:text-2xl">Fresh Kitchen · Daily Food Moments</p>
+        <h1 class="mt-4 text-[clamp(2.9rem,6.2vw,6rem)] font-black leading-[1.05] tracking-tight">
+          好好吃饭，<br>
+          <span class="mt-3 inline-block -rotate-2 rounded-[1.25rem] bg-[#e0452c] px-5 text-[#faf6ef] shadow-[0_18px_44px_-16px_rgba(224,69,44,0.65)] md:px-7">是头等大事。</span>
+        </h1>
+        <p class="mt-8 max-w-xl text-lg font-medium leading-relaxed text-[#201a15]/70">
+          400 道真实家常菜谱，覆盖减脂、增肌、维持与营养。一桌人间烟火，每天一道新灵感。
+        </p>
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          <a href="#library" class="group inline-flex items-center gap-3 rounded-full bg-[#201a15] px-8 py-4 text-lg font-black text-[#faf6ef] shadow-[0_16px_36px_-14px_rgba(32,26,21,0.5)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-16px_rgba(32,26,21,0.55)]">
+            开始探索菜谱
+            <span class="transition-transform duration-300 group-hover:translate-y-1">↓</span>
+          </a>
+          <a href="#home" class="inline-flex items-center gap-2 rounded-full border-2 border-[#201a15] bg-white px-8 py-[0.9rem] text-lg font-black text-[#201a15] transition-all duration-300 hover:-translate-y-1 hover:bg-[#201a15] hover:text-[#faf6ef]">
+            今日推荐 →
+          </a>
+        </div>
+        <div class="mt-12 flex flex-wrap gap-x-10 gap-y-4">
+          <div><p class="text-3xl font-black">400+</p><p class="mt-1 text-sm font-bold text-[#201a15]/55">真实菜谱</p></div>
+          <div class="w-px bg-[#201a15]/15"></div>
+          <div><p class="text-3xl font-black">5</p><p class="mt-1 text-sm font-bold text-[#201a15]/55">大分类</p></div>
+          <div class="w-px bg-[#201a15]/15"></div>
+          <div><p class="text-3xl font-black">100%</p><p class="mt-1 text-sm font-bold text-[#201a15]/55">家常味</p></div>
+        </div>
+      </div>
+
+      <!-- right: search + floating emojis -->
+      <div class="relative mx-auto w-full max-w-xl lg:max-w-none lg:pl-8">
+
+        <div data-parallax="0.18" class="absolute -left-6 -top-16 z-10 hidden lg:block xl:-left-12">
+          <div class="emoji-float grid h-28 w-28 place-items-center rounded-[2rem] bg-[#eab308] text-6xl shadow-[0_24px_50px_-14px_rgba(32,26,21,0.3)]">🍳</div>
+        </div>
+        <div data-parallax="0.12" class="absolute -right-3 -top-14 z-10 hidden lg:block">
+          <div class="emoji-float-2 grid h-36 w-36 place-items-center rounded-[2.5rem] bg-white text-7xl shadow-[0_28px_60px_-16px_rgba(32,26,21,0.32)]">🥘</div>
+        </div>
+        <div data-parallax="0.08" class="absolute -left-10 -bottom-14 z-10 hidden lg:block xl:-left-14">
+          <div class="emoji-float-3 grid h-32 w-32 place-items-center rounded-[2.25rem] bg-[#4f7a3f] text-6xl shadow-[0_24px_50px_-14px_rgba(32,26,21,0.3)]">🥗</div>
+        </div>
+        <div data-parallax="0.15" class="absolute -bottom-16 -right-2 z-10 hidden lg:block">
+          <div class="emoji-float grid h-28 w-28 place-items-center rounded-[2rem] bg-[#f2793b] text-6xl shadow-[0_24px_50px_-14px_rgba(32,26,21,0.3)]">🍜</div>
+        </div>
+
+        <div class="relative rounded-[2.5rem] bg-white p-8 shadow-[0_40px_90px_-32px_rgba(32,26,21,0.38)] md:p-10">
+          <p class="text-xs font-black tracking-[0.25em] text-[#e0452c]">SEARCH · 找灵感</p>
+          <h3 class="mt-3 text-3xl font-black">今晚想吃什么？</h3>
+          <form role="search" class="mt-7 flex items-center gap-2 rounded-full bg-[#faf6ef] p-2 pl-6 ring-1 ring-[#201a15]/5 focus-within:ring-2 focus-within:ring-[#e0452c]" onsubmit="return false">
+            <span class="text-xl">🔍</span>
+            <input id="search-input" name="q" type="search" class="w-full bg-transparent text-lg font-bold placeholder:text-[#201a15]/40" placeholder="搜一搜今晚吃什么…" aria-label="搜索菜谱">
+            <button type="submit" class="shrink-0 rounded-full bg-[#201a15] px-7 py-3.5 font-black text-[#faf6ef] transition-colors hover:bg-[#e0452c]">搜索</button>
+          </form>
+          <div class="mt-6 flex flex-wrap items-center gap-2 text-sm font-bold">
+            <span class="text-[#201a15]/50">热门：</span>
+            <a href="#home" class="rounded-full bg-[#f2793b]/15 px-3.5 py-1.5 text-[#b34c16] transition-colors hover:bg-[#f2793b]/30">水煮鱼 🌶️</a>
+            <a href="#keep" class="rounded-full bg-[#eab308]/20 px-3.5 py-1.5 text-[#8a6a00] transition-colors hover:bg-[#eab308]/35">红烧肉 🍖</a>
+            <a href="#keep" class="rounded-full bg-[#e0452c]/10 px-3.5 py-1.5 text-[#b0341f] transition-colors hover:bg-[#e0452c]/25">番茄炒蛋 🍅</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 3. RECIPE LIBRARY ============ -->
+<section id="library" class="relative mx-auto max-w-7xl scroll-mt-24 overflow-hidden px-5 py-20 md:px-6 md:py-28">
+  <div class="blob" style="top:2rem;right:-10rem;width:24rem;height:24rem;background:#f0e2c4;opacity:.6"></div>
+
+  <div class="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div>
+      <p class="font-en-it text-xl text-[#7a5aa6] md:text-2xl">Recipe Library</p>
+      <h2 class="mt-2 text-4xl font-black md:text-5xl">菜谱库</h2>
+      <p class="mt-4 max-w-xl font-medium leading-relaxed text-[#201a15]/70">减脂 · 增肌 · 维持 · 营养，四大精选分类，道道真材实料。悬停卡片，尝尝看。</p>
+    </div>
+    <span aria-hidden="true" class="pointer-events-none hidden select-none text-[8rem] font-black leading-none text-transparent [-webkit-text-stroke:2.5px_rgba(32,26,21,0.16)] md:block">12</span>
+  </div>
+
+  <!-- category chips -->
+  <div class="relative mt-10 flex flex-wrap items-center gap-3">
+    <a href="#loss" id="loss" class="chip cat-green scroll-mt-32">🥗 减脂 <span class="font-medium opacity-75">· 3 道</span></a>
+    <a href="#gain" id="gain" class="chip cat-red scroll-mt-32">💪 增肌 <span class="font-medium opacity-75">· 3 道</span></a>
+    <a href="#keep" id="keep" class="chip cat-yellow scroll-mt-32">⚖️ 维持 <span class="font-medium opacity-75">· 3 道</span></a>
+    <a href="#nutri" id="nutri" class="chip cat-purple scroll-mt-32">🌿 营养 <span class="font-medium opacity-75">· 3 道</span></a>
+    <a href="#home" class="chip cat-orange">🏠 家常菜 <span class="font-medium opacity-75">· 人气</span></a>
+  </div>
+
+  <!-- 12 staggered color-block cards -->
+  <div class="stagger relative mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-x-8 lg:gap-y-12">
+
+    <article class="dish-card cat-green" style="--d:.0s">
+      <div class="d-top">
+        <span class="d-emoji">🐟</span>
+        <span class="kcal">280 kcal</span>
+      </div>
+      <div>
+        <h3>清蒸鲈鱼</h3>
+        <p class="desc">鲜嫩原味，减脂期的蛋白质担当。</p>
+        <p class="tag">减脂 · 蒸 · 高蛋白</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-green" style="--d:.06s">
+      <div class="d-top">
+        <span class="d-emoji">🦐</span>
+        <span class="kcal">203 kcal</span>
+      </div>
+      <div>
+        <h3>白灼虾</h3>
+        <p class="desc">弹嫩清甜，高蛋白低脂的鲜味代表。</p>
+        <p class="tag">减脂 · 焯 · 高蛋白</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-green" style="--d:.12s">
+      <div class="d-top">
+        <span class="d-emoji">🍲</span>
+        <span class="kcal">260 kcal</span>
+      </div>
+      <div>
+        <h3>冬瓜排骨汤</h3>
+        <p class="desc">清淡鲜甜，夏日祛暑养胃汤。</p>
+        <p class="tag">减脂 · 炖 · 低卡</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-red" style="--d:.18s">
+      <div class="d-top">
+        <span class="d-emoji">🍗</span>
+        <span class="kcal">520 kcal</span>
+      </div>
+      <div>
+        <h3>宫保鸡丁</h3>
+        <p class="desc">酸甜微辣，花生脆爽的国民小炒。</p>
+        <p class="tag">增肌 · 炒 · 高蛋白</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-red" style="--d:.24s">
+      <div class="d-top">
+        <span class="d-emoji">🍖</span>
+        <span class="kcal">520 kcal</span>
+      </div>
+      <div>
+        <h3>糖醋里脊</h3>
+        <p class="desc">外酥里嫩，酸甜可口的经典名菜。</p>
+        <p class="tag">增肌 · 炸 · 高蛋白</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-red" style="--d:.3s">
+      <div class="d-top">
+        <span class="d-emoji">🥘</span>
+        <span class="kcal">480 kcal</span>
+      </div>
+      <div>
+        <h3>土豆炖牛肉</h3>
+        <p class="desc">软烂入味，暖胃管饱的硬核炖菜。</p>
+        <p class="tag">增肌 · 炖 · 高蛋白</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-yellow" style="--d:.36s">
+      <div class="d-top">
+        <span class="d-emoji">🍖</span>
+        <span class="kcal">665 kcal</span>
+      </div>
+      <div>
+        <h3>红烧肉</h3>
+        <p class="desc">肥而不腻，入口即化的经典硬菜。</p>
+        <p class="tag">维持 · 烧 · 硬菜</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-yellow" style="--d:.3s">
+      <div class="d-top">
+        <span class="d-emoji">🍅</span>
+        <span class="kcal">280 kcal</span>
+      </div>
+      <div>
+        <h3>番茄炒蛋</h3>
+        <p class="desc">酸甜浓郁，十分钟搞定的灵魂家常。</p>
+        <p class="tag">维持 · 炒 · 快手</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-yellow" style="--d:.24s">
+      <div class="d-top">
+        <span class="d-emoji">🍳</span>
+        <span class="kcal">480 kcal</span>
+      </div>
+      <div>
+        <h3>蛋炒饭</h3>
+        <p class="desc">粒粒分明，最朴实的幸福感。</p>
+        <p class="tag">维持 · 炒 · 主食</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-purple" style="--d:.18s">
+      <div class="d-top">
+        <span class="d-emoji">🥬</span>
+        <span class="kcal">260 kcal</span>
+      </div>
+      <div>
+        <h3>地三鲜</h3>
+        <p class="desc">土豆茄子青椒，东北下饭三件套。</p>
+        <p class="tag">营养 · 烧 · 素菜</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-purple" style="--d:.12s">
+      <div class="d-top">
+        <span class="d-emoji">🍜</span>
+        <span class="kcal">420 kcal</span>
+      </div>
+      <div>
+        <h3>葱油拌面</h3>
+        <p class="desc">葱香扑鼻，五分钟速成的满足。</p>
+        <p class="tag">营养 · 拌 · 主食</p>
+      </div>
+    </article>
+
+    <article class="dish-card cat-purple" style="--d:.06s">
+      <div class="d-top">
+        <span class="d-emoji">🌶️</span>
+        <span class="kcal">320 kcal</span>
+      </div>
+      <div>
+        <h3>麻婆豆腐</h3>
+        <p class="desc">麻辣鲜香烫，豆腐嫩滑超下饭。</p>
+        <p class="tag">营养 · 烧 · 川味</p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ 4. HOME COOKING BAND ============ -->
+<section id="home" class="scroll-mt-24 px-4 pb-24 md:px-6 md:pb-28">
+  <div class="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#f2793b] px-6 py-12 text-white md:rounded-[3rem] md:px-14 md:py-16">
+    <div class="blob" style="top:-11rem;right:-9rem;width:26rem;height:26rem;background:rgba(255,255,255,.09)"></div>
+    <div class="blob blob-2" style="bottom:-13rem;left:-7rem;width:24rem;height:24rem;background:rgba(255,255,255,.08)"></div>
+
+    <div class="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="font-en-it text-xl text-white/85 md:text-2xl">Home Cooking · 一桌人间烟火</p>
+        <h2 class="mt-3 text-4xl font-black md:text-5xl">家常菜 · 家的味道</h2>
+        <p class="mt-4 max-w-xl font-medium leading-relaxed text-white/85">从回锅肉到可乐鸡翅，那些刻在记忆里的味道，值得被认真端上桌。</p>
+      </div>
+      <p class="font-en-it text-2xl text-white/70">Today's Pick</p>
+    </div>
+
+    <div class="relative mt-10 grid gap-6 lg:grid-cols-3">
+      <!-- today's big card -->
+      <a href="#library" class="group flex min-h-[24rem] flex-col justify-between rounded-[2rem] bg-[#faf6ef] p-8 text-[#201a15] shadow-[0_24px_60px_-24px_rgba(32,26,21,0.45)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_36px_70px_-26px_rgba(32,26,21,0.5)] lg:row-span-2">
+        <div class="flex items-start justify-between">
+          <span class="rounded-full bg-[#f2793b] px-4 py-1.5 text-sm font-black text-white">今日推荐</span>
+          <span class="text-sm font-bold text-[#201a15]/50">663 kcal</span>
+        </div>
+        <div>
+          <div class="text-8xl transition-transform duration-500 ease-out group-hover:-rotate-6 group-hover:scale-110">🥘</div>
+          <h3 class="mt-6 text-5xl font-black">回锅肉</h3>
+          <p class="mt-2 max-w-xs font-medium leading-relaxed text-[#201a15]/70">川菜之魂，蒜苗香辣，肥而不腻，米饭杀手级下饭菜。</p>
+          <div class="mt-5 flex flex-wrap gap-2 text-sm font-bold text-[#faf6ef]">
+            <span class="rounded-full bg-[#201a15] px-3.5 py-1.5">川菜</span>
+            <span class="rounded-full bg-[#201a15]/85 px-3.5 py-1.5">下饭</span>
+            <span class="rounded-full bg-[#201a15]/70 px-3.5 py-1.5">微辣</span>
+          </div>
+          <span class="mt-7 inline-flex items-center gap-2 rounded-full bg-[#201a15] px-6 py-3 font-black text-[#faf6ef] transition-transform duration-300 group-hover:translate-x-1.5">查看做法 →</span>
+        </div>
+      </a>
+
+      <!-- 4 small cards -->
+      <div class="grid grid-cols-2 gap-6">
+        <a href="#library" class="sm-card" style="--d:.1s">
+          <span class="e">🍗</span>
+          <span>
+            <span class="n block">可乐鸡翅</span>
+            <span class="k mt-1 block">450 kcal · 甜咸焦香</span>
+          </span>
+        </a>
+        <a href="#library" class="sm-card" style="--d:.18s">
+          <span class="e">🍆</span>
+          <span>
+            <span class="n block">红烧茄子</span>
+            <span class="k mt-1 block">240 kcal · 软糯入味</span>
+          </span>
+        </a>
+        <a href="#library" class="sm-card" style="--d:.26s">
+          <span class="e">🥔</span>
+          <span>
+            <span class="n block">酸辣土豆丝</span>
+            <span class="k mt-1 block">190 kcal · 爽脆酸辣</span>
+          </span>
+        </a>
+        <a href="#library" class="sm-card" style="--d:.34s">
+          <span class="e">🥬</span>
+          <span>
+            <span class="n block">梅菜扣肉</span>
+            <span class="k mt-1 block">562 kcal · 咸香浓郁</span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- hot picks -->
+    <div class="relative mt-10 flex flex-wrap items-center gap-3">
+      <span class="mr-1 text-sm font-black tracking-[0.2em] text-white/75">本周人气</span>
+      <a href="#library" class="rounded-full bg-white/15 px-4 py-2 font-bold text-white transition-colors hover:bg-white/30">水煮鱼 🌶️ · 480 kcal</a>
+      <a href="#nutri" class="rounded-full bg-white/15 px-4 py-2 font-bold text-white transition-colors hover:bg-white/30">麻婆豆腐 🌶️ · 320 kcal</a>
+      <a href="#keep" class="rounded-full bg-white/15 px-4 py-2 font-bold text-white transition-colors hover:bg-white/30">红烧肉 🍖 · 665 kcal</a>
+    </div>
+
+    <!-- full-width CTA band -->
+    <a href="#library" class="group relative mt-10 flex w-full items-center justify-center gap-3 rounded-[1.75rem] bg-[#201a15] py-7 text-xl font-black text-[#faf6ef] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_-22px_rgba(32,26,21,0.6)] md:py-8 md:text-2xl">
+      查看全部 300 道家常菜
+      <span class="inline-block transition-transform duration-300 group-hover:translate-x-2">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ============ 5. FOOTER ============ -->
+<footer class="bg-[#201a15] text-[#faf6ef]">
+  <div class="mx-auto max-w-7xl px-5 py-16 md:px-6">
+    <div class="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+      <div class="max-w-xs">
+        <a href="#top" class="flex items-center gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-2xl bg-[#faf6ef] text-lg font-black text-[#201a15]">食</span>
+          <span class="leading-none">
+            <span class="block text-lg font-black tracking-tight">每日食光</span>
+            <span class="font-en-it block text-[11px] text-[#faf6ef]/50">Daily Food Moments</span>
+          </span>
+        </a>
+        <p class="mt-4 text-sm leading-relaxed text-[#faf6ef]/60">把每一餐都过成值得期待的小事。</p>
+      </div>
+
+      <div>
+        <p class="text-xs font-black tracking-[0.25em] text-[#faf6ef]/50">导航</p>
+        <div class="mt-4 grid grid-cols-2 gap-x-10 gap-y-3 text-sm font-bold text-[#faf6ef]/80">
+          <a href="#loss" class="transition-colors hover:text-white">减脂</a>
+          <a href="#gain" class="transition-colors hover:text-white">增肌</a>
+          <a href="#keep" class="transition-colors hover:text-white">维持</a>
+          <a href="#nutri" class="transition-colors hover:text-white">营养</a>
+          <a href="#home" class="transition-colors hover:text-white">家常菜</a>
+          <a href="#top" class="transition-colors hover:text-white">回到顶部 ↑</a>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-black tracking-[0.25em] text-[#faf6ef]/50">分类色板</p>
+        <div class="mt-4 flex flex-col gap-2.5 text-sm font-bold">
+          <span class="flex items-center gap-3"><span class="h-4 w-4 rounded-full" style="background:#4f7a3f"></span>减脂 · 牛油果绿</span>
+          <span class="flex items-center gap-3"><span class="h-4 w-4 rounded-full" style="background:#e0452c"></span>增肌 · 番茄红</span>
+          <span class="flex items-center gap-3"><span class="h-4 w-4 rounded-full" style="background:#eab308"></span>维持 · 柠檬黄</span>
+          <span class="flex items-center gap-3"><span class="h-4 w-4 rounded-full" style="background:#7a5aa6"></span>营养 · 芋泥紫</span>
+          <span class="flex items-center gap-3"><span class="h-4 w-4 rounded-full" style="background:#f2793b"></span>家常菜 · 柿子橙</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-[#faf6ef]/50 md:flex-row md:items-center md:justify-between">
+      <p>© 2026 每日食光 · 网站重构视觉方案 C「大胆极简 · 鲜食工坊」</p>
+      <p>静态展示页 · 菜谱数据为示意，仅供视觉演示</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  /* parallax for hero emoji tiles */
+  var px = document.querySelectorAll('[data-parallax]');
+  if (px.length) {
+    var ticking = false;
+    var raf = window.requestAnimationFrame || function (f) { f(); };
+    function move() {
+      var y = window.scrollY || 0;
+      for (var i = 0; i < px.length; i++) {
+        var sp = parseFloat(px[i].getAttribute('data-parallax')) || 0.08;
+        px[i].style.transform = 'translate3d(0,' + (y * sp).toFixed(1) + 'px,0)';
+      }
+      ticking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; raf(move); }
+    }, { passive: true });
+    move();
+  }
+
+  /* reveal cards on scroll */
+  var reveals = document.querySelectorAll('.dish-card, .sm-card');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('in-view');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(function (el) { io.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('in-view'); });
+  }
+})();
+</script>
+</body>
+</html>

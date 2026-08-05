@@ -1,0 +1,1455 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 模块化排版提案 v1</title>
+  <meta name="description" content="每日食光 网站重构视觉 Demo · 模块化排版提案：清晰分区、每模块独立版面、全局模块导航" />
+  <link rel="icon" href="data:," />
+
+  <!-- Tailwind v4 browser CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Fonts: Space Grotesk (数字/英文) + Noto Sans SC (中文)，font-display swap + 系统字体回退 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ============ 设计令牌（沿用方案 B） ============ */
+    :root {
+      --bg: #0b0a10;
+      --amber: #f5a524;
+      --purple: #8b7cf6;
+      --glass: rgba(255, 255, 255, 0.04);
+      --stroke: rgba(255, 255, 255, 0.08);
+      --font-en: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-cn: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      background: var(--bg);
+      color: rgba(255, 255, 255, 0.88);
+      font-family: var(--font-cn);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    ::selection { background: rgba(245, 165, 36, 0.35); color: #fff; }
+    ::-webkit-scrollbar { width: 10px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0b0a10; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(245, 165, 36, 0.5); }
+
+    /* ============ 背景层 ============ */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+      background-size: 56px 56px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 75%);
+    }
+    .blob {
+      position: fixed; border-radius: 9999px; z-index: 0; pointer-events: none;
+      filter: blur(130px);
+    }
+    .blob-1 { width: 44vw; height: 44vw; left: -12vw; top: -14vh; background: rgba(139, 124, 246, 0.20); }
+    .blob-2 { width: 38vw; height: 38vw; right: -14vw; top: 30vh;  background: rgba(245, 165, 36, 0.13); }
+    .blob-3 { width: 34vw; height: 34vw; left: 24vw;  top: 96vh;  background: rgba(139, 124, 246, 0.12); }
+
+    #cursorLight {
+      position: fixed; inset: 0; z-index: 3; pointer-events: none;
+      opacity: 0.05; mix-blend-mode: screen;
+      background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%), #f5a524 0%, #8b7cf6 38%, transparent 68%);
+    }
+
+    /* ============ 玻璃基元 ============ */
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .num { font-family: var(--font-en); font-feature-settings: "tnum" 1; letter-spacing: -0.02em; }
+
+    /* ============ 顶部模块导航 ============ */
+    .mod-tab {
+      position: relative; flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 999px;
+      font-size: 14.5px; font-weight: 500; color: rgba(255,255,255,0.62);
+      border: 1px solid transparent; cursor: pointer; user-select: none;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      white-space: nowrap;
+    }
+    .mod-tab:hover { color: #fff; background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+    .mod-tab.active {
+      background: linear-gradient(135deg, var(--amber), #d98a12);
+      border-color: rgba(245, 165, 36, 0.6);
+      color: #14100a; font-weight: 700;
+      box-shadow: 0 10px 30px -10px rgba(245, 165, 36, 0.55);
+    }
+    .mod-tab .tab-badge {
+      min-width: 1.15rem; height: 1.15rem; padding: 0 4px;
+      border-radius: 999px; display: inline-grid; place-items: center;
+      font-family: var(--font-en); font-size: 10.5px; font-weight: 700; line-height: 1;
+      background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.75);
+    }
+    .mod-tab.active .tab-badge { background: rgba(20,16,10,0.85); color: var(--amber); }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+    /* ============ 模块切换动画 ============ */
+    .module { animation: modIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes modIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============ 按钮 ============ */
+    .btn-glow { position: relative; overflow: hidden; isolation: isolate; }
+    .btn-glow::before {
+      content: ""; position: absolute; inset: -60%;
+      background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.5), transparent 70%);
+      opacity: 0; transition: opacity 0.35s ease; z-index: -1; pointer-events: none;
+    }
+    .btn-glow:hover::before { opacity: 1; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--amber), #d98a12);
+      color: #14100a;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, filter 0.3s ease;
+      box-shadow: 0 0 0 rgba(245, 165, 36, 0);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px -12px rgba(245, 165, 36, 0.55); filter: brightness(1.06); }
+    .btn-ghost { transition: border-color 0.3s ease, transform 0.25s ease, background-color 0.3s ease; }
+    .btn-ghost:hover { border-color: rgba(139, 124, 246, 0.65); transform: translateY(-2px); background: rgba(139, 124, 246, 0.08); }
+
+    /* ============ 胶囊 chips ============ */
+    .chip {
+      border: 1px solid var(--stroke); background: var(--glass);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      transition: all 0.3s ease; cursor: pointer;
+      flex-shrink: 0;
+    }
+    .chip:hover { border-color: rgba(255, 255, 255, 0.25); transform: translateY(-1px); }
+    .chip.active {
+      background: linear-gradient(135deg, var(--amber), #d98a12);
+      border-color: rgba(245, 165, 36, 0.6);
+      color: #14100a; font-weight: 700;
+    }
+
+    .kcal-chip {
+      font-family: var(--font-en);
+      border: 1px solid rgba(245, 165, 36, 0.35);
+      color: var(--amber);
+      background: rgba(245, 165, 36, 0.08);
+    }
+
+    /* ============ 菜谱卡片 ============ */
+    .rec-card {
+      position: relative;
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-radius: 1.25rem;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .rec-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.75);
+    }
+    .rec-card .add-btn {
+      position: absolute; top: 12px; right: 12px;
+      width: 2rem; height: 2rem; border-radius: 999px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--amber), #d98a12);
+      color: #14100a; font-size: 1.15rem; line-height: 1;
+      opacity: 0; transform: translateY(-4px) scale(0.9);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer; box-shadow: 0 8px 22px -8px rgba(245, 165, 36, 0.6);
+    }
+    .rec-card:hover .add-btn, .rec-card .add-btn:focus-visible { opacity: 1; transform: translateY(0) scale(1); }
+    .rec-card .add-btn:hover { filter: brightness(1.1); transform: translateY(-2px) scale(1.06); }
+
+    /* ============ 大推荐卡 ============ */
+    .big-recipe {
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(480px 300px at 82% 18%, rgba(245, 165, 36, 0.16), transparent 70%),
+        radial-gradient(420px 300px at 8% 90%, rgba(139, 124, 246, 0.14), transparent 70%),
+        var(--glass);
+    }
+    .big-recipe .emoji-float { animation: emoji-float 5s ease-in-out infinite; }
+    @keyframes emoji-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-14px) rotate(3deg); }
+    }
+    .badge-today {
+      background: linear-gradient(135deg, var(--amber), #d98a12);
+      color: #14100a;
+      box-shadow: 0 8px 24px -8px rgba(245, 165, 36, 0.6);
+    }
+
+    /* ============ Hero 关键词 ============ */
+    .kw { display: inline-block; overflow: hidden; vertical-align: bottom; }
+    .kw-in {
+      display: inline-block; will-change: transform, opacity;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    }
+    .hero-title {
+      font-weight: 900; letter-spacing: 0.01em; line-height: 1.08;
+      font-size: clamp(2.1rem, 4.6vw, 3.4rem);
+    }
+    .hero-word-amber { color: var(--amber); }
+    .hero-word-purple { color: var(--purple); }
+
+    /* ============ Marquee ============ */
+    .marquee {
+      overflow: hidden; white-space: nowrap;
+      border-top: 1px solid var(--stroke); border-bottom: 1px solid var(--stroke);
+      background: rgba(255, 255, 255, 0.02);
+      transform: rotate(-1.2deg) scale(1.02);
+    }
+    .marquee-track {
+      display: flex; width: max-content;
+      animation: marquee-scroll 26s linear infinite;
+      will-change: transform;
+    }
+    .marquee:hover .marquee-track { animation-play-state: paused; }
+    .marquee-seg { display: flex; align-items: center; flex-shrink: 0; }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ============ 快捷入口 ============ */
+    .quick-card {
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-radius: 1.25rem;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+    .quick-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(245, 165, 36, 0.45);
+      box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.75);
+    }
+    .quick-card:hover .qc-arrow { transform: translateX(4px); color: var(--amber); }
+
+    /* ============ 年夜饭条目 ============ */
+    .nye-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: border-color 0.25s ease, background-color 0.25s ease;
+    }
+    .nye-item:hover { border-color: rgba(245, 165, 36, 0.3); background: rgba(245, 165, 36, 0.05); }
+    .swap-btn {
+      font-size: 11.5px; color: rgba(255,255,255,0.55);
+      border: 1px solid var(--stroke); border-radius: 999px;
+      padding: 3px 10px; background: rgba(255,255,255,0.03);
+      transition: all 0.25s ease; cursor: pointer; white-space: nowrap;
+    }
+    .swap-btn:hover { color: var(--amber); border-color: rgba(245, 165, 36, 0.5); }
+
+    /* ============ 餐桌行 / 清单 ============ */
+    .table-row {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--glass); border: 1px solid var(--stroke);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-radius: 16px; padding: 12px 16px;
+      transition: border-color 0.25s ease;
+    }
+    .table-row:hover { border-color: rgba(255,255,255,0.16); }
+    .del-btn {
+      width: 2rem; height: 2rem; border-radius: 999px;
+      display: grid; place-items: center;
+      color: rgba(255,255,255,0.45); font-size: 14px;
+      border: 1px solid var(--stroke); background: rgba(255,255,255,0.04);
+      transition: all 0.25s ease; cursor: pointer;
+    }
+    .del-btn:hover { color: #ff6b6b; border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.1); }
+    .shop-group {
+      background: var(--glass); border: 1px solid var(--stroke);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-radius: 18px; padding: 16px 18px;
+    }
+
+    /* ============ Toast ============ */
+    #toast {
+      position: fixed; left: 50%; bottom: 28px; z-index: 80;
+      transform: translate(-50%, 24px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      background: rgba(20, 17, 28, 0.85);
+      border: 1px solid rgba(245, 165, 36, 0.4);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-radius: 999px; padding: 11px 22px;
+      font-size: 14px; color: #fff;
+      box-shadow: 0 18px 50px -16px rgba(0, 0, 0, 0.8);
+    }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track, .emoji-float, .module { animation: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+  <!-- 背景层 -->
+  <div class="bg-grid"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div id="cursorLight" aria-hidden="true"></div>
+
+  <!-- ============ 顶部模块导航（sticky 毛玻璃） ============ -->
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-[#0b0a10]/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6">
+      <div class="h-16 flex items-center gap-3">
+        <a href="#module-home" class="hidden sm:flex items-center gap-2 shrink-0 mr-1" aria-label="每日食光 首页">
+          <span class="text-xl leading-none">🍱</span>
+          <span class="font-black text-lg tracking-wide">每日<span class="text-[#f5a524]">食光</span></span>
+        </a>
+
+        <!-- 模块 tab（移动端横向滚动） -->
+        <nav class="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1.5" role="tablist" aria-label="模块导航">
+          <button class="mod-tab active" role="tab" aria-selected="true" data-mod="home">🏠 首页</button>
+          <button class="mod-tab" role="tab" aria-selected="false" data-mod="library">📚 菜谱库 <span class="tab-badge">12</span></button>
+          <button class="mod-tab" role="tab" aria-selected="false" data-mod="home-style">🍳 家常菜 <span class="tab-badge">6</span></button>
+          <button class="mod-tab" role="tab" aria-selected="false" data-mod="nye">🧧 年夜饭 <span class="tab-badge">11</span></button>
+          <button class="mod-tab" role="tab" aria-selected="false" data-mod="table">🛒 我的餐桌 <span class="tab-badge" id="tableBadge">5</span></button>
+        </nav>
+
+        <a href="index.html" class="hidden md:inline-flex shrink-0 items-center gap-1.5 text-[13px] text-white/50 hover:text-white transition-colors border border-white/10 rounded-full px-3.5 py-1.5 hover:border-white/25">
+          <span aria-hidden="true">←</span> 返回方案画廊
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10">
+    <!-- ============================================================
+         模块 1 · 首页
+    ============================================================ -->
+    <section id="module-home" class="module max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-20">
+      <!-- Hero 精简版 -->
+      <div class="pt-6 pb-10">
+        <p class="inline-flex items-center gap-2 text-xs tracking-[0.28em] uppercase text-white/45 mb-5 border border-white/10 rounded-full px-4 py-1.5 bg-white/[0.03] backdrop-blur-md">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#f5a524] animate-pulse"></span>
+          Modular Layout · 模块化排版 v1
+        </p>
+        <h1 class="hero-title max-w-3xl">
+          <span class="kw"><span class="kw-in">今天</span></span>
+          <span class="kw"><span class="kw-in">吃</span></span>
+          <span class="kw"><span class="kw-in hero-word-amber">什么</span></span>
+          <span class="kw"><span class="kw-in">，</span></span>
+          <span class="kw"><span class="kw-in">替你</span></span>
+          <span class="kw"><span class="kw-in">算好了</span></span>
+          <span class="kw"><span class="kw-in hero-word-purple">卡路里</span></span>
+        </h1>
+        <p class="mt-5 text-white/55 text-base sm:text-lg leading-relaxed max-w-xl">
+          五个独立模块，各管一摊：菜谱库、家常菜、年夜饭、我的餐桌——每道菜的
+          <span class="num text-[#f5a524] font-semibold">kcal</span> 都替你算好了。
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <button type="button" data-go="meals" class="btn-glow btn-primary num rounded-full px-7 py-3.5 font-bold text-[16px]">
+            🍳 开始搭配三餐
+          </button>
+          <button type="button" data-go="library" class="btn-glow btn-ghost glass rounded-full px-7 py-3.5 font-medium text-[16px] text-white/85">
+            浏览菜谱库 <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <div class="mt-10 flex flex-wrap gap-3">
+          <span class="num rounded-full px-4 py-2 text-sm border border-white/10 bg-white/[0.03] backdrop-blur-md">
+            <strong class="text-[#f5a524] text-base mr-1">509</strong>道食谱
+          </span>
+          <span class="num rounded-full px-4 py-2 text-sm border border-white/10 bg-white/[0.03] backdrop-blur-md">
+            <strong class="text-[#8b7cf6] text-base mr-1">5</strong>个独立模块
+          </span>
+          <span class="rounded-full px-4 py-2 text-sm border border-white/10 bg-white/[0.03] backdrop-blur-md">
+            每道菜 <span class="text-[#f5a524] font-semibold">kcal</span> 全标注
+          </span>
+        </div>
+      </div>
+
+      <!-- Marquee 标语条 -->
+      <div class="overflow-hidden py-4 -mx-4 sm:-mx-6" aria-hidden="true">
+        <div class="marquee">
+          <div class="marquee-track" id="marqueeTrack">
+            <div class="marquee-seg">
+              <span class="px-6 text-xl sm:text-2xl font-bold tracking-wide">今天吃什么</span>
+              <span class="px-6 text-xl sm:text-2xl num font-semibold text-[#f5a524]">· 509 道家常菜 ·</span>
+              <span class="px-6 text-xl sm:text-2xl font-bold tracking-wide">一荤一素一汤</span>
+              <span class="px-6 text-xl sm:text-2xl num font-semibold text-[#8b7cf6]">· kcal 全标注 ·</span>
+              <span class="px-6 text-xl sm:text-2xl font-bold tracking-wide">年夜饭一键配齐</span>
+              <span class="px-6 text-xl sm:text-2xl num font-semibold text-[#f5a524]">· 减脂 · 增肌 · 维持 · 营养 ·</span>
+            </div>
+            <div class="marquee-seg">
+              <span class="px-6 text-xl sm:text-2xl font-bold tracking-wide">今天吃什么</span>
+              <span class="px-6 text-xl sm:text-2xl num font-semibold text-[#f5a524]">· 509 道家常菜 ·</span>
+              <span class="px-6 text-xl sm:text-2xl font-bold tracking-wide">一荤一素一汤</span>
+              <span class="px-6 text-xl sm:text-2xl num font-semibold text-[#8b7cf6]">· kcal 全标注 ·</span>
+              <span class="px-6 text-xl sm:text-2xl font-bold tracking-wide">年夜饭一键配齐</span>
+              <span class="px-6 text-xl sm:text-2xl num font-semibold text-[#f5a524]">· 减脂 · 增肌 · 维持 · 营养 ·</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷入口卡 -->
+      <h2 class="mt-12 mb-5 text-lg font-bold text-white/90 flex items-center gap-2">
+        <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-[#f5a524] to-[#8b7cf6] inline-block"></span>
+        快捷入口
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button type="button" data-go="library" class="quick-card p-6 text-left group">
+          <span class="text-4xl block mb-4">📚</span>
+          <h3 class="font-bold text-lg">逛菜谱库</h3>
+          <p class="mt-1.5 text-sm text-white/50 leading-relaxed">509 道菜，分类 / 餐次 / 地区多维筛选</p>
+          <span class="qc-arrow inline-flex items-center gap-1 mt-4 text-sm text-white/40 transition-all" aria-hidden="true">去看看 <span class="text-lg leading-none">→</span></span>
+        </button>
+        <button type="button" data-go="nye" class="quick-card p-6 text-left group">
+          <span class="text-4xl block mb-4">🧧</span>
+          <h3 class="font-bold text-lg">配一桌年夜饭</h3>
+          <p class="mt-1.5 text-sm text-white/50 leading-relaxed">凉菜硬菜热菜汤品主食甜品，一键配齐</p>
+          <span class="qc-arrow inline-flex items-center gap-1 mt-4 text-sm text-white/40 transition-all" aria-hidden="true">去配桌 <span class="text-lg leading-none">→</span></span>
+        </button>
+        <button type="button" data-go="table" class="quick-card p-6 text-left group">
+          <span class="text-4xl block mb-4">🛒</span>
+          <h3 class="font-bold text-lg">我的餐桌</h3>
+          <p class="mt-1.5 text-sm text-white/50 leading-relaxed">已选菜汇总营养，一键生成购物清单</p>
+          <span class="qc-arrow inline-flex items-center gap-1 mt-4 text-sm text-white/40 transition-all" aria-hidden="true">去看看 <span class="text-lg leading-none">→</span></span>
+        </button>
+        <button type="button" data-go="meals" class="quick-card p-6 text-left group">
+          <span class="text-4xl block mb-4">⚡</span>
+          <h3 class="font-bold text-lg">算热量</h3>
+          <p class="mt-1.5 text-sm text-white/50 leading-relaxed">今日三餐搭配，每道菜的 kcal 一目了然</p>
+          <span class="qc-arrow inline-flex items-center gap-1 mt-4 text-sm text-white/40 transition-all" aria-hidden="true">去看看 <span class="text-lg leading-none">→</span></span>
+        </button>
+      </div>
+
+      <!-- 今日三餐搭配 -->
+      <h2 id="daily-meals" class="mt-14 mb-5 text-lg font-bold text-white/90 flex items-center gap-2">
+        <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-[#f5a524] to-[#8b7cf6] inline-block"></span>
+        今日三餐搭配
+        <span class="num text-xs font-medium text-white/35 border border-white/10 rounded-full px-2.5 py-0.5 ml-1">kcal 已算好</span>
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass rounded-3xl p-6 relative overflow-hidden border-l-2 border-l-[#f5a524]">
+          <p class="num text-xs tracking-[0.22em] uppercase text-white/40 mb-3">Breakfast · 早餐</p>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-xl">燕麦牛奶粥 <span class="ml-1">🥣</span></h3>
+              <p class="mt-2 text-sm text-white/50">高纤慢碳，暖胃唤醒</p>
+            </div>
+            <span class="kcal-chip num rounded-full px-3.5 py-1.5 text-sm font-bold shrink-0">260 kcal</span>
+          </div>
+        </div>
+        <div class="glass rounded-3xl p-6 relative overflow-hidden border-l-2 border-l-[#8b7cf6]">
+          <p class="num text-xs tracking-[0.22em] uppercase text-white/40 mb-3">Lunch · 午餐</p>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-xl">宫保鸡丁 <span class="ml-1">🍗</span></h3>
+              <p class="mt-2 text-sm text-white/50">高蛋白，酸甜微辣提神</p>
+            </div>
+            <span class="kcal-chip num rounded-full px-3.5 py-1.5 text-sm font-bold shrink-0">520 kcal</span>
+          </div>
+        </div>
+        <div class="glass rounded-3xl p-6 relative overflow-hidden border-l-2 border-l-[#f5a524]">
+          <p class="num text-xs tracking-[0.22em] uppercase text-white/40 mb-3">Dinner · 晚餐</p>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-xl">清蒸鲈鱼 <span class="ml-1">🐟</span></h3>
+              <p class="mt-2 text-sm text-white/50">低脂高蛋白，清淡收尾</p>
+            </div>
+            <span class="kcal-chip num rounded-full px-3.5 py-1.5 text-sm font-bold shrink-0">280 kcal</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         模块 2 · 菜谱库
+    ============================================================ -->
+    <section id="module-library" class="module hidden max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-20">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+          <p class="num text-xs tracking-[0.28em] uppercase text-white/40 mb-2">Recipe Library</p>
+          <h2 class="text-3xl font-black">📚 菜谱库</h2>
+        </div>
+        <p class="text-sm text-white/45">
+          共 <span class="num text-[#f5a524] font-bold">509</span> 道 · 当前筛选
+          <span class="num text-[#f5a524] font-bold" id="libCount">12</span> 道
+        </p>
+      </div>
+
+      <!-- 筛选工具栏：一行收纳 4 维度 + 搜索 + 排序 -->
+      <div class="glass rounded-2xl p-4 mb-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- 折叠开关 -->
+          <button type="button" id="filterToggle" aria-expanded="false"
+            class="chip num rounded-full px-4 py-2 text-sm font-semibold inline-flex items-center gap-1.5">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#8b7cf6]"></span>
+            筛选 <span id="filterCaret" aria-hidden="true">▾</span>
+            <span class="chip-cnt num text-xs" id="filterCount" hidden></span>
+          </button>
+
+          <!-- 分类（一行） -->
+          <div class="flex items-center gap-2 flex-wrap" data-group="cat" aria-label="分类筛选">
+            <span class="text-xs text-white/35 shrink-0">分类</span>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="cat" data-val="减脂">减脂</button>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="cat" data-val="增肌">增肌</button>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="cat" data-val="维持">维持</button>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="cat" data-val="营养">营养</button>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="cat" data-val="家常">家常</button>
+          </div>
+
+          <!-- 餐次 -->
+          <div class="flex items-center gap-2 flex-wrap" data-group="meal" aria-label="餐次筛选">
+            <span class="text-xs text-white/35 shrink-0">餐次</span>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="meal" data-val="早">早 🌅</button>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="meal" data-val="午">午 ☀️</button>
+            <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="meal" data-val="晚">晚 🌙</button>
+          </div>
+
+          <!-- 搜索 + 排序（右侧） -->
+          <div class="flex-1 min-w-[220px] flex items-center gap-2 justify-end flex-wrap">
+            <label class="relative flex-1 min-w-[180px] max-w-[240px]">
+              <span class="sr-only">搜索菜名</span>
+              <input id="libSearch" type="search" placeholder="搜索菜名…"
+                class="w-full rounded-full bg-white/[0.05] border border-white/10 px-4 py-2 pr-9 text-sm placeholder:text-white/30 focus:border-[#f5a524]/60 focus:outline-none transition-colors" />
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/35 text-sm pointer-events-none" aria-hidden="true">🔍</span>
+            </label>
+            <select id="libSort" aria-label="排序方式"
+              class="rounded-full bg-white/[0.05] border border-white/10 px-4 py-2 text-sm text-white/80 focus:border-[#8b7cf6]/60 focus:outline-none transition-colors">
+              <option value="kcal-asc" class="bg-[#14101d]">热量 ↑</option>
+              <option value="kcal-desc" class="bg-[#14101d]">热量 ↓</option>
+              <option value="name" class="bg-[#14101d]">名称</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 折叠面板：地区维度（默认收起，点「筛选」展开） -->
+      <div id="filterPanel" class="glass rounded-2xl p-4 mb-6 hidden">
+        <div class="flex items-center gap-2 flex-wrap" data-group="region" aria-label="地区筛选">
+          <span class="text-xs text-white/35 shrink-0">地区</span>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="川">川</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="湘">湘</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="粤">粤</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="鄂">鄂</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="鲁">鲁</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="苏浙">苏浙</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="北">北</button>
+          <button type="button" class="chip num rounded-full px-3.5 py-1.5 text-[13px]" data-group="region" data-val="家常">家常</button>
+          <span class="text-xs text-white/30 ml-auto">点击「筛选 ▾」收起 / 展开</span>
+        </div>
+      </div>
+
+      <!-- 分批加载提示 -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5 text-sm">
+        <p class="text-white/45">
+          <span class="num text-white/70 font-semibold">已加载 12 道</span> · 每批 12 道 · 滚动可继续分批加载
+        </p>
+        <button type="button" id="loadMore" class="chip num rounded-full px-4 py-2 text-[13px] inline-flex items-center gap-1.5">
+          加载更多 <span aria-hidden="true">↓</span>
+        </button>
+      </div>
+
+      <!-- 菜谱网格 3 列 -->
+      <div id="lib-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <article class="rec-card p-5" data-cat="维持" data-meal="晚" data-region="鲁" data-name="红烧肉">
+          <span class="text-4xl block mb-3">🍖</span>
+          <h3 class="font-bold text-lg">红烧肉</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">肥而不腻，入口即化的经典硬菜</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="chip-cnt num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">维持</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">665 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="红烧肉" title="加入我的餐桌" aria-label="把红烧肉加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="增肌" data-meal="午" data-region="川" data-name="宫保鸡丁">
+          <span class="text-4xl block mb-3">🍗</span>
+          <h3 class="font-bold text-lg">宫保鸡丁</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">鸡肉滑嫩，花生酥脆，酸甜微辣</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">增肌</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">520 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="宫保鸡丁" title="加入我的餐桌" aria-label="把宫保鸡丁加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="减脂" data-meal="午" data-region="粤" data-name="清蒸鲈鱼">
+          <span class="text-4xl block mb-3">🐟</span>
+          <h3 class="font-bold text-lg">清蒸鲈鱼</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">蒸汽锁鲜，鱼肉嫩白，减脂优选</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">减脂</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">280 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="清蒸鲈鱼" title="加入我的餐桌" aria-label="把清蒸鲈鱼加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="营养" data-meal="晚" data-region="川" data-name="麻婆豆腐">
+          <span class="text-4xl block mb-3">🌶️</span>
+          <h3 class="font-bold text-lg">麻婆豆腐</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">麻辣鲜香烫，嫩豆腐下饭神器</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">营养</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">310 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="麻婆豆腐" title="加入我的餐桌" aria-label="把麻婆豆腐加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="家常" data-meal="早" data-region="家常" data-name="番茄炒蛋">
+          <span class="text-4xl block mb-3">🍅</span>
+          <h3 class="font-bold text-lg">番茄炒蛋</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">国民家常菜，酸甜开胃十分钟上桌</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">家常</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">220 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="番茄炒蛋" title="加入我的餐桌" aria-label="把番茄炒蛋加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="减脂" data-meal="午" data-region="粤" data-name="白灼虾">
+          <span class="text-4xl block mb-3">🦐</span>
+          <h3 class="font-bold text-lg">白灼虾</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">原汁原味，高蛋白低脂肪</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">减脂</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">180 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="白灼虾" title="加入我的餐桌" aria-label="把白灼虾加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="营养" data-meal="晚" data-region="川" data-name="酸菜鱼">
+          <span class="text-4xl block mb-3">🐟</span>
+          <h3 class="font-bold text-lg">酸菜鱼</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">酸辣开胃，鱼片嫩滑，汤都能拌饭</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">营养</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">420 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="酸菜鱼" title="加入我的餐桌" aria-label="把酸菜鱼加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="增肌" data-meal="晚" data-region="家常" data-name="可乐鸡翅">
+          <span class="text-4xl block mb-3">🍗</span>
+          <h3 class="font-bold text-lg">可乐鸡翅</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">甜咸交织，大人小孩都爱</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">增肌</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">380 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="可乐鸡翅" title="加入我的餐桌" aria-label="把可乐鸡翅加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="维持" data-meal="晚" data-region="粤" data-name="梅菜扣肉">
+          <span class="text-4xl block mb-3">🥩</span>
+          <h3 class="font-bold text-lg">梅菜扣肉</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">五花肉配梅干菜，咸香酥烂</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">维持</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">620 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="梅菜扣肉" title="加入我的餐桌" aria-label="把梅菜扣肉加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="营养" data-meal="晚" data-region="北" data-name="地三鲜">
+          <span class="text-4xl block mb-3">🍆</span>
+          <h3 class="font-bold text-lg">地三鲜</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">茄子土豆青椒，东北下饭三剑客</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">营养</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">250 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="地三鲜" title="加入我的餐桌" aria-label="把她三鲜加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="维持" data-meal="午" data-region="家常" data-name="蛋炒饭">
+          <span class="text-4xl block mb-3">🍚</span>
+          <h3 class="font-bold text-lg">蛋炒饭</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">粒粒分明，深夜食堂灵魂主食</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">维持</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">480 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="蛋炒饭" title="加入我的餐桌" aria-label="把蛋炒饭加入我的餐桌">+</button>
+        </article>
+        <article class="rec-card p-5" data-cat="减脂" data-meal="午" data-region="鄂" data-name="冬瓜排骨汤">
+          <span class="text-4xl block mb-3">🍲</span>
+          <h3 class="font-bold text-lg">冬瓜排骨汤</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">清淡解腻，汤鲜肉烂暖胃</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">减脂</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">160 kcal</span>
+          </div>
+          <button type="button" class="add-btn" data-add="冬瓜排骨汤" title="加入我的餐桌" aria-label="把冬瓜排骨汤加入我的餐桌">+</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         模块 3 · 家常菜
+    ============================================================ -->
+    <section id="module-home-style" class="module hidden max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-20">
+      <div class="mb-8">
+        <p class="num text-xs tracking-[0.28em] uppercase text-white/40 mb-2">Home-Style Kitchen</p>
+        <h2 class="text-3xl font-black">🍳 家常菜</h2>
+      </div>
+
+      <!-- 今日推荐横卡 -->
+      <div class="big-recipe glass rounded-3xl p-7 sm:p-9 mb-8">
+        <span class="badge-today num absolute top-5 right-5 rounded-full px-3.5 py-1.5 text-xs font-bold inline-flex items-center gap-1">
+          ⭐ 今日推荐
+        </span>
+        <div class="grid md:grid-cols-12 gap-8 items-center">
+          <div class="md:col-span-4 flex justify-center">
+            <span class="emoji-float text-8xl leading-none">🥓</span>
+          </div>
+          <div class="md:col-span-8">
+            <h3 class="text-3xl font-black">回锅肉 <span class="text-xl align-middle text-white/40 font-medium ml-1">川味经典</span></h3>
+            <p class="mt-3 text-white/60 leading-relaxed max-w-2xl">
+              蒜苗豆豉爆香五花肉，肥而不腻、咸鲜微辣，配一碗白米饭，今晚就它了。
+            </p>
+            <div class="mt-6 flex flex-wrap items-center gap-4">
+              <div class="rounded-2xl bg-white/[0.05] border border-white/10 px-5 py-3.5 flex gap-6">
+                <div class="text-center">
+                  <p class="num text-2xl font-bold text-[#f5a524]">24<small class="text-sm">g</small></p>
+                  <p class="text-xs text-white/45 mt-0.5">蛋白质</p>
+                </div>
+                <div class="w-px bg-white/10"></div>
+                <div class="text-center">
+                  <p class="num text-2xl font-bold text-[#8b7cf6]">42<small class="text-sm">g</small></p>
+                  <p class="text-xs text-white/45 mt-0.5">脂肪</p>
+                </div>
+                <div class="w-px bg-white/10"></div>
+                <div class="text-center">
+                  <p class="num text-2xl font-bold text-white/85">18<small class="text-sm">g</small></p>
+                  <p class="text-xs text-white/45 mt-0.5">碳水</p>
+                </div>
+              </div>
+              <span class="kcal-chip num rounded-full px-5 py-2.5 text-lg font-bold">550 kcal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地区细分胶囊行 -->
+      <div class="flex items-center gap-2 flex-wrap mb-7" id="hs-region" role="group" aria-label="地区细分">
+        <span class="text-xs text-white/35 mr-1">地区</span>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="川">川菜🌶️</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="湘">湘菜🔥</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="粤">粤菜🦐</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="鄂">鄂菜🪷</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="鲁">鲁菜🥘</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="苏浙">苏浙🍃</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="北">北方🥟</button>
+        <button type="button" class="chip num rounded-full px-4 py-2 text-sm" data-hs="家常">家常🍳</button>
+      </div>
+
+      <!-- 精选网格 6 张 -->
+      <div id="hs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <article class="rec-card p-5" data-region="川">
+          <span class="text-4xl block mb-3">🥓</span>
+          <h3 class="font-bold text-lg">回锅肉</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">蒜苗豆豉爆香，肥而不腻川味下饭王</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">川菜</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">550 kcal</span>
+          </div>
+        </article>
+        <article class="rec-card p-5" data-region="川">
+          <span class="text-4xl block mb-3">🐔</span>
+          <h3 class="font-bold text-lg">口水鸡</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">麻辣红油浇鸡腿，让人口水直流</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">川菜</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">380 kcal</span>
+          </div>
+        </article>
+        <article class="rec-card p-5" data-region="湘">
+          <span class="text-4xl block mb-3">🐟</span>
+          <h3 class="font-bold text-lg">剁椒鱼头</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">剁椒铺满鱼头，鲜辣过瘾</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">湘菜</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">420 kcal</span>
+          </div>
+        </article>
+        <article class="rec-card p-5" data-region="苏浙">
+          <span class="text-4xl block mb-3">🐟</span>
+          <h3 class="font-bold text-lg">西湖醋鱼</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">糖醋汁挂鱼身，酸甜滑嫩</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">苏浙</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">320 kcal</span>
+          </div>
+        </article>
+        <article class="rec-card p-5" data-region="北">
+          <span class="text-4xl block mb-3">🥩</span>
+          <h3 class="font-bold text-lg">锅包肉</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">外酥里嫩，糖醋汁东北名菜</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">北方</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">480 kcal</span>
+          </div>
+        </article>
+        <article class="rec-card p-5" data-region="鄂">
+          <span class="text-4xl block mb-3">🍲</span>
+          <h3 class="font-bold text-lg">莲藕排骨汤</h3>
+          <p class="mt-1 text-[13px] text-white/50 leading-relaxed">粉藕配排骨，汤浓味鲜</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="num text-xs text-white/45 border border-white/10 rounded-full px-2.5 py-0.5">鄂菜</span>
+            <span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold">260 kcal</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         模块 4 · 年夜饭
+    ============================================================ -->
+    <section id="module-nye" class="module hidden max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-20">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <div>
+          <p class="num text-xs tracking-[0.28em] uppercase text-white/40 mb-2">New Year's Eve Feast</p>
+          <h2 class="text-3xl font-black">🧧 年夜饭</h2>
+        </div>
+        <button type="button" id="nyeShuffle" class="btn-glow btn-primary num rounded-full px-6 py-3 font-bold text-[15px]">
+          🎲 重新配一桌
+        </button>
+      </div>
+
+      <!-- 全宽生成器 -->
+      <div class="big-recipe glass rounded-3xl p-6 sm:p-8 mb-8">
+        <p class="text-sm text-white/45 mb-6">
+          凉菜 · 硬菜 · 热菜 · 汤 · 主食 · 甜品，<span class="text-[#f5a524] font-semibold">六池 11 道</span>，每道都能单独「换一道」。
+        </p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <!-- 六池由 JS 渲染 -->
+          <div id="nye-pools" class="contents"></div>
+        </div>
+      </div>
+
+      <!-- 汇总行 -->
+      <div class="glass rounded-2xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-wrap items-center gap-x-8 gap-y-4 justify-between">
+          <div class="flex flex-wrap items-center gap-x-7 gap-y-3">
+            <div>
+              <p class="text-xs text-white/40 mb-1">合计热量</p>
+              <p class="num text-2xl font-bold text-[#f5a524]"><span id="nyeKcal">0</span> <small class="text-sm text-white/40 font-medium">kcal</small></p>
+            </div>
+            <div class="w-px h-9 bg-white/10 hidden sm:block"></div>
+            <div>
+              <p class="text-xs text-white/40 mb-1">蛋白质</p>
+              <p class="num text-xl font-bold text-[#8b7cf6]"><span id="nyeP">0</span>g</p>
+            </div>
+            <div>
+              <p class="text-xs text-white/40 mb-1">碳水</p>
+              <p class="num text-xl font-bold text-white/85"><span id="nyeC">0</span>g</p>
+            </div>
+            <div>
+              <p class="text-xs text-white/40 mb-1">脂肪</p>
+              <p class="num text-xl font-bold text-[#f5a524]"><span id="nyeF">0</span>g</p>
+            </div>
+          </div>
+          <button type="button" id="nyeJoin" class="btn-glow btn-primary num rounded-full px-8 py-4 font-bold text-[16px]">
+            🍽️ 加入我的餐桌
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         模块 5 · 我的餐桌
+    ============================================================ -->
+    <section id="module-table" class="module hidden max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-20">
+      <div class="mb-8">
+        <p class="num text-xs tracking-[0.28em] uppercase text-white/40 mb-2">My Table</p>
+        <h2 class="text-3xl font-black">🛒 我的餐桌</h2>
+      </div>
+
+      <!-- 视图 A：已选菜列表 -->
+      <div id="table-view">
+        <!-- 汇总卡 -->
+        <div class="glass rounded-2xl p-6 mb-6">
+          <div class="flex flex-wrap items-center gap-x-8 gap-y-4 justify-between">
+            <div class="flex flex-wrap items-center gap-x-7 gap-y-3">
+              <div>
+                <p class="text-xs text-white/40 mb-1">已选菜</p>
+                <p class="num text-2xl font-bold text-white"><span id="tableCount">0</span> <small class="text-sm text-white/40 font-medium">道</small></p>
+              </div>
+              <div class="w-px h-9 bg-white/10 hidden sm:block"></div>
+              <div>
+                <p class="text-xs text-white/40 mb-1">合计热量</p>
+                <p class="num text-2xl font-bold text-[#f5a524]"><span id="tableKcal">0</span> <small class="text-sm text-white/40 font-medium">kcal</small></p>
+              </div>
+              <div>
+                <p class="text-xs text-white/40 mb-1">蛋白质</p>
+                <p class="num text-xl font-bold text-[#8b7cf6]"><span id="tableP">0</span>g</p>
+              </div>
+              <div>
+                <p class="text-xs text-white/40 mb-1">碳水</p>
+                <p class="num text-xl font-bold text-white/85"><span id="tableC">0</span>g</p>
+              </div>
+              <div>
+                <p class="text-xs text-white/40 mb-1">脂肪</p>
+                <p class="num text-xl font-bold text-[#f5a524]"><span id="tableF">0</span>g</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" id="genShop" class="btn-glow btn-primary num rounded-full px-6 py-3 font-bold text-[15px]">
+                📋 生成购物清单
+              </button>
+              <button type="button" id="clearTable" class="btn-glow btn-ghost glass rounded-full px-6 py-3 font-medium text-[15px] text-white/75">
+                清空餐桌
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表 -->
+        <div id="table-list" class="space-y-3"></div>
+
+        <!-- 空状态 -->
+        <div id="table-empty" class="hidden glass rounded-3xl py-16 text-center">
+          <p class="text-5xl mb-4">🍽️</p>
+          <p class="text-white/60">餐桌上还没有菜</p>
+          <p class="text-sm text-white/35 mt-2 mb-6">去菜谱库逛逛，或配一桌年夜饭</p>
+          <button type="button" data-go="library" class="btn-glow btn-primary num rounded-full px-6 py-3 font-bold text-[15px]">去菜谱库选菜</button>
+        </div>
+      </div>
+
+      <!-- 视图 B：购物清单 -->
+      <div id="shop-view" class="hidden">
+        <div class="glass rounded-2xl p-6 mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 class="text-xl font-bold">📋 购物清单</h3>
+              <p class="mt-1 text-sm text-white/45">按食材合并去重 · 共 <span class="num text-[#f5a524] font-bold" id="shopCount">0</span> 项</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" id="copyShop" class="btn-glow btn-primary num rounded-full px-6 py-3 font-bold text-[15px]">
+                📋 复制清单
+              </button>
+              <button type="button" id="backTable" class="btn-glow btn-ghost glass rounded-full px-6 py-3 font-medium text-[15px] text-white/75">
+                ← 返回餐桌
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="shop-groups" class="space-y-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 页脚 ============ -->
+  <footer class="relative z-10 border-t border-white/10 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+      <p class="text-sm text-white/40">
+        🍱 每日食光 · <span class="num">模块化排版提案 v1</span>
+      </p>
+      <a href="index.html" class="text-sm text-white/45 hover:text-white transition-colors inline-flex items-center gap-1.5">
+        <span aria-hidden="true">←</span> 返回方案画廊
+      </a>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ============================================================
+       工具
+    ============================================================ */
+    const $  = (s, el = document) => el.querySelector(s);
+    const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    /* ============================================================
+       模块切换
+    ============================================================ */
+    const MODULES = ['home', 'library', 'home-style', 'nye', 'table'];
+    function showModule(id, scrollTop = true) {
+      if (!MODULES.includes(id)) return;
+      $$('.module').forEach(m => m.classList.toggle('hidden', m.id !== 'module-' + id));
+      $$('.mod-tab').forEach(t => {
+        const on = t.dataset.mod === id;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (scrollTop) window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    $$('.mod-tab').forEach(tab => {
+      tab.addEventListener('click', () => showModule(tab.dataset.mod));
+    });
+
+    /* 快捷入口 / 通用跳转 */
+    function goTo(target) {
+      if (target === 'meals') {
+        showModule('home');
+        setTimeout(() => $('#daily-meals').scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      } else {
+        showModule(target);
+      }
+    }
+    $$('[data-go]').forEach(el => el.addEventListener('click', () => goTo(el.dataset.go)));
+
+    /* ============================================================
+       菜谱库：筛选 / 搜索 / 排序
+    ============================================================ */
+    const chips = $$('.chip[data-group]');
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+        applyFilters();
+      });
+    });
+
+    $('#filterToggle').addEventListener('click', () => {
+      const panel = $('#filterPanel');
+      const open = !panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', open);
+      $('#filterCaret').textContent = open ? '▾' : '▴';
+      $('#filterToggle').setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+
+    function activeVal(group) {
+      const a = $('.chip[data-group="' + group + '"].active');
+      return a ? a.dataset.val : null;
+    }
+
+    function applyFilters() {
+      const cat = activeVal('cat'), meal = activeVal('meal'), region = activeVal('region');
+      const q = $('#libSearch').value.trim();
+
+      let visible = 0;
+      $$('#lib-grid .rec-card').forEach(card => {
+        const ok =
+          (!cat || card.dataset.cat === cat) &&
+          (!meal || card.dataset.meal === meal) &&
+          (!region || card.dataset.region === region) &&
+          (!q || card.dataset.name.includes(q));
+        card.classList.toggle('hidden', !ok);
+        if (ok) visible++;
+      });
+
+      $('#libCount').textContent = visible;
+
+      /* 折叠面板里有筛选时，在开关上显示数量 */
+      const totalActive = chips.filter(c => c.classList.contains('active')).length;
+      const fc = $('#filterCount');
+      fc.hidden = totalActive === 0;
+      fc.textContent = totalActive ? '已选 ' + totalActive : '';
+      sortCards();
+    }
+
+    function sortCards() {
+      const grid = $('#lib-grid');
+      const cards = $$('#lib-grid .rec-card:not(.hidden)');
+      const mode = $('#libSort').value;
+      cards.sort((a, b) => {
+        const ka = parseInt(a.querySelector('.kcal-chip').textContent, 10);
+        const kb = parseInt(b.querySelector('.kcal-chip').textContent, 10);
+        if (mode === 'kcal-asc') return ka - kb;
+        if (mode === 'kcal-desc') return kb - ka;
+        return a.dataset.name.localeCompare(b.dataset.name, 'zh');
+      });
+      cards.forEach(c => grid.appendChild(c));
+    }
+
+    $('#libSearch').addEventListener('input', applyFilters);
+    $('#libSort').addEventListener('change', sortCards);
+    $('#loadMore').addEventListener('click', () => toast('已加载全部 509 道（演示分批加载，最多展示 12 道）'));
+
+    /* ============================================================
+       家常菜：地区筛选
+    ============================================================ */
+    $$('#hs-region .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const was = chip.classList.contains('active');
+        $$('#hs-region .chip').forEach(c => c.classList.remove('active'));
+        if (!was) chip.classList.add('active');
+        const sel = chip.classList.contains('active') ? chip.dataset.hs : null;
+        $$('#hs-grid .rec-card').forEach(card => {
+          card.classList.toggle('hidden', !!sel && card.dataset.region !== sel);
+        });
+      });
+    });
+
+    /* ============================================================
+       我的餐桌（跨模块共享状态）
+    ============================================================ */
+    const MACROS = {
+      '红烧肉': { p: 28, c: 52, f: 38 }, '宫保鸡丁': { p: 32, c: 28, f: 30 },
+      '清蒸鲈鱼': { p: 40, c: 4, f: 9 }, '麻婆豆腐': { p: 20, c: 14, f: 18 },
+      '番茄炒蛋': { p: 14, c: 12, f: 14 }, '白灼虾': { p: 36, c: 2, f: 4 },
+      '酸菜鱼': { p: 34, c: 10, f: 20 }, '可乐鸡翅': { p: 30, c: 22, f: 18 },
+      '梅菜扣肉': { p: 30, c: 40, f: 42 }, '地三鲜': { p: 8, c: 20, f: 16 },
+      '蛋炒饭': { p: 15, c: 62, f: 18 }, '冬瓜排骨汤': { p: 12, c: 8, f: 9 },
+      '凉拌黄瓜': { p: 2, c: 12, f: 2 }, '口水鸡': { p: 28, c: 6, f: 26 },
+      '糖醋排骨': { p: 26, c: 38, f: 26 }, '银耳莲子羹': { p: 2, c: 30, f: 0 },
+      '凉拌木耳': { p: 2, c: 14, f: 1 }, '皮蛋豆腐': { p: 10, c: 6, f: 12 },
+      '白切鸡': { p: 28, c: 2, f: 14 }, '番茄蛋汤': { p: 8, c: 10, f: 6 },
+      '紫菜蛋花汤': { p: 9, c: 8, f: 5 }, '葱油拌面': { p: 12, c: 66, f: 16 },
+      '桂花糖藕': { p: 4, c: 40, f: 2 }, '汤圆': { p: 5, c: 50, f: 3 },
+      '回锅肉': { p: 24, c: 18, f: 42 }, '剁椒鱼头': { p: 30, c: 8, f: 16 },
+      '西湖醋鱼': { p: 32, c: 14, f: 12 }, '锅包肉': { p: 26, c: 40, f: 22 },
+      '莲藕排骨汤': { p: 14, c: 16, f: 10 },
+    };
+
+    let table = [
+      { emoji: '🍖', name: '红烧肉', kcal: 665 },
+      { emoji: '🍗', name: '宫保鸡丁', kcal: 520 },
+      { emoji: '🐟', name: '清蒸鲈鱼', kcal: 280 },
+      { emoji: '🍅', name: '番茄炒蛋', kcal: 220 },
+      { emoji: '🍚', name: '蛋炒饭', kcal: 480 },
+    ];
+
+    function addToTable(item, silent = false) {
+      if (table.some(d => d.name === item.name)) {
+        if (!silent) toast('「' + item.name + '」已经在餐桌上了 😋');
+        return false;
+      }
+      table.push(item);
+      renderTable();
+      if (!silent) toast('已把「' + item.name + '」加入餐桌 🍽️');
+      return true;
+    }
+
+    function renderTable() {
+      $('#tableCount').textContent = table.length;
+      $('#tableBadge').textContent = table.length;
+
+      const kcal = table.reduce((s, d) => s + d.kcal, 0);
+      const p = table.reduce((s, d) => s + ((MACROS[d.name] || {}).p || 0), 0);
+      const c = table.reduce((s, d) => s + ((MACROS[d.name] || {}).c || 0), 0);
+      const f = table.reduce((s, d) => s + ((MACROS[d.name] || {}).f || 0), 0);
+      $('#tableKcal').textContent = kcal;
+      $('#tableP').textContent = p;
+      $('#tableC').textContent = c;
+      $('#tableF').textContent = f;
+
+      const list = $('#table-list');
+      list.innerHTML = '';
+      table.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.innerHTML =
+          '<span class="text-2xl shrink-0">' + d.emoji + '</span>' +
+          '<span class="flex-1 font-semibold">' + d.name + '</span>' +
+          '<span class="kcal-chip num rounded-full px-3 py-1 text-sm font-bold shrink-0">' + d.kcal + ' kcal</span>' +
+          '<button type="button" class="del-btn" data-del="' + d.name + '" aria-label="移除' + d.name + '">✕</button>';
+        list.appendChild(row);
+      });
+
+      $('#table-empty').classList.toggle('hidden', table.length > 0);
+      $('#genShop').disabled = table.length === 0;
+    }
+
+    $('#table-list').addEventListener('click', e => {
+      const btn = e.target.closest('[data-del]');
+      if (!btn) return;
+      table = table.filter(d => d.name !== btn.dataset.del);
+      renderTable();
+      toast('已从餐桌移除「' + btn.dataset.del + '」');
+    });
+
+    $('#clearTable').addEventListener('click', () => {
+      if (!table.length) { toast('餐桌已经是空的了'); return; }
+      table = [];
+      renderTable();
+      $('#shop-view').classList.add('hidden');
+      $('#table-view').classList.remove('hidden');
+      toast('餐桌已清空 🧹');
+    });
+
+    /* 菜谱库「+」加入餐桌 */
+    $('#lib-grid').addEventListener('click', e => {
+      const btn = e.target.closest('[data-add]');
+      if (!btn) return;
+      const card = btn.closest('.rec-card');
+      const name = btn.dataset.add;
+      const kcal = parseInt(card.querySelector('.kcal-chip').textContent, 10);
+      const emoji = card.querySelector('span.text-4xl').textContent;
+      addToTable({ emoji, name, kcal });
+    });
+
+    /* ============================================================
+       购物清单（按食材合并去重）
+    ============================================================ */
+    const INGREDIENTS = {
+      '红烧肉': [['肉蛋', '五花肉', 500, 'g'], ['调料', '冰糖', 30, 'g'], ['调料', '生抽', 2, '勺'], ['调料', '老抽', 1, '勺'], ['调料', '葱姜蒜', 1, '份'], ['调料', '八角', 2, '颗']],
+      '宫保鸡丁': [['肉蛋', '鸡腿肉', 400, 'g'], ['蔬菜', '花生米', 80, 'g'], ['蔬菜', '干辣椒', 10, '个'], ['蔬菜', '黄瓜', 1, '根'], ['调料', '葱姜蒜', 1, '份']],
+      '清蒸鲈鱼': [['水产', '鲈鱼', 1, '条'], ['调料', '蒸鱼豉油', 3, '勺'], ['调料', '姜丝', 1, '份'], ['蔬菜', '小葱', 1, '根']],
+      '麻婆豆腐': [['蔬菜', '嫩豆腐', 1, '盒'], ['肉蛋', '牛肉末', 100, 'g'], ['调料', '豆瓣酱', 2, '勺'], ['调料', '花椒粉', 1, '勺'], ['蔬菜', '蒜苗', 1, '根']],
+      '番茄炒蛋': [['蛋奶', '鸡蛋', 4, '个'], ['蔬菜', '番茄', 3, '个'], ['调料', '白糖', 1, '勺'], ['蔬菜', '小葱', 1, '根']],
+      '白灼虾': [['水产', '基围虾', 500, 'g'], ['调料', '姜', 1, '块'], ['调料', '生抽', 2, '勺'], ['调料', '料酒', 1, '勺']],
+      '酸菜鱼': [['水产', '黑鱼', 1, '条'], ['蔬菜', '酸菜', 1, '包'], ['蔬菜', '干辣椒', 8, '个'], ['调料', '花椒', 1, '勺']],
+      '可乐鸡翅': [['肉蛋', '鸡翅', 8, '个'], ['调料', '可乐', 1, '罐'], ['调料', '姜片', 1, '份'], ['调料', '生抽', 2, '勺']],
+      '梅菜扣肉': [['肉蛋', '五花肉', 400, 'g'], ['蔬菜', '梅干菜', 150, 'g'], ['调料', '腐乳汁', 2, '勺'], ['调料', '葱姜', 1, '份']],
+      '地三鲜': [['蔬菜', '茄子', 2, '根'], ['蔬菜', '土豆', 2, '个'], ['蔬菜', '青椒', 2, '个'], ['调料', '蒜', 3, '瓣']],
+      '蛋炒饭': [['主食', '米饭', 400, 'g'], ['蛋奶', '鸡蛋', 3, '个'], ['肉蛋', '火腿丁', 50, 'g'], ['蔬菜', '葱花', 1, '份']],
+      '冬瓜排骨汤': [['肉蛋', '排骨', 400, 'g'], ['蔬菜', '冬瓜', 500, 'g'], ['调料', '姜', 1, '块'], ['调料', '盐', 1, '勺']],
+    };
+    const SHOP_ORDER = ['肉蛋', '水产', '蔬菜', '蛋奶', '主食', '调料'];
+
+    function buildShoppingList() {
+      const merged = new Map(); /* name -> {cat, name, qty, unit} */
+      table.forEach(d => {
+        (INGREDIENTS[d.name] || []).forEach(([cat, name, qty, unit]) => {
+          if (merged.has(name)) {
+            merged.get(name).qty += qty;
+          } else {
+            merged.set(name, { cat, name, qty, unit });
+          }
+        });
+      });
+      return Array.from(merged.values());
+    }
+
+    function renderShop() {
+      const items = buildShoppingList();
+      $('#shopCount').textContent = items.length;
+      const wrap = $('#shop-groups');
+      wrap.innerHTML = '';
+      SHOP_ORDER.forEach(cat => {
+        const group = items.filter(it => it.cat === cat);
+        if (!group.length) return;
+        const el = document.createElement('div');
+        el.className = 'shop-group';
+        el.innerHTML =
+          '<p class="text-xs tracking-[0.2em] uppercase text-white/40 mb-3">' + cat + '</p>' +
+          '<div class="flex flex-wrap gap-x-2 gap-y-1.5 text-[15px]">' +
+          group.map(it =>
+            '<span class="inline-flex items-baseline gap-1.5">' +
+            '<span class="text-white/75">' + it.name + '</span>' +
+            '<span class="num text-[#f5a524] font-semibold text-sm">' + it.qty + it.unit + '</span>' +
+            '</span>'
+          ).join('<span class="text-white/20">·</span>') +
+          '</div>';
+        wrap.appendChild(el);
+      });
+    }
+
+    $('#genShop').addEventListener('click', () => {
+      if (!table.length) { toast('餐桌还是空的，先去加几道菜吧'); return; }
+      renderShop();
+      $('#table-view').classList.add('hidden');
+      $('#shop-view').classList.remove('hidden');
+      toast('购物清单已生成 📋');
+    });
+    $('#backTable').addEventListener('click', () => {
+      $('#shop-view').classList.add('hidden');
+      $('#table-view').classList.remove('hidden');
+    });
+
+    $('#copyShop').addEventListener('click', () => {
+      const items = buildShoppingList();
+      const lines = ['🛒 每日食光 · 购物清单（' + table.length + ' 道菜）'];
+      SHOP_ORDER.forEach(cat => {
+        const group = items.filter(it => it.cat === cat);
+        if (!group.length) return;
+        lines.push(cat + '：' + group.map(it => it.name + ' ' + it.qty + it.unit).join(' · '));
+      });
+      const text = lines.join('\n');
+
+      let handled = false;
+      const done = () => { if (handled) return; handled = true; toast('已复制 ' + items.length + ' 项食材到剪贴板 ✅'); };
+      const fallback = () => {
+        if (handled) return; handled = true;
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        } catch (err) { /* ignore */ }
+        toast('已复制到剪贴板 ✅');
+      };
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          Promise.race([
+            navigator.clipboard.writeText(text).then(done, () => {}),
+            new Promise(res => setTimeout(res, 1200)),
+          ]).then(fallback);
+        } else {
+          fallback();
+        }
+      } catch (err) { fallback(); }
+    });
+
+    /* ============================================================
+       年夜饭生成器
+    ============================================================ */
+    const NYE = {
+      cold:   { title: '凉菜', emoji: '🥗', keep: 2, items: [
+        { e: '🥒', n: '凉拌黄瓜', tag: '凉菜', kcal: 80, p: 2, c: 12, f: 2 },
+        { e: '🐔', n: '口水鸡',   tag: '凉菜', kcal: 380, p: 28, c: 6, f: 26 },
+      ], alts: [
+        { e: '🥗', n: '凉拌木耳', tag: '凉菜', kcal: 70, p: 2, c: 14, f: 1 },
+        { e: '🥚', n: '皮蛋豆腐', tag: '凉菜', kcal: 180, p: 10, c: 6, f: 12 },
+      ]},
+      main:   { title: '硬菜', emoji: '🍖', keep: 3, items: [
+        { e: '🍖', n: '红烧肉',   tag: '硬菜', kcal: 665, p: 28, c: 52, f: 38 },
+        { e: '🥩', n: '梅菜扣肉', tag: '硬菜', kcal: 620, p: 30, c: 40, f: 42 },
+        { e: '🍖', n: '糖醋排骨', tag: '硬菜', kcal: 480, p: 26, c: 38, f: 26 },
+      ], alts: [
+        { e: '🍗', n: '可乐鸡翅', tag: '硬菜', kcal: 380, p: 30, c: 22, f: 18 },
+        { e: '🐔', n: '白切鸡',   tag: '硬菜', kcal: 320, p: 28, c: 2, f: 14 },
+      ]},
+      hot:    { title: '热菜', emoji: '🔥', keep: 3, items: [
+        { e: '🍗', n: '宫保鸡丁', tag: '热菜', kcal: 520, p: 32, c: 28, f: 30 },
+        { e: '🐟', n: '清蒸鲈鱼', tag: '热菜', kcal: 280, p: 40, c: 4, f: 9 },
+        { e: '🦐', n: '白灼虾',   tag: '热菜', kcal: 180, p: 36, c: 2, f: 4 },
+      ], alts: [
+        { e: '🌶️', n: '麻婆豆腐', tag: '热菜', kcal: 310, p: 20, c: 14, f: 18 },
+        { e: '🐟', n: '酸菜鱼',   tag: '热菜', kcal: 420, p: 34, c: 10, f: 20 },
+      ]},
+      soup:   { title: '汤', emoji: '🍲', keep: 1, items: [
+        { e: '🍲', n: '冬瓜排骨汤', tag: '汤品', kcal: 160, p: 12, c: 8, f: 9 },
+      ], alts: [
+        { e: '🍅', n: '番茄蛋汤', tag: '汤品', kcal: 120, p: 8, c: 10, f: 6 },
+        { e: '🥣', n: '紫菜蛋花汤', tag: '汤品', kcal: 90, p: 9, c: 8, f: 5 },
+      ]},
+      staple: { title: '主食', emoji: '🍚', keep: 1, items: [
+        { e: '🍚', n: '蛋炒饭', tag: '主食', kcal: 480, p: 15, c: 62, f: 18 },
+      ], alts: [
+        { e: '🍜', n: '葱油拌面', tag: '主食', kcal: 450, p: 12, c: 66, f: 16 },
+      ]},
+      sweet:  { title: '甜品', emoji: '🍮', keep: 1, items: [
+        { e: '🍮', n: '银耳莲子羹', tag: '甜品', kcal: 150, p: 2, c: 30, f: 0 },
+      ], alts: [
+        { e: '🪷', n: '桂花糖藕', tag: '甜品', kcal: 210, p: 4, c: 40, f: 2 },
+        { e: '🍡', n: '汤圆',   tag: '甜品', kcal: 240, p: 5, c: 50, f: 3 },
+      ]},
+    };
+
+    const nyeState = {}; /* key -> picked items[] */
+
+    function pickPool(key, n) {
+      const pool = NYE[key];
+      const bag = [...pool.items, ...pool.alts];
+      const picked = [];
+      while (picked.length < n && bag.length) {
+        const i = Math.floor(Math.random() * bag.length);
+        picked.push(bag.splice(i, 1)[0]);
+      }
+      return picked;
+    }
+
+    function renderNyePool(key) {
+      const pool = NYE[key];
+      const picked = nyeState[key];
+      const box = $('#nye-pool-' + key);
+      box.innerHTML =
+        '<div class="flex items-center justify-between mb-3">' +
+        '<h4 class="font-bold text-white/90 flex items-center gap-1.5">' + pool.emoji + ' ' + pool.title +
+        '<span class="num text-[11px] text-white/40 border border-white/10 rounded-full px-2 py-0.5">' + pool.keep + '</span></h4>' +
+        '</div>' +
+        '<div class="space-y-2">' +
+        picked.map((it, idx) =>
+          '<div class="nye-item">' +
+          '<span class="text-xl leading-none shrink-0">' + it.e + '</span>' +
+          '<span class="font-medium text-[15px] truncate">' + it.n + '</span>' +
+          '<span class="num text-[10.5px] text-white/40 border border-white/10 rounded-full px-2 py-0.5 shrink-0">' + it.tag + '</span>' +
+          '<span class="num text-[#f5a524] font-bold text-sm ml-auto shrink-0">' + it.kcal + '</span>' +
+          '<button type="button" class="swap-btn" data-pool="' + key + '" data-idx="' + idx + '">换一道</button>' +
+          '</div>'
+        ).join('') +
+        '</div>';
+    }
+
+    function renderNye() {
+      Object.keys(NYE).forEach(renderNyePool);
+      let kcal = 0, p = 0, c = 0, f = 0;
+      Object.keys(NYE).forEach(key => {
+        nyeState[key].forEach(it => { kcal += it.kcal; p += it.p; c += it.c; f += it.f; });
+      });
+      $('#nyeKcal').textContent = kcal;
+      $('#nyeP').textContent = p;
+      $('#nyeC').textContent = c;
+      $('#nyeF').textContent = f;
+    }
+
+    /* 初始化六池 DOM 容器 */
+    (function initNye() {
+      const wrap = $('#nye-pools');
+      Object.keys(NYE).forEach(key => {
+        const div = document.createElement('div');
+        div.id = 'nye-pool-' + key;
+        div.className = 'glass rounded-2xl p-4';
+        wrap.appendChild(div);
+        nyeState[key] = pickPool(key, NYE[key].keep);
+      });
+      renderNye();
+    })();
+
+    $('#nyeShuffle').addEventListener('click', () => {
+      Object.keys(NYE).forEach(key => { nyeState[key] = pickPool(key, NYE[key].keep); });
+      Object.keys(NYE).forEach(renderNyePool);
+      renderNye();
+      toast('重新配好了一桌 🎲');
+    });
+
+    $('#nye-pools').addEventListener('click', e => {
+      const btn = e.target.closest('[data-pool]');
+      if (!btn) return;
+      const key = btn.dataset.pool;
+      const idx = parseInt(btn.dataset.idx, 10);
+      const pool = NYE[key];
+      const used = new Set(nyeState[key].map(it => it.n));
+      const candidates = [...pool.items, ...pool.alts].filter(it => !used.has(it.n));
+      if (!candidates.length) { toast('这桌已经试遍了，换一桌吧 😅'); return; }
+      nyeState[key][idx] = candidates[Math.floor(Math.random() * candidates.length)];
+      renderNyePool(key);
+      renderNye();
+    });
+
+    $('#nyeJoin').addEventListener('click', () => {
+      const all = Object.values(nyeState).flat();
+      let added = 0;
+      all.forEach(it => { if (addToTable({ emoji: it.e, name: it.n, kcal: it.kcal }, true)) added++; });
+      renderTable();
+      showModule('table');
+      toast(added ? '已把 ' + added + ' 道菜加入餐桌 🍽️' : '这些菜已经在餐桌上了 😋');
+    });
+
+    /* ============================================================
+       背景动效：光标光晕（沿用方案 B）
+    ============================================================ */
+    const cursorLight = $('#cursorLight');
+    if (cursorLight && window.matchMedia('(pointer: fine)').matches) {
+      document.addEventListener('mousemove', e => {
+        cursorLight.style.setProperty('--mx', e.clientX + 'px');
+        cursorLight.style.setProperty('--my', e.clientY + 'px');
+      });
+    }
+
+    /* ============================================================
+       初始化
+    ============================================================ */
+    renderTable();
+  </script>
+</body>
+</html>

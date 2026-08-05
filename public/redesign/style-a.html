@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>方案 A · 编辑部风美食杂志 | 每日食光重构</title>
+  <meta name="description" content="每日食光重构方案 A：编辑部风美食杂志。米白纸感、超大衬线标题、杂志式瀑布流。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    :root {
+      --paper: #faf7f2;
+      --ink: #1c1917;
+      --tomato: #e3502e;
+      --olive: #5c6b3f;
+      --mustard: #d9a441;
+      --font-serif-cn: "Noto Serif SC", "Songti SC", "SimSun", serif;
+      --font-sans-cn: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-sans-cn);
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.01em;
+    }
+    .serif { font-family: var(--font-serif-cn); }
+    .display {
+      font-family: var(--font-serif-cn);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.06;
+      font-size: clamp(3rem, 8.5vw, 6.4rem);
+    }
+    .kicker {
+      font-family: var(--font-sans-cn);
+      font-size: 0.72rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--tomato);
+    }
+    ::selection { background: var(--tomato); color: var(--paper); }
+
+    /* 纸纹噪点 */
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0.05;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    }
+
+    /* 贯穿页面的竖向细红线（桌面） */
+    .page-rule { position: relative; }
+    @media (min-width: 1024px) {
+      .page-rule::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 1.75rem;
+        width: 1px;
+        background: rgba(227, 80, 46, 0.5);
+      }
+    }
+    .red-rule { height: 1px; background: var(--tomato); }
+
+    /* 竖排小字 */
+    .vtext { writing-mode: vertical-rl; }
+
+    /* 滚动逐字/逐词淡入 */
+    .rw {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(0.5em);
+      transition: opacity 0.65s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.65s cubic-bezier(0.22, 0.61, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal.in .rw { opacity: 1; transform: none; }
+
+    /* 卡片纸感阴影 + 轻微上浮 */
+    .card {
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid rgba(28, 25, 23, 0.1);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 22px 44px -20px rgba(28, 25, 23, 0.35), 0 2px 6px rgba(28, 25, 23, 0.08);
+    }
+    .emoji-block {
+      display: grid;
+      place-items: center;
+      font-size: 3.4rem;
+      line-height: 1;
+      padding: 1.6rem 0;
+    }
+    .emoji-a { background: rgba(227, 80, 46, 0.1); }
+    .emoji-b { background: rgba(92, 107, 63, 0.12); }
+    .emoji-c { background: rgba(217, 164, 65, 0.16); }
+    .emoji-d { background: rgba(28, 25, 23, 0.05); }
+
+    /* 锚点滚动补偿 */
+    section[id], div[id^="cat-"] { scroll-margin-top: 5.5rem; }
+
+    /* chips */
+    .chip {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      padding: 0.42rem 1rem;
+      border: 1px solid rgba(28, 25, 23, 0.28);
+      color: var(--ink);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--tomato); color: var(--tomato); }
+    .chip-active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--paper);
+    }
+
+    .btn-primary {
+      background: var(--tomato);
+      color: var(--paper);
+      transition: background 0.25s ease, transform 0.25s ease;
+    }
+    .btn-primary:hover { background: #c9421f; transform: translateY(-1px); }
+    .btn-ghost {
+      border: 1px solid rgba(28, 25, 23, 0.4);
+      color: var(--ink);
+      transition: border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+    }
+    .btn-ghost:hover { border-color: var(--olive); color: var(--olive); transform: translateY(-1px); }
+
+    .mini-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .mini-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px -18px rgba(28, 25, 23, 0.4);
+    }
+
+    .nav-link { transition: color 0.2s ease; }
+    .nav-link:hover { color: var(--tomato); }
+  </style>
+</head>
+<body class="page-rule antialiased">
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ======== 顶部细导航条 ======== -->
+  <header class="sticky top-0 z-50 border-b border-stone-900/10 bg-[#faf7f2]/90 backdrop-blur-sm">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-3 lg:px-10">
+      <a href="#top" class="serif text-xl font-bold tracking-tight">每日食光</a>
+      <nav class="flex flex-1 items-center gap-5 overflow-x-auto text-[13px] tracking-wide text-stone-700 lg:justify-center lg:gap-8">
+        <a href="#cat-jianzhi" class="nav-link whitespace-nowrap">减脂餐</a>
+        <a href="#cat-zengji" class="nav-link whitespace-nowrap">增肌餐</a>
+        <a href="#cat-weichi" class="nav-link whitespace-nowrap">维持餐</a>
+        <a href="#cat-yingyang" class="nav-link whitespace-nowrap">营养餐</a>
+        <a href="#jiachang" class="nav-link whitespace-nowrap">家常菜</a>
+      </nav>
+      <a href="index.html" class="nav-link hidden shrink-0 text-[12px] tracking-[0.18em] text-stone-500 lg:block">方案画廊 ↗</a>
+    </div>
+  </header>
+
+  <main id="top" class="mx-auto max-w-6xl px-5 lg:px-10">
+
+    <!-- ======== Hero 头版 ======== -->
+    <section class="relative border-b border-stone-900/10 py-16 lg:py-24">
+      <div class="grid gap-10 lg:grid-cols-[1fr_auto] lg:gap-16">
+        <div>
+          <p class="kicker mb-6 flex items-center gap-3">
+            <span class="inline-block h-2 w-2 bg-[#e3502e]"></span>
+            Vol. 08 · Aug 2026 · 每日食光编辑部
+          </p>
+          <h1 class="display js-split reveal">今天吃什么</h1>
+          <p class="mt-6 max-w-xl text-sm leading-7 text-stone-600 lg:text-base">
+            四百道家常与营养菜谱，热量、做法与时令推荐，都收在这一本里。
+            翻一页，就是一道菜；读一行，就知道这一餐值不值得。
+          </p>
+          <div class="mt-9 flex flex-wrap gap-4">
+            <a href="#cat-jianzhi" class="btn-primary px-7 py-3 text-sm tracking-[0.14em]">计算热量</a>
+            <a href="#recipes" class="btn-ghost px-7 py-3 text-sm tracking-[0.14em]">浏览食谱</a>
+          </div>
+        </div>
+
+        <!-- 右侧竖排：本期内容索引 -->
+        <aside class="hidden shrink-0 border-l border-stone-900/15 pl-8 lg:block">
+          <p class="vtext text-[13px] leading-8 tracking-[0.35em] text-stone-600">
+            本期内容&nbsp;&nbsp;01 本期菜谱&nbsp;&nbsp;02 家常菜专题&nbsp;&nbsp;03 订阅食光
+          </p>
+        </aside>
+      </div>
+      <div class="red-rule mt-14 lg:mt-20"></div>
+      <p class="mt-3 text-right text-[11px] tracking-[0.25em] text-stone-400">每周四上新 · 定价：用心</p>
+    </section>
+
+    <!-- ======== 分类锚点区 ======== -->
+    <section class="grid grid-cols-2 gap-4 py-12 lg:grid-cols-4 lg:gap-6">
+      <div id="cat-jianzhi" class="reveal border-t-2 border-[#e3502e] pt-4">
+        <p class="kicker mb-1">减脂餐</p>
+        <h2 class="serif text-2xl font-bold">轻负担，够满足</h2>
+        <p class="mt-2 text-xs leading-5 text-stone-500">本期限 2 道 · 平均 242 kcal</p>
+      </div>
+      <div id="cat-zengji" class="reveal border-t-2 border-[#5c6b3f] pt-4" style="transition-delay:.08s">
+        <p class="kicker mb-1 text-[#5c6b3f]">增肌餐</p>
+        <h2 class="serif text-2xl font-bold">高蛋白，管够</h2>
+        <p class="mt-2 text-xs leading-5 text-stone-500">本期限 2 道 · 平均 465 kcal</p>
+      </div>
+      <div id="cat-weichi" class="reveal border-t-2 border-[#d9a441] pt-4" style="transition-delay:.16s">
+        <p class="kicker mb-1 text-[#b38320]">维持餐</p>
+        <h2 class="serif text-2xl font-bold">日常平衡之选</h2>
+        <p class="mt-2 text-xs leading-5 text-stone-500">本期限 3 道 · 平均 363 kcal</p>
+      </div>
+      <div id="cat-yingyang" class="reveal border-t-2 border-[#1c1917]/60 pt-4" style="transition-delay:.24s">
+        <p class="kicker mb-1 text-stone-700">营养餐</p>
+        <h2 class="serif text-2xl font-bold">清润滋补</h2>
+        <p class="mt-2 text-xs leading-5 text-stone-500">本期限 2 道 · 平均 270 kcal</p>
+      </div>
+    </section>
+
+    <!-- ======== 本期菜谱 ======== -->
+    <section id="recipes" class="border-t border-stone-900/10 py-14 lg:py-20">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p class="kicker mb-3 flex items-center gap-3">
+            <span class="inline-block h-2 w-2 bg-[#e3502e]"></span>Recipes · 本期
+          </p>
+          <h2 class="serif text-4xl font-black tracking-tight lg:text-5xl">本期菜谱</h2>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="chip chip-active" data-filter="all">全部</button>
+          <button class="chip" data-filter="jianzhi">减脂餐</button>
+          <button class="chip" data-filter="zengji">增肌餐</button>
+          <button class="chip" data-filter="weichi">维持餐</button>
+          <button class="chip" data-filter="yingyang">营养餐</button>
+          <button class="chip" data-filter="jia">家常菜</button>
+        </div>
+      </div>
+
+      <!-- 杂志式瀑布流 -->
+      <div class="columns-2 gap-5 lg:columns-3 lg:gap-7 lg:[&>*:nth-child(3n+2)]:mt-10">
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="jia">
+          <div class="emoji-block emoji-a">🍖</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">家常菜 · 招牌</p>
+            <h3 class="serif mt-1 text-2xl font-bold">红烧肉</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">浓油赤酱，慢火两小时，肥而不腻入口即化。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 665 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="jia">
+          <div class="emoji-block emoji-b">🥘</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">家常菜 · 川味</p>
+            <h3 class="serif mt-1 text-2xl font-bold">宫保鸡丁</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">鸡丁滑嫩，花生香脆，经典糊辣荔枝口。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 520 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="jianzhi">
+          <div class="emoji-block emoji-c">🍅</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">减脂餐 · 快手</p>
+            <h3 class="serif mt-1 text-2xl font-bold">番茄炒蛋</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">国民下饭菜，酸甜开胃，十五分钟上桌。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 280 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="jia">
+          <div class="emoji-block emoji-d">🌶️</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">家常菜 · 川味</p>
+            <h3 class="serif mt-1 text-2xl font-bold">麻婆豆腐</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">麻辣鲜香烫，豆腐嫩如脂，拌饭一绝。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 320 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="yingyang">
+          <div class="emoji-block emoji-a">🐟</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">营养餐 · 清鲜</p>
+            <h3 class="serif mt-1 text-2xl font-bold">清蒸鲈鱼</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">原汁原味，鲜嫩无腥，葱姜豉油点睛。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 280 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="jianzhi">
+          <div class="emoji-block emoji-b">🦐</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">减脂餐 · 高蛋白</p>
+            <h3 class="serif mt-1 text-2xl font-bold">白灼虾</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">高蛋白低脂，蘸姜葱豉油，爽脆弹牙。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 203 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="weichi">
+          <div class="emoji-block emoji-c">🥔</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">维持餐 · 素炒</p>
+            <h3 class="serif mt-1 text-2xl font-bold">酸辣土豆丝</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">脆爽酸辣，刀工见功夫，下饭开胃。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 190 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="zengji">
+          <div class="emoji-block emoji-d">🍗</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">增肌餐 · 人气</p>
+            <h3 class="serif mt-1 text-2xl font-bold">可乐鸡翅</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">甜咸交织，色泽红亮，聚会人气王。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 450 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="yingyang">
+          <div class="emoji-block emoji-a">🍲</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">营养餐 · 汤品</p>
+            <h3 class="serif mt-1 text-2xl font-bold">冬瓜排骨汤</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">清润解腻，夏日一碗，暖胃舒心。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 260 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="weichi">
+          <div class="emoji-block emoji-b">🍳</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">维持餐 · 主食</p>
+            <h3 class="serif mt-1 text-2xl font-bold">蛋炒饭</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">粒粒分明，锅气十足，剩饭的春天。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 480 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="weichi">
+          <div class="emoji-block emoji-c">🍜</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">维持餐 · 面食</p>
+            <h3 class="serif mt-1 text-2xl font-bold">葱油拌面</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">葱香四溢，酱汁挂面，简单纯粹。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 420 kcal</span> · 每份</p>
+          </div>
+        </article>
+
+        <article class="card reveal mb-5 break-inside-avoid p-0 lg:mb-7" data-cat="zengji">
+          <div class="emoji-block emoji-d">🥘</div>
+          <div class="p-5 pt-4">
+            <p class="text-[11px] tracking-[0.2em] text-stone-400">增肌餐 · 炖菜</p>
+            <h3 class="serif mt-1 text-2xl font-bold">土豆炖牛肉</h3>
+            <p class="mt-2 text-[13px] leading-6 text-stone-600">牛肉软烂，汤汁浓郁，土豆吸饱精华。</p>
+            <p class="mt-3 text-xs tracking-wider text-stone-500"><span class="text-[#e3502e]">≈ 480 kcal</span> · 每份</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ======== 家常菜专题 ======== -->
+    <section id="jiachang" class="scroll-mt-24 border-t border-stone-900/10 py-14 lg:py-20">
+      <div class="reveal bg-[#5c6b3f] px-6 py-12 text-[#faf7f2] lg:px-14 lg:py-16">
+        <div class="grid items-end gap-8 lg:grid-cols-[1fr_auto]">
+          <div>
+            <p class="text-[11px] tracking-[0.35em] text-[#d9a441]">FEATURE · 专题</p>
+            <h2 class="serif mt-3 text-5xl font-black tracking-tight lg:text-7xl">家常菜</h2>
+            <p class="mt-5 max-w-xl text-sm leading-7 text-[#faf7f2]/85">
+              家的味道，从来不需要菜单。本期专题收录六道灶台常客——
+              从回锅肉的香到水煮鱼的辣，热腾腾端上桌。
+            </p>
+          </div>
+          <p class="serif hidden text-6xl opacity-40 lg:block">灶</p>
+        </div>
+      </div>
+
+      <div class="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
+        <div class="mini-card reveal flex items-center gap-4 border border-stone-900/10 bg-white/50 p-4">
+          <span class="grid h-12 w-12 shrink-0 place-items-center bg-[#e3502e]/10 text-2xl">🥘</span>
+          <div>
+            <h3 class="serif text-lg font-bold">回锅肉</h3>
+            <p class="text-[11px] text-stone-500">≈ 663 kcal · 肥而不腻，蒜苗点睛</p>
+          </div>
+        </div>
+        <div class="mini-card reveal flex items-center gap-4 border border-stone-900/10 bg-white/50 p-4" style="transition-delay:.06s">
+          <span class="grid h-12 w-12 shrink-0 place-items-center bg-[#5c6b3f]/10 text-2xl">🍆</span>
+          <div>
+            <h3 class="serif text-lg font-bold">红烧茄子</h3>
+            <p class="text-[11px] text-stone-500">≈ 240 kcal · 软糯入味，酱香浓郁</p>
+          </div>
+        </div>
+        <div class="mini-card reveal flex items-center gap-4 border border-stone-900/10 bg-white/50 p-4" style="transition-delay:.12s">
+          <span class="grid h-12 w-12 shrink-0 place-items-center bg-[#d9a441]/15 text-2xl">🥬</span>
+          <div>
+            <h3 class="serif text-lg font-bold">地三鲜</h3>
+            <p class="text-[11px] text-stone-500">≈ 260 kcal · 土豆茄子青椒，东北三宝</p>
+          </div>
+        </div>
+        <div class="mini-card reveal flex items-center gap-4 border border-stone-900/10 bg-white/50 p-4" style="transition-delay:.18s">
+          <span class="grid h-12 w-12 shrink-0 place-items-center bg-[#e3502e]/10 text-2xl">🍖</span>
+          <div>
+            <h3 class="serif text-lg font-bold">糖醋里脊</h3>
+            <p class="text-[11px] text-stone-500">≈ 520 kcal · 外酥里嫩，酸甜平衡</p>
+          </div>
+        </div>
+        <div class="mini-card reveal flex items-center gap-4 border border-stone-900/10 bg-white/50 p-4" style="transition-delay:.24s">
+          <span class="grid h-12 w-12 shrink-0 place-items-center bg-[#5c6b3f]/10 text-2xl">🥬</span>
+          <div>
+            <h3 class="serif text-lg font-bold">梅菜扣肉</h3>
+            <p class="text-[11px] text-stone-500">≈ 562 kcal · 咸香下饭，入口即化</p>
+          </div>
+        </div>
+        <div class="mini-card reveal flex items-center gap-4 border border-stone-900/10 bg-white/50 p-4" style="transition-delay:.3s">
+          <span class="grid h-12 w-12 shrink-0 place-items-center bg-[#d9a441]/15 text-2xl">🌶️</span>
+          <div>
+            <h3 class="serif text-lg font-bold">水煮鱼</h3>
+            <p class="text-[11px] text-stone-500">≈ 480 kcal · 麻辣滚烫，鱼肉嫩滑</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== 页脚：订阅式 ======== -->
+    <footer class="border-t border-stone-900/10 py-14 lg:py-16">
+      <div class="grid gap-10 lg:grid-cols-2">
+        <div>
+          <p class="kicker mb-3 flex items-center gap-3">
+            <span class="inline-block h-2 w-2 bg-[#e3502e]"></span>Subscribe · 订阅
+          </p>
+          <h2 class="serif text-3xl font-black tracking-tight lg:text-4xl">下一期，吃什么？</h2>
+          <p class="mt-4 max-w-md text-sm leading-7 text-stone-600">
+            留下邮箱，每周四收到一期「今日食光」——一道新菜、一份热量账、一句编辑部的唠叨。
+          </p>
+          <form class="mt-6 flex max-w-md" onsubmit="event.preventDefault();this.querySelector('input').value='已订阅，下期见 👋';">
+            <input
+              type="email"
+              required
+              placeholder="your@email.com"
+              class="w-full border border-stone-900/30 bg-white/60 px-4 py-3 text-sm outline-none placeholder:text-stone-400 focus:border-[#e3502e]"
+            />
+            <button type="submit" class="btn-primary shrink-0 px-6 text-sm tracking-[0.14em]">订阅</button>
+          </form>
+        </div>
+        <div class="lg:justify-self-end">
+          <p class="serif text-2xl font-bold">每日食光</p>
+          <p class="mt-2 text-xs leading-6 tracking-[0.14em] text-stone-500">
+            DAILY FEAST · VOL.08<br />
+            减脂餐 · 增肌餐 · 维持餐 · 营养餐 · 家常菜<br />
+            网站重构视觉提案 A —— 编辑部风 · 美食杂志
+          </p>
+          <a href="index.html" class="nav-link mt-5 inline-block text-xs tracking-[0.2em] text-stone-500">← 返回方案画廊</a>
+        </div>
+      </div>
+      <div class="red-rule mt-12"></div>
+      <p class="mt-4 text-center text-[11px] tracking-[0.2em] text-stone-400">
+        © 2026 每日食光 · 本文为静态视觉演示，非线上数据
+      </p>
+    </footer>
+  </main>
+
+  <script>
+    // 滚动逐字淡入（标题拆字 + IntersectionObserver stagger）
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".js-split").forEach(function (el) {
+        var text = el.textContent;
+        el.textContent = "";
+        Array.from(text).forEach(function (ch, i) {
+          var s = document.createElement("span");
+          s.className = "rw";
+          s.textContent = ch;
+          s.style.transitionDelay = i * 55 + "ms";
+          el.appendChild(s);
+        });
+      });
+
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
+      );
+      document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+    });
+
+    // 分类 chips 筛选
+    document.querySelectorAll("[data-filter]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll("[data-filter]").forEach(function (b) { b.classList.remove("chip-active"); });
+        btn.classList.add("chip-active");
+        var f = btn.dataset.filter;
+        document.querySelectorAll("[data-cat]").forEach(function (card) {
+          card.classList.toggle("hidden", f !== "all" && card.dataset.cat !== f);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 网站重构方案</title>
+  <meta name="description" content="每日食光网站重构视觉提案：编辑部美食杂志 / 清爽轻食实验室 / 深夜食堂，三个方向的完整演示。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    :root {
+      --ink: #17130e;
+      --paper: #f2ead9;
+      --muted: #a89f8c;
+      --line: rgba(242, 234, 217, 0.16);
+      --tomato: #e3502e;
+      --olive: #5c6b3f;
+      --mustard: #d9a441;
+      --font-serif-cn: "Noto Serif SC", "Songti SC", "SimSun", serif;
+      --font-sans-cn: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--font-sans-cn);
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.01em;
+    }
+    .serif { font-family: var(--font-serif-cn); }
+    .display {
+      font-family: var(--font-serif-cn);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+      font-size: clamp(2.6rem, 6.5vw, 4.8rem);
+    }
+    .kicker {
+      font-size: 0.7rem;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: var(--mustard);
+    }
+    ::selection { background: var(--tomato); color: var(--ink); }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0.05;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    }
+
+    /* 逐字/逐块淡入 */
+    .rw {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(0.5em);
+      transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal.in .rw { opacity: 1; transform: none; }
+
+    /* 缩略预览框 */
+    .mock {
+      border: 1px solid var(--line);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .mock:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+    }
+    .num {
+      font-family: var(--font-serif-cn);
+      font-weight: 900;
+      font-size: 3rem;
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(242, 234, 217, 0.35);
+    }
+    .prose-line { border-top: 1px solid var(--line); }
+  </style>
+</head>
+<body class="antialiased">
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="mx-auto flex max-w-5xl items-center justify-between px-6 py-6 lg:px-0">
+    <a href="/" class="serif text-xl font-bold tracking-tight">每日食光</a>
+    <p class="text-[11px] tracking-[0.3em] text-[#a89f8c]">DESIGN PROPOSALS · 2026</p>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-6 lg:px-0">
+    <!-- Hero -->
+    <section class="pb-16 pt-10 lg:pb-24 lg:pt-16">
+      <p class="kicker mb-6">网站重构 · 视觉提案</p>
+      <h1 class="display js-split reveal max-w-3xl">每日食光 · 网站重构方案</h1>
+      <p class="reveal mt-7 max-w-2xl text-sm leading-7 text-[#c9bfa9] lg:text-base">
+        同一个菜谱库，三种不同的气质。三个方案均有完整演示页——
+        选一个你愿意每天打开的阅读方式。
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#plan-a" class="border border-[#e3502e]/70 px-5 py-2 text-xs tracking-[0.18em] text-[#e3502e] transition-colors hover:bg-[#e3502e] hover:text-[#17130e]">方案 A</a>
+        <a href="#plan-b" class="border border-[#d9a441]/50 px-5 py-2 text-xs tracking-[0.18em] text-[#d9a441] transition-colors hover:bg-[#d9a441] hover:text-[#17130e]">方案 B</a>
+        <a href="#plan-c" class="border border-[#a89f8c]/50 px-5 py-2 text-xs tracking-[0.18em] text-[#a89f8c] transition-colors hover:bg-[#a89f8c] hover:text-[#17130e]">方案 C</a>
+      </div>
+    </section>
+
+    <!-- ============ 方案 A ============ -->
+    <section id="plan-a" class="prose-line scroll-mt-16 py-14 lg:py-20">
+      <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div class="reveal">
+          <div class="mb-4 flex items-baseline gap-4">
+            <span class="num">01</span>
+            <span class="kicker !text-[#e3502e]">EDITORIAL · 编辑部</span>
+          </div>
+          <h2 class="serif text-3xl font-black tracking-tight lg:text-4xl">美食杂志</h2>
+          <p class="mt-3 text-sm leading-6 text-[#c9bfa9]">
+            把菜谱 App 做成一本米白纸感的美食杂志——内容即设计，翻页即阅读。
+          </p>
+          <ul class="mt-6 space-y-2 text-[13px] leading-6 text-[#a89f8c]">
+            <li><span class="mr-2 text-[#e3502e]">▸</span>米白纸感 #faf7f2 × 炭黑 #1c1917 正文</li>
+            <li><span class="mr-2 text-[#e3502e]">▸</span>Noto Serif SC 超大衬线标题（桌面 5–7rem）</li>
+            <li><span class="mr-2 text-[#e3502e]">▸</span>瀑布流错位排版 + 番茄红细线贯穿</li>
+            <li><span class="mr-2 text-[#e3502e]">▸</span>滚动标题逐字淡入，纸感阴影（无霓虹）</li>
+            <li><span class="mr-2 text-[#e3502e]">▸</span>大 emoji 衬色块 + 热量小字，食谱即版面</li>
+          </ul>
+          <a href="style-a.html" class="mt-8 inline-block border-b-2 border-[#e3502e] pb-1 text-sm tracking-[0.16em] text-[#e3502e] transition-all hover:tracking-[0.22em]">查看完整演示 →</a>
+        </div>
+
+        <!-- 缩略预览：纸感头版 -->
+        <div class="mock reveal bg-[#faf7f2] p-6 text-[#1c1917] lg:p-8" style="transition-delay:.1s">
+          <div class="flex items-center justify-between text-[10px] tracking-[0.3em] text-[#1c1917]/60">
+            <span>VOL.08 · AUG 2026</span>
+            <span>每日食光</span>
+          </div>
+          <div class="my-4 h-px bg-[#e3502e]"></div>
+          <p class="serif text-4xl font-black tracking-tight lg:text-5xl">今天吃什么</p>
+          <p class="mt-2 text-[11px] leading-5 text-[#1c1917]/65">四百道家常与营养菜谱，热量与做法都收在这一本里。</p>
+          <div class="mt-5 grid grid-cols-3 gap-3">
+            <div class="flex flex-col items-center bg-[#e3502e]/10 py-3">
+              <span class="text-2xl">🍖</span><span class="serif mt-1 text-sm font-bold">红烧肉</span><span class="text-[10px] text-[#1c1917]/60">≈665 kcal</span>
+            </div>
+            <div class="flex flex-col items-center bg-[#5c6b3f]/15 py-3">
+              <span class="text-2xl">🐟</span><span class="serif mt-1 text-sm font-bold">清蒸鲈鱼</span><span class="text-[10px] text-[#1c1917]/60">≈280 kcal</span>
+            </div>
+            <div class="flex flex-col items-center bg-[#d9a441]/20 py-3">
+              <span class="text-2xl">🍅</span><span class="serif mt-1 text-sm font-bold">番茄炒蛋</span><span class="text-[10px] text-[#1c1917]/60">≈280 kcal</span>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-[10px] tracking-[0.25em] text-[#1c1917]/50">
+            <span>本期菜谱 · 12 道</span>
+            <span>家常菜专题 →</span>
+          </div>
+          <!-- 色卡 + 字型样例 -->
+          <div class="mt-5 flex items-center gap-4 border-t border-[#1c1917]/15 pt-4">
+            <div class="flex items-center gap-2">
+              <span class="h-4 w-4 rounded-full border border-black/10 bg-[#faf7f2]"></span>
+              <span class="h-4 w-4 rounded-full bg-[#e3502e]"></span>
+              <span class="h-4 w-4 rounded-full bg-[#5c6b3f]"></span>
+              <span class="h-4 w-4 rounded-full bg-[#d9a441]"></span>
+            </div>
+            <p class="serif text-sm font-bold tracking-tight">食光 · 纸感衬线</p>
+            <p class="text-[10px] tracking-[0.2em] text-[#1c1917]/60">NOTO SERIF SC</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 方案 B ============ -->
+    <section id="plan-b" class="prose-line scroll-mt-16 py-14 lg:py-20">
+      <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div class="reveal order-2 lg:order-1">
+          <!-- 缩略预览：深夜食堂 -->
+          <div class="mock relative overflow-hidden bg-[#0b0a10] p-6 text-[#f5f3ff] lg:p-8" style="transition-delay:.1s">
+            <div class="pointer-events-none absolute -right-14 -top-14 h-52 w-52 rounded-full bg-[#8b7cf6]/25 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-16 -left-12 h-44 w-44 rounded-full bg-[#f5a524]/15 blur-3xl"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between text-[10px] tracking-[0.3em] text-[#f5a524]/90">
+                <span>深夜食堂 · 营业中</span>
+                <span>🌙</span>
+              </div>
+              <p class="serif mt-5 text-4xl font-black tracking-[0.08em] text-[#f5f3ff] lg:text-5xl">深夜最治愈的一碗</p>
+              <p class="mt-3 max-w-xs text-[11px] leading-5 text-[#b8b0d4]/85">
+                沉浸式暗色实验风。大字 kinetic 排版 + 毛玻璃卡片，午夜后也温柔。
+              </p>
+              <div class="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-lg">🍲</span>
+                  <span class="rounded-full bg-[#f5a524] px-3 py-1 text-[10px] font-bold tracking-[0.15em] text-[#0b0a10]">≈260 kcal</span>
+                </div>
+                <p class="serif mt-2 text-sm font-bold">冬瓜排骨汤</p>
+                <p class="text-[10px] text-[#b8b0d4]/70">清润解腻 · 慢炖 90 分钟</p>
+              </div>
+              <div class="mt-5 flex items-center gap-4 border-t border-white/10 pt-4">
+                <div class="flex items-center gap-2">
+                  <span class="h-4 w-4 rounded-full bg-[#0b0a10] ring-1 ring-[#f5a524]/70"></span>
+                  <span class="h-4 w-4 rounded-full bg-[#f5a524]"></span>
+                  <span class="h-4 w-4 rounded-full bg-[#8b7cf6]"></span>
+                  <span class="h-4 w-4 rounded-full bg-white/15 ring-1 ring-white/20"></span>
+                </div>
+                <p class="serif text-sm font-bold tracking-[0.08em]">夜 · 暗色 · 玻璃</p>
+                <p class="text-[10px] tracking-[0.2em] text-[#b8b0d4]/50">KINETIC + GLASS</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal order-1 lg:order-2">
+          <div class="mb-4 flex items-baseline gap-4">
+            <span class="num">02</span>
+            <span class="kicker !text-[#f5a524]">NIGHT · 深夜</span>
+          </div>
+          <h2 class="serif text-3xl font-black tracking-tight lg:text-4xl">深夜食堂 · 沉浸式暗色实验风</h2>
+          <p class="mt-3 text-sm leading-6 text-[#c9bfa9]">
+            深空紫黑底 + 琥珀光，kinetic 大字排版 + 毛玻璃卡片——为午夜后的最后一餐而设计。
+          </p>
+          <ul class="mt-6 space-y-2 text-[13px] leading-6 text-[#a89f8c]">
+            <li><span class="mr-2 text-[#f5a524]">▸</span>深空紫黑 #0b0a10 × 琥珀 #f5a524 × 紫 #8b7cf6</li>
+            <li><span class="mr-2 text-[#f5a524]">▸</span>kinetic typography 动态大字标题</li>
+            <li><span class="mr-2 text-[#f5a524]">▸</span>毛玻璃 glassmorphism 卡片 + 氛围光晕</li>
+            <li><span class="mr-2 text-[#f5a524]">▸</span>深色底夜间可读性优先，低光不刺眼</li>
+            <li><span class="mr-2 text-[#f5a524]">▸</span>克制微动效，午夜温柔不打扰</li>
+          </ul>
+          <a href="style-b.html" class="mt-8 inline-block border-b-2 border-[#f5a524] pb-1 text-sm tracking-[0.16em] text-[#f5a524] transition-all hover:tracking-[0.22em]">查看完整演示 →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 方案 C ============ -->
+    <section id="plan-c" class="prose-line scroll-mt-16 py-14 lg:py-24">
+      <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div class="reveal">
+          <div class="mb-4 flex items-baseline gap-4">
+            <span class="num">03</span>
+            <span class="kicker !text-[#4f7a3f]">FRESH · 鲜食</span>
+          </div>
+          <h2 class="serif text-3xl font-black tracking-tight lg:text-4xl">鲜食工坊 · 天然食材感</h2>
+          <p class="mt-3 text-sm leading-6 text-[#c9bfa9]">
+            米白纸底 + 墨绿番茄红的食材市集配色，像逛菜市场一样挑今天吃什么。
+          </p>
+          <ul class="mt-6 space-y-2 text-[13px] leading-6 text-[#a89f8c]">
+            <li><span class="mr-2 text-[#4f7a3f]">▸</span>米白 #faf6ef × 墨绿 #4f7a3f × 番茄红 #e0452c</li>
+            <li><span class="mr-2 text-[#4f7a3f]">▸</span>食材市集式分类色块，鲜食即色彩</li>
+            <li><span class="mr-2 text-[#4f7a3f]">▸</span>圆润卡片 + 大 emoji 呈现，亲切有食欲</li>
+            <li><span class="mr-2 text-[#4f7a3f]">▸</span>热量徽章与营养标签一目了然</li>
+            <li><span class="mr-2 text-[#4f7a3f]">▸</span>轻快柔和的 hover 动效</li>
+          </ul>
+          <a href="style-c.html" class="mt-8 inline-block border-b-2 border-[#4f7a3f] pb-1 text-sm tracking-[0.16em] text-[#4f7a3f] transition-all hover:tracking-[0.22em]">查看完整演示 →</a>
+        </div>
+
+        <!-- 缩略预览：鲜食工坊 -->
+        <div class="mock reveal bg-[#faf6ef] p-6 text-[#201a15] lg:p-8" style="transition-delay:.1s">
+          <div class="flex items-center justify-between">
+            <span class="rounded-full bg-[#4f7a3f] px-3 py-1 text-[10px] tracking-[0.18em] text-[#faf6ef]">鲜食工坊 · 今日上架</span>
+            <span class="text-[10px] tracking-[0.25em] text-[#201a15]/50">FRESH MARKET</span>
+          </div>
+          <p class="serif mt-5 text-3xl font-black tracking-tight lg:text-4xl">好好吃饭，是头等大事。</p>
+          <div class="mt-4 flex items-end gap-5">
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e0452c]/10">
+              <span class="text-3xl">🍅</span>
+            </div>
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4f7a3f]/10">
+              <span class="text-3xl">🥬</span>
+            </div>
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eab308]/15">
+              <span class="text-3xl">🍳</span>
+            </div>
+            <div class="ml-auto text-right">
+              <p class="text-3xl font-black leading-none text-[#4f7a3f]">280</p>
+              <p class="mt-1 text-[10px] tracking-[0.18em] text-[#201a15]/55">KCAL · 番茄炒蛋</p>
+            </div>
+          </div>
+          <div class="mt-5 flex gap-2">
+            <span class="rounded-full bg-[#e0452c] px-3 py-1 text-[10px] text-[#faf6ef]">减脂餐</span>
+            <span class="rounded-full border border-[#201a15]/20 px-3 py-1 text-[10px] text-[#201a15]/60">蛋白质 12g</span>
+            <span class="rounded-full border border-[#201a15]/20 px-3 py-1 text-[10px] text-[#201a15]/60">碳水 24g</span>
+          </div>
+          <div class="mt-5 flex items-center gap-4 border-t border-[#201a15]/10 pt-4">
+            <div class="flex items-center gap-2">
+              <span class="h-4 w-4 rounded-full bg-[#faf6ef] ring-1 ring-black/15"></span>
+              <span class="h-4 w-4 rounded-full bg-[#4f7a3f]"></span>
+              <span class="h-4 w-4 rounded-full bg-[#e0452c]"></span>
+              <span class="h-4 w-4 rounded-full bg-[#eab308]"></span>
+            </div>
+            <p class="serif text-sm font-bold tracking-tight">鲜食 · 市集 · 亲切</p>
+            <p class="text-[10px] tracking-[0.2em] text-[#201a15]/50">NOTO SANS SC</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 说明 -->
+    <section class="prose-line py-12 text-center">
+      <p class="kicker mb-3">下一步</p>
+      <p class="serif text-xl font-bold tracking-tight lg:text-2xl">三个方案演示均已可用：A 编辑部杂志 · B 深夜食堂 · C 鲜食工坊。</p>
+      <a href="/" class="mt-6 inline-block border-b border-[#a89f8c]/60 pb-1 text-xs tracking-[0.25em] text-[#a89f8c] transition-colors hover:border-[#e3502e] hover:text-[#e3502e]">← 返回每日食光主站</a>
+    </section>
+  </main>
+
+  <footer class="border-t border-[#f2ead9]/10 py-8 text-center">
+    <p class="text-[11px] tracking-[0.25em] text-[#6b6353]">© 2026 每日食光 · 重构视觉提案 · 静态演示</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".js-split").forEach(function (el) {
+        var text = el.textContent;
+        el.textContent = "";
+        Array.from(text).forEach(function (ch, i) {
+          var s = document.createElement("span");
+          s.className = "rw";
+          s.textContent = ch;
+          s.style.transitionDelay = i * 40 + "ms";
+          el.appendChild(s);
+        });
+      });
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -6% 0px" }
+      );
+      document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+    });
+  </script>
+</body>
+</html>
