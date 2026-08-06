@@ -62,6 +62,16 @@ export const ACTIVITY_LEVELS: Record<ActivityLevel, number> = {
 const CUTTING_FLOOR: Record<Gender, number> = { male: 1500, female: 1200 }
 
 /**
+ * 单餐候选池规模上限（防御性）：超过上限的池（仅异常输入可达，正常路径各池
+ * 分类过滤后 ≤ 48 道）跳过组合枚举、直接取热量最接近该餐目标的 2 道。
+ * 组合枚举的复杂度是 O(C(n,2)+C(n,3))，损坏的 goal 会让分类过滤失效、候选池
+ * 膨胀到数百道，C(500,3)≈2000 万次枚举曾卡死主线程 27.5s。
+ */
+const MAX_POOL_SIZE = 60
+/** 组合枚举总预算：超过则放弃枚举，直接退化取热量最高的 3 道（双保险） */
+const MAX_COMBOS = 120_000
+
+/**
  * 数值字段归一：输入框现在存的是原始字符串（可为空串的编辑中间态，见 CalorieCalculator），
  * 所有计算入口统一经此转数字——空串/null/undefined 按 0 处理，非法值也归 0，杜绝 NaN 崩溃与字符串拼接。
  */
@@ -104,11 +114,15 @@ export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number
  * 分类：<18.5 偏瘦、18.5-24 正常、24-28 超重、≥28 肥胖
  * @param weightKg 体重（kg）
  * @param heightCm 身高（cm）
+ * @returns 体重/身高为 0 或负数时返回 null（身高清空等编辑中间态会经 toNumber 归 0，
+ *   此时除零会得 NaN，UI 需按「未填写」处理而非展示 NaN）
  */
-export function calculateBMI(weightKg: number | string, heightCm: number | string): BmiResult {
+export function calculateBMI(weightKg: number | string, heightCm: number | string): BmiResult | null {
   // 与 calculateBMR 同理：入口先归一，空串按 0，避免 NaN 或字符串参与运算
   const w = toNumber(weightKg)
   const h = toNumber(heightCm)
+  // 除零保护：身高或体重无效时不计算，返回 null 由 UI 提示「请填写完整的身高体重」
+  if (w <= 0 || h <= 0) return null
   const heightM = h / 100
   const bmi = Math.round((w / (heightM * heightM)) * 10) / 10 // 保留 1 位小数
   let category: BmiResult['category']
@@ -167,6 +181,31 @@ export function calculateDailyTargets(input: NutritionForm): DailyTargets {
     carbsG: Math.round((targetKcal * split.c) / KCAL_PER_GRAM.carbs),
     fatG: Math.round((targetKcal * split.f) / KCAL_PER_GRAM.fat),
   }
+}
+
+/** 数值字段的合理范围（U3 提交前校验） */
+const RANGES: Record<'age' | 'heightCm' | 'weightKg', { min: number; max: number; unit: string; label: string }> = {
+  age: { min: 1, max: 120, unit: '岁', label: '年龄' },
+  heightCm: { min: 80, max: 250, unit: 'cm', label: '身高' },
+  weightKg: { min: 20, max: 300, unit: 'kg', label: '体重' },
+}
+
+/**
+ * 表单提交前校验：年龄 1-120 岁、身高 80-250cm、体重 20-300kg。
+ * 空串（未填写）给出对应提示；超范围给出范围提示。
+ * @returns 校验通过返回 null，否则返回中文错误提示
+ */
+export function validateNutritionForm(input: Pick<NutritionForm, 'age' | 'heightCm' | 'weightKg'>): string | null {
+  const keys = ['age', 'heightCm', 'weightKg'] as const
+  for (const key of keys) {
+    const { min, max, unit, label } = RANGES[key]
+    const raw = input[key]
+    if (raw === '' || raw === null || raw === undefined) return `请填写${label}`
+    const value = Number(raw)
+    if (!Number.isFinite(value)) return `${label}需为数字`
+    if (value < min || value > max) return `${label}需在 ${min}-${max} ${unit}之间`
+  }
+  return null
 }
 
 /** 从数组中取 k 个元素的所有组合（k ≤ n） */
@@ -232,8 +271,16 @@ export function generateSmartPlan(
     )
     if (pool.length === 0) continue // 池空跳过该槽位
 
+    // 防御：异常输入（如损坏的 goal 使 category 失效）会让候选池膨胀到数百道，
+    // 组合枚举 C(n,3) 随 n 立方增长，曾导致主线程卡死 27.5s。
+    // 池超上限（正常路径各池 ≤ 48 道，不会触发）时跳过组合枚举，
+    // 直接取热量最接近该餐目标的 2 道，O(n log n) 毫秒级返回，确定性不依赖随机。
     let chosen: Meal[]
-    if (pool.length < 2) {
+    if (pool.length > MAX_POOL_SIZE) {
+      chosen = [...pool]
+        .sort((a, b) => Math.abs(a.kcal - slotGoal) - Math.abs(b.kcal - slotGoal))
+        .slice(0, Math.min(2, pool.length))
+    } else if (pool.length < 2) {
       // 池不足 2 道：退化出 1 道（kcal 最接近目标的）
       chosen = [
         pool.reduce((best, m) =>
@@ -241,31 +288,36 @@ export function generateSmartPlan(
         ),
       ]
     } else {
-      // 枚举 2 道与 3 道的所有组合
+      // 枚举 2 道与 3 道的所有组合（规模被 MAX_POOL_SIZE 约束，MAX_COMBOS 兜底）
       const combos = [...combinations(pool, 2), ...combinations(pool, 3)]
-      // 合计 ≥ 目标 70% 的组合（不低于下限）
-      const eligible = combos.filter((c) => sum(c) >= slotGoal * 0.7)
-
-      if (eligible.length > 0) {
-        // 最优距离：与目标差最小
-        let bestDiff = Infinity
-        for (const c of eligible) {
-          bestDiff = Math.min(bestDiff, Math.abs(sum(c) - slotGoal))
-        }
-        if (random) {
-          // 重新生成：在「最优距离 ±5% 目标」内的组合中随机选一个
-          const nearBest = eligible.filter(
-            (c) => Math.abs(sum(c) - slotGoal) <= bestDiff + slotGoal * 0.05
-          )
-          chosen = nearBest[Math.floor(Math.random() * nearBest.length)]
-        } else {
-          chosen = eligible.reduce((best, c) =>
-            Math.abs(sum(c) - slotGoal) < Math.abs(sum(best) - slotGoal) ? c : best
-          )
-        }
-      } else {
-        // 退化：合计最大的 3 道（池不足 3 道就全取）
+      if (combos.length > MAX_COMBOS) {
+        // 双保险：超出枚举预算（正常路径不可能）直接退化为热量最高的 3 道
         chosen = [...pool].sort((a, b) => b.kcal - a.kcal).slice(0, Math.min(3, pool.length))
+      } else {
+        // 合计 ≥ 目标 70% 的组合（不低于下限）
+        const eligible = combos.filter((c) => sum(c) >= slotGoal * 0.7)
+
+        if (eligible.length > 0) {
+          // 最优距离：与目标差最小
+          let bestDiff = Infinity
+          for (const c of eligible) {
+            bestDiff = Math.min(bestDiff, Math.abs(sum(c) - slotGoal))
+          }
+          if (random) {
+            // 重新生成：在「最优距离 ±5% 目标」内的组合中随机选一个
+            const nearBest = eligible.filter(
+              (c) => Math.abs(sum(c) - slotGoal) <= bestDiff + slotGoal * 0.05
+            )
+            chosen = nearBest[Math.floor(Math.random() * nearBest.length)]
+          } else {
+            chosen = eligible.reduce((best, c) =>
+              Math.abs(sum(c) - slotGoal) < Math.abs(sum(best) - slotGoal) ? c : best
+            )
+          }
+        } else {
+          // 退化：合计最大的 3 道（池不足 3 道就全取）
+          chosen = [...pool].sort((a, b) => b.kcal - a.kcal).slice(0, Math.min(3, pool.length))
+        }
       }
     }
 

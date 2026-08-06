@@ -183,8 +183,12 @@ export default function Hero({ mealCount, onNavigate }: HeroProps) {
         </div>
       </div>
 
-      {/* 跑马灯标语条：两段相同内容实现无缝循环（track 整体平移 -50%），字号随精简 Hero 收小 */}
-      <div className="marquee -mx-5 mt-12 border-y border-white/5 py-3" aria-label="站点标语">
+      {/* 跑马灯标语条：两段相同内容实现无缝循环（track 整体平移 -50%），字号随精简 Hero 收小；
+          纯装饰（内容与上方副标题重复），整条 aria-hidden 不进无障碍树，避免低对比文本告警 */}
+      <div
+        aria-hidden="true"
+        className="marquee -mx-5 mt-12 border-y border-white/5 py-3"
+      >
         <div className="marquee-track">
           {[0, 1].map((dup) => (
             <div key={dup} aria-hidden={dup === 1} className="flex items-center">

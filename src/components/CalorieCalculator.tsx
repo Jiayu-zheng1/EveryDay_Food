@@ -20,11 +20,15 @@ interface CalorieCalculatorProps {
   results: DailyTargets
   submitted: boolean
   mealSplit: MealSplitItem[]
-  bmi: BmiResult
+  bmi: BmiResult | null
   suggestedGoal: Goal
   onSubmit: () => void
   onGenerate: () => void
   hasSmartPlan: boolean
+  /** 提交校验失败的中文错误提示（null = 校验通过） */
+  error: string | null
+  /** 重置表单与本地持久化状态 */
+  onReset: () => void
 }
 
 /** 数值输入字段 key（存原始字符串，编辑中间态可为空串） */
@@ -119,6 +123,8 @@ export default function CalorieCalculator({
   onSubmit,
   onGenerate,
   hasSmartPlan,
+  error,
+  onReset,
 }: CalorieCalculatorProps) {
   // 数值输入存原始字符串（含空串与编辑中间态）：
   // 之前这里直接 Number(e.target.value) 会命中 Number('') === 0 的坑——
@@ -159,8 +165,8 @@ export default function CalorieCalculator({
               <Field label="年龄（岁）">
                 <input
                   type="number"
-                  min={10}
-                  max={100}
+                  min={1}
+                  max={120}
                   value={form.age ?? ''}
                   onChange={updateNumber('age')}
                   className={inputCls}
@@ -170,7 +176,7 @@ export default function CalorieCalculator({
               <Field label="身高（cm）">
                 <input
                   type="number"
-                  min={100}
+                  min={80}
                   max={250}
                   value={form.heightCm ?? ''}
                   onChange={updateNumber('heightCm')}
@@ -181,7 +187,7 @@ export default function CalorieCalculator({
               <Field label="体重（kg）">
                 <input
                   type="number"
-                  min={30}
+                  min={20}
                   max={300}
                   value={form.weightKg ?? ''}
                   onChange={updateNumber('weightKg')}
@@ -222,50 +228,67 @@ export default function CalorieCalculator({
               </div>
             </div>
 
+            {/* 提交校验失败提示（中文；不满足则不计算） */}
+            {error && (
+              <p
+                role="alert"
+                className="border-t border-white/8 bg-berry/10 px-6 py-2.5 text-sm font-semibold text-tangerine"
+              >
+                {error}
+              </p>
+            )}
+
             {/* 结果卡：提交后展示 */}
             {submitted && (
               <div className="border-t border-white/8 bg-ink p-6">
-                {/* BMI 卡片 */}
-                <div className="mb-5 rounded-2xl border border-white/8 bg-ink-2 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-snow">
-                      BMI{' '}
-                      <span className="text-gradient text-xl font-black">{bmi.bmi}</span>
-                      <span className="ml-2 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs text-snow/85">
-                        {bmi.label}
-                      </span>
-                    </p>
-                    {bmi.category !== 'normal' && (
-                      <p className="text-xs text-grape">
-                        建议目标：{GOAL_LABELS[suggestedGoal]}（已自动选中，可手动更改）
+                {/* BMI 卡片：身高/体重未填写或无效时不计算（calculateBMI 返回 null），
+                    展示提示而非 NaN；数值可算时展示完整卡片 */}
+                {bmi ? (
+                  <div className="mb-5 rounded-2xl border border-white/8 bg-ink-2 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-snow">
+                        BMI{' '}
+                        <span className="text-gradient text-xl font-black">{bmi.bmi}</span>
+                        <span className="ml-2 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs text-snow/85">
+                          {bmi.label}
+                        </span>
                       </p>
-                    )}
-                  </div>
+                      {bmi.category !== 'normal' && (
+                        <p className="text-xs text-grape">
+                          建议目标：{GOAL_LABELS[suggestedGoal]}（已自动选中，可手动更改）
+                        </p>
+                      )}
+                    </div>
 
-                  {/* BMI 区间刻度条：18.5 / 24 / 28 分四段（15-35 标尺） */}
-                  <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-white/8">
-                    <div className="absolute inset-y-0 left-0 bg-sky-400/40" style={{ width: '17.5%' }} />
-                    <div className="absolute inset-y-0 bg-emerald-400/40" style={{ left: '17.5%', width: '27.5%' }} />
-                    <div className="absolute inset-y-0 bg-amber-400/40" style={{ left: '45%', width: '20%' }} />
-                    <div className="absolute inset-y-0 right-0 bg-rose-400/40" style={{ width: '35%' }} />
-                    {/* 分段刻度 */}
-                    <span className="absolute -top-0.5 h-3 w-px bg-white/50" style={{ left: '17.5%' }} />
-                    <span className="absolute -top-0.5 h-3 w-px bg-white/50" style={{ left: '45%' }} />
-                    <span className="absolute -top-0.5 h-3 w-px bg-white/50" style={{ left: '65%' }} />
-                    {/* 当前 BMI 位置 */}
-                    <span
-                      className="absolute -top-1 size-3.5 -translate-x-1/2 rounded-full border-2 border-white bg-gradient-brand shadow-md shadow-berry/30"
-                      style={{ left: `${Math.min(Math.max(((bmi.bmi - 15) / 20) * 100, 2), 98)}%` }}
-                    />
+                    {/* BMI 区间刻度条：18.5 / 24 / 28 分四段（15-35 标尺） */}
+                    <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-white/8">
+                      <div className="absolute inset-y-0 left-0 bg-sky-400/40" style={{ width: '17.5%' }} />
+                      <div className="absolute inset-y-0 bg-emerald-400/40" style={{ left: '17.5%', width: '27.5%' }} />
+                      <div className="absolute inset-y-0 bg-amber-400/40" style={{ left: '45%', width: '20%' }} />
+                      <div className="absolute inset-y-0 right-0 bg-rose-400/40" style={{ width: '35%' }} />
+                      {/* 分段刻度 */}
+                      <span className="absolute -top-0.5 h-3 w-px bg-white/50" style={{ left: '17.5%' }} />
+                      <span className="absolute -top-0.5 h-3 w-px bg-white/50" style={{ left: '45%' }} />
+                      <span className="absolute -top-0.5 h-3 w-px bg-white/50" style={{ left: '65%' }} />
+                      {/* 当前 BMI 位置 */}
+                      <span
+                        className="absolute -top-1 size-3.5 -translate-x-1/2 rounded-full border-2 border-white bg-gradient-brand shadow-md shadow-berry/30"
+                        style={{ left: `${Math.min(Math.max(((bmi.bmi - 15) / 20) * 100, 2), 98)}%` }}
+                      />
+                    </div>
+                    <div className="mt-1.5 flex justify-between text-[10px] text-mist/85">
+                      <span>15</span>
+                      <span>18.5</span>
+                      <span>24</span>
+                      <span>28</span>
+                      <span>35</span>
+                    </div>
                   </div>
-                  <div className="mt-1.5 flex justify-between text-[10px] text-mist/60">
-                    <span>15</span>
-                    <span>18.5</span>
-                    <span>24</span>
-                    <span>28</span>
-                    <span>35</span>
+                ) : (
+                  <div className="mb-5 rounded-2xl border border-white/8 bg-ink-2 p-4 text-sm text-mist">
+                    请填写完整的身高和体重后再查看 BMI
                   </div>
-                </div>
+                )}
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   {/* 热量概览 */}
@@ -276,7 +299,7 @@ export default function CalorieCalculator({
                         {results.tdee}
                         <span className="ml-1 text-xs font-semibold text-mist">kcal</span>
                       </p>
-                      <p className="mt-1 text-[11px] text-mist/70">基础代谢 BMR {results.bmr} kcal</p>
+                      <p className="mt-1 text-[11px] text-mist/90">基础代谢 BMR {results.bmr} kcal</p>
                     </div>
                     <div className="rounded-2xl border border-white/8 bg-ink-2 p-4 text-center">
                       <p className="text-xs text-mist">目标热量</p>
@@ -338,6 +361,14 @@ export default function CalorieCalculator({
                       {hasSmartPlan && (
                         <span className="text-xs text-grape">已生成，展示在下方搭配区（可点击重新生成）</span>
                       )}
+                      {/* 重置：清除本地保存的表单与结果，恢复默认值 */}
+                      <button
+                        type="button"
+                        onClick={onReset}
+                        className="ml-auto rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-mist transition-all duration-300 hover:border-tangerine/40 hover:text-snow active:scale-95"
+                      >
+                        🔄 重置
+                      </button>
                     </div>
                   </div>
                 </div>

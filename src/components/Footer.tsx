@@ -10,7 +10,7 @@ export default function Footer() {
           <span>🍱</span> 每日食光
         </div>
         <p className="text-sm text-mist">减脂 · 增肌 · 维持 · 营养 —— 每一道菜的热量都替你算好了</p>
-        <p className="text-xs text-mist/60">© 2026 每日食光 · 内容仅供参考，具体饮食请结合自身情况</p>
+        <p className="text-xs text-mist/80">© 2026 每日食光 · 内容仅供参考，具体饮食请结合自身情况</p>
       </div>
     </footer>
   )

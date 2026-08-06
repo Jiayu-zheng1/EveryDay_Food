@@ -99,7 +99,7 @@ export const meals = [
     category: 'fat-loss',
     cuisine: 'generic',
     emoji: '🍤',
-    kcal: 190,
+    kcal: 168,
     desc: '魔芋面几乎零热量，搭配虾仁高蛋白，减脂期也能吃得满足。',
     ingredients: ['虾仁 120 克', '魔芋面 200 克', '香菇 3 朵', '小青菜 100 克', '蒜 2 瓣', '生抽 1 勺', '橄榄油 3 克'],
     steps: [

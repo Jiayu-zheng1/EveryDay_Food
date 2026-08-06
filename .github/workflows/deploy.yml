@@ -1,0 +1,53 @@
+name: Build, Test & Deploy
+
+on:
+  # 仅 main 分支 push 触发自动部署；其余分支手动触发
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# upload-artifact 需要 actions: write；checkout 只需只读
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+      # Cloudflare Pages 部署（需先在 Cloudflare 创建 Pages 项目 everyday-food，
+      # 并在仓库 Settings → Secrets and variables → Actions 配置以下两个 secret：
+      #   CLOUDFLARE_API_TOKEN   — Cloudflare API Token（权限：Cloudflare Pages → Edit）
+      #   CLOUDFLARE_ACCOUNT_ID  — Cloudflare 账号 ID（仪表盘首页右下角可查）
+      # 若 Pages 项目名不同，把 --project-name 改为实际项目名即可）
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=everyday-food

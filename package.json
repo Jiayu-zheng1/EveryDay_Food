@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/export-data.mjs && vite",
+    "build": "node scripts/export-data.mjs && tsc -b && vite build",
+    "test": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@vitejs/plugin-react": "^4.5.2",
     "tailwindcss": "^4.1.11",
     "typescript": "^7.0.2",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^4.1.10"
   }
 }

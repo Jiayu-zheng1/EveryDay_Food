@@ -717,7 +717,7 @@ export const bakeryMeals = [
     id: 'bakery-35',
     name: '老婆饼',
     category: 'bakery',
-    cuisine: 'suzhe',
+    cuisine: 'yue',
     emoji: '🥮',
     kcal: 235,
     desc: '广式经典甜饼，冬瓜蓉馅清甜软糯，层层酥皮一碰就掉，名字里藏着浪漫传说。',

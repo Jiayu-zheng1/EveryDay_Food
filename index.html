@@ -7,16 +7,33 @@
       name="description"
       content="每日食光——减脂、增肌、维持、营养四大分类的健康食谱，每道菜的做法、热量与营养构成都替你算好了。"
     />
+    <meta name="theme-color" content="#0b0a10" />
+    <!-- 社交分享（OG） -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="每日食光 · 每日美食搭配" />
+    <meta
+      property="og:description"
+      content="减脂、增肌、维持、营养四大分类的健康食谱，每道菜的做法、热量与营养构成都替你算好了。"
+    />
+    <meta property="og:locale" content="zh_CN" />
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- 字体：preconnect + 非阻塞加载（display=swap，字体 CSS 不阻塞渲染，加载后无缝切换） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🍱%3C/text%3E%3C/svg%3E"
-    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <title>每日食光 · 每日美食搭配</title>
   </head>
   <body>

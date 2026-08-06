@@ -117,7 +117,7 @@ export default function TableModule({
       <section id="table" className="scroll-mt-24 px-5 py-16">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <h2 className="text-2xl font-black sm:text-3xl">🛒 我的餐桌</h2>
+            <h1 className="text-2xl font-black sm:text-3xl">🛒 我的餐桌</h1>
             <p className="mt-2 text-sm text-mist">一家人这顿吃什么，都在这儿</p>
           </Reveal>
           <Reveal delay={60}>
@@ -143,7 +143,7 @@ export default function TableModule({
       <div className="mx-auto max-w-6xl">
         {/* 标题区 */}
         <Reveal>
-          <h2 className="text-2xl font-black sm:text-3xl">🛒 我的餐桌</h2>
+          <h1 className="text-2xl font-black sm:text-3xl">🛒 我的餐桌</h1>
           <p className="mt-2 text-sm text-mist">一家人这顿吃什么，都在这儿</p>
         </Reveal>
 

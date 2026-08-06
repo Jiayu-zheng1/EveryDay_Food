@@ -33,7 +33,13 @@ export default function TableBar({
   if (items.length === 0) return null
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-40 flex justify-center px-4">
+    /* role=region：底部浮动栏不在 main/footer 等 landmark 内，给它一个可命名的
+       content region，满足 axe region 规则（内容都应落在 landmark 中） */
+    <div
+      role="region"
+      aria-label="我的餐桌"
+      className="fixed inset-x-0 bottom-20 z-40 flex justify-center px-4"
+    >
       <div className="glass-card w-full max-w-xl rounded-2xl border-white/10 bg-ink-2/85 px-4 py-3 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           {/* 左侧：标题 + 数量 */}

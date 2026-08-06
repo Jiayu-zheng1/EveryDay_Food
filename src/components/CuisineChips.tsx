@@ -50,7 +50,7 @@ export default function CuisineChips({ active, counts, onChange }: CuisineChipsP
             <span>
               {meta.emoji} {meta.label}
             </span>
-            <span className={`text-[10px] ${isActive ? 'text-white/80' : 'text-mist/70'}`}>{count}</span>
+            <span className={`text-[10px] ${isActive ? 'text-white/80' : 'text-mist/90'}`}>{count}</span>
           </button>
         )
       })}

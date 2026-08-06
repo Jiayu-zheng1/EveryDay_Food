@@ -38,7 +38,7 @@ export default function CategoryTabs({ active, counts, categoryMeta, onChange }:
             }`}
           >
             {tab.label}
-            <span className={`ml-1.5 text-xs ${isActive ? 'text-white/70' : 'text-mist/60'}`}>
+            <span className={`ml-1.5 text-xs ${isActive ? 'text-white/70' : 'text-mist/85'}`}>
               {counts[tab.key]}
             </span>
           </button>

@@ -1,0 +1,18 @@
+{
+  "name": "每日食光 · 每日美食搭配",
+  "short_name": "每日食光",
+  "description": "减脂、增肌、维持、营养四大分类的健康食谱，做法、热量与营养构成都替你算好了。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0a10",
+  "theme_color": "#0b0a10",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -36,7 +36,14 @@ const POOLS: Array<{ key: string; label: string; count: number; keywords: string
     key: 'hot',
     label: '🔥 热菜',
     count: 3,
-    keywords: ['宫保鸡丁', '鱼香肉丝', '麻婆豆腐', '地三鲜', '干煸四季豆', '虎皮青椒', '红烧茄子', '鱼香茄子', '香菇油菜', '蒜蓉西兰花', '木须肉', '青椒肉丝', '蒜苔炒肉', '小炒肉'],
+    // 2026-08 U9：补充常见热菜技法的通用关键词（炒/烧/炖/焖/爆/熘/烩），
+    // 候选从 15 道提升到约 195 道，与凉菜/硬菜/汤等池均衡；
+    // 刻意不收录「蒸」系关键词——清蒸/粉蒸 等蒸菜归硬菜池，避免两池抢同一批菜。
+    keywords: [
+      '宫保鸡丁', '鱼香肉丝', '麻婆豆腐', '地三鲜', '干煸四季豆', '虎皮青椒', '红烧茄子', '鱼香茄子',
+      '香菇油菜', '蒜蓉西兰花', '木须肉', '青椒肉丝', '蒜苔炒肉', '小炒肉',
+      '炒', '烧', '炖', '焖', '爆', '熘', '烩',
+    ],
   },
   {
     key: 'soup',
@@ -82,6 +89,7 @@ function pickOne<T>(candidates: T[], rand: () => number): T {
  * 2. 排除整桌已用的 id；
  * 3. cuisineFilter 非 all 时优先抽该菜系，该菜系无候选则回退全库候选；
  * 4. 无可用候选返回 null（由调用方跳过该池）。
+ * @returns { meal, fellBack } fellBack=true 表示所选菜系在该池无候选、已用全库补充
  */
 function pickFromPool(
   poolKey: string,
@@ -89,33 +97,44 @@ function pickFromPool(
   cuisineFilter: CuisineFilter,
   rand: () => number,
   usedIds: Set<string>
-): Meal | null {
+): { meal: Meal | null; fellBack: boolean } {
   // poolKey 恒来自 POOLS 配置，find 必然命中（断言消除 undefined）
   const spec = POOLS.find((p) => p.key === poolKey)!
   const candidates = meals.filter((m) => spec.keywords.some((kw) => (m.name ?? '').includes(kw)))
   const available = candidates.filter((m) => !usedIds.has(m.id))
-  if (available.length === 0) return null
+  if (available.length === 0) return { meal: null, fellBack: false }
   if (cuisineFilter && cuisineFilter !== 'all') {
     const preferred = available.filter((m) => m.cuisine === cuisineFilter)
-    if (preferred.length > 0) return pickOne(preferred, rand)
+    if (preferred.length > 0) return { meal: pickOne(preferred, rand), fellBack: false }
+    // 所选菜系下该池无候选：回退全库（由调用方汇总展示「已用全库补充」提示）
+    return { meal: pickOne(available, rand), fellBack: true }
   }
-  return pickOne(available, rand)
+  return { meal: pickOne(available, rand), fellBack: false }
 }
 
-// 按六个池子顺序抽满一桌：池内不重复、整桌 id 不重复
-function generateTable(meals: Meal[], cuisineFilter: CuisineFilter, seed: number): TableDish[] {
+// 按六个池子顺序抽满一桌：池内不重复、整桌 id 不重复；
+// 返回一桌 + 因所选菜系无候选而回退全库的池 key 列表（供「已用全库补充」提示）
+function generateTable(
+  meals: Meal[],
+  cuisineFilter: CuisineFilter,
+  seed: number
+): { table: TableDish[]; fallbackPools: string[] } {
   const rand = mulberry32(seed)
   const usedIds = new Set<string>()
   const table: TableDish[] = []
+  const fallbackPools: string[] = []
   for (const pool of POOLS) {
+    let poolFellBack = false
     for (let i = 0; i < pool.count; i += 1) {
-      const dish = pickFromPool(pool.key, meals, cuisineFilter, rand, usedIds)
-      if (!dish) break // 该池候选用尽，跳过剩余名额
-      usedIds.add(dish.id)
-      table.push({ poolKey: pool.key, meal: dish })
+      const { meal, fellBack } = pickFromPool(pool.key, meals, cuisineFilter, rand, usedIds)
+      if (!meal) break // 该池候选用尽，跳过剩余名额
+      poolFellBack = poolFellBack || fellBack
+      usedIds.add(meal.id)
+      table.push({ poolKey: pool.key, meal })
     }
+    if (poolFellBack) fallbackPools.push(pool.key)
   }
-  return table
+  return { table, fallbackPools }
 }
 
 // 单道换菜：排除整桌已用 id（含当前这道），从该池重新抽一道，只替换被点击的那道
@@ -127,9 +146,9 @@ function replaceDish(
   cuisineFilter: CuisineFilter
 ): TableDish[] {
   const usedIds = new Set(table.map((item) => item.meal.id))
-  const dish = pickFromPool(poolKey, meals, cuisineFilter, mulberry32(Date.now()), usedIds)
-  if (!dish) return table // 无可用替代（理论上不会发生），保持原桌
-  return table.map((item) => (item.meal.id === dishId ? { poolKey, meal: dish } : item))
+  const { meal } = pickFromPool(poolKey, meals, cuisineFilter, mulberry32(Date.now()), usedIds)
+  if (!meal) return table // 无可用替代（理论上不会发生），保持原桌
+  return table.map((item) => (item.meal.id === dishId ? { poolKey, meal } : item))
 }
 
 /**
@@ -142,11 +161,19 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
   // 当前一桌（{ poolKey, meal }[]），重新配一桌时通过 rollVersion 触发 effect 重抽
   const [table, setTable] = useState<TableDish[]>([])
   const [rollVersion, setRollVersion] = useState(0)
+  // 所选菜系下无候选、已用全库补充的池 key 列表（U9：空池不再静默回退，展示提示）
+  const [fallbackPools, setFallbackPools] = useState<string[]>([])
 
   // meals 加载完成 / 地区筛选变化 / 点击「重新配一桌」时整桌重抽
   // 用 Date.now() 作随机种子：每次重抽都是新的一桌，不追求可复现
   useEffect(() => {
-    setTable(generateTable(meals, cuisineFilter, Date.now()))
+    const { table: nextTable, fallbackPools: nextFallbacks } = generateTable(
+      meals,
+      cuisineFilter,
+      Date.now()
+    )
+    setTable(nextTable)
+    setFallbackPools(nextFallbacks)
   }, [meals, cuisineFilter, rollVersion])
 
   // 汇总一行：对当前一桌的 kcal 与三大营养素求和（缺字段按 0 处理）
@@ -168,7 +195,7 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
       <section id="newyear" className="scroll-mt-24 px-5 py-16">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <h2 className="text-2xl font-black sm:text-3xl">🧧 年夜饭</h2>
+            <h1 className="text-2xl font-black sm:text-3xl">🧧 年夜饭</h1>
             <p className="mt-2 text-sm text-mist">一桌团圆饭，从选菜到上桌都替你配好</p>
           </Reveal>
           <div className="mt-10 flex flex-col items-center gap-4 rounded-2xl border border-white/5 bg-ink-2 px-6 py-16 text-center">
@@ -180,6 +207,11 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
     )
   }
 
+  // 所选菜系下无候选、已用全库补充的池标签（如「凉菜」「热菜」）
+  const fallbackLabels = fallbackPools.map(
+    (key) => POOLS.find((p) => p.key === key)?.label.replace(/^[^\s]+\s/, '') ?? key
+  )
+
   return (
     <section id="newyear" className="scroll-mt-24 px-5 py-16">
       <div className="mx-auto max-w-6xl">
@@ -187,7 +219,7 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
         <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-black sm:text-3xl">🧧 年夜饭</h2>
+              <h1 className="text-2xl font-black sm:text-3xl">🧧 年夜饭</h1>
               <p className="mt-2 text-sm text-mist">一桌团圆饭，从选菜到上桌都替你配好</p>
             </div>
             <button
@@ -198,6 +230,18 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
             </button>
           </div>
         </Reveal>
+
+        {/* 菜系空池提示：所选菜系下某些池无候选时已自动用全库补充（U9，不再静默回退） */}
+        {cuisineFilter !== 'all' && fallbackLabels.length > 0 && (
+          <Reveal delay={40}>
+            <p
+              role="status"
+              className="mt-5 rounded-2xl border border-tangerine/25 bg-tangerine/10 px-4 py-3 text-sm text-tangerine"
+            >
+              该菜系下 {fallbackLabels.join('、')} 暂无菜品，已用全库补充
+            </p>
+          </Reveal>
+        )}
 
         {/* 一桌展示：整桌玻璃底 + 六组并排玻璃卡，更有「一桌菜」的仪式感 */}
         <div className="glass-card relative mt-10 overflow-hidden rounded-3xl p-6 sm:p-8">
@@ -219,7 +263,7 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
                   {/* 每组一张玻璃卡：组标题 + 该池菜品条目 */}
                   <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                     <div className="mb-3 flex items-center justify-between">
-                      <h3 className="text-base font-bold text-snow/90">{pool.label}</h3>
+                      <h2 className="text-base font-bold text-snow/90">{pool.label}</h2>
                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-medium text-mist">
                         {dishes.length} 道
                       </span>

@@ -60,7 +60,7 @@ export const lxjExtra = [
     nutrition: { protein: 3, carbs: 36, fat: 8 },
     per100g: { protein: 1, carbs: 12, fat: 2.5 },
     servingSize: { amount: 300, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'lxj-snack-4',
@@ -79,7 +79,7 @@ export const lxjExtra = [
     nutrition: { protein: 1, carbs: 24, fat: 0 },
     per100g: { protein: 0.2, carbs: 6, fat: 0 },
     servingSize: { amount: 400, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'lxj-snack-5',
@@ -98,7 +98,7 @@ export const lxjExtra = [
     nutrition: { protein: 11, carbs: 2, fat: 11 },
     per100g: { protein: 12, carbs: 2, fat: 12 },
     servingSize: { amount: 90, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-6',
@@ -137,7 +137,7 @@ export const lxjExtra = [
     nutrition: { protein: 35, carbs: 50, fat: 45 },
     per100g: { protein: 14, carbs: 20, fat: 18 },
     servingSize: { amount: 250, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-8',
@@ -157,7 +157,7 @@ export const lxjExtra = [
     nutrition: { protein: 25, carbs: 20, fat: 30 },
     per100g: { protein: 10, carbs: 8, fat: 12 },
     servingSize: { amount: 250, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'lxj-snack-9',
@@ -177,7 +177,7 @@ export const lxjExtra = [
     nutrition: { protein: 26, carbs: 18, fat: 24 },
     per100g: { protein: 17, carbs: 12, fat: 16 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-10',
@@ -196,7 +196,7 @@ export const lxjExtra = [
     nutrition: { protein: 36, carbs: 12, fat: 32 },
     per100g: { protein: 18, carbs: 6, fat: 16 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'lxj-snack-11',
@@ -216,7 +216,7 @@ export const lxjExtra = [
     nutrition: { protein: 29, carbs: 25, fat: 31 },
     per100g: { protein: 16, carbs: 14, fat: 17 },
     servingSize: { amount: 180, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-12',
@@ -236,7 +236,7 @@ export const lxjExtra = [
     nutrition: { protein: 32, carbs: 9, fat: 31 },
     per100g: { protein: 18, carbs: 5, fat: 17 },
     servingSize: { amount: 180, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'lxj-snack-13',
@@ -256,7 +256,7 @@ export const lxjExtra = [
     nutrition: { protein: 48, carbs: 10, fat: 38 },
     per100g: { protein: 19, carbs: 4, fat: 15 },
     servingSize: { amount: 250, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'lxj-snack-14',
@@ -276,7 +276,7 @@ export const lxjExtra = [
     nutrition: { protein: 23, carbs: 27, fat: 27 },
     per100g: { protein: 15, carbs: 18, fat: 18 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-15',
@@ -296,7 +296,7 @@ export const lxjExtra = [
     nutrition: { protein: 12, carbs: 22, fat: 16 },
     per100g: { protein: 12, carbs: 22, fat: 16 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-16',
@@ -315,7 +315,7 @@ export const lxjExtra = [
     nutrition: { protein: 4, carbs: 30, fat: 10 },
     per100g: { protein: 4, carbs: 30, fat: 10 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-17',
@@ -335,7 +335,7 @@ export const lxjExtra = [
     nutrition: { protein: 4, carbs: 54, fat: 17 },
     per100g: { protein: 3, carbs: 45, fat: 14 },
     servingSize: { amount: 120, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'lxj-snack-18',
@@ -354,7 +354,7 @@ export const lxjExtra = [
     nutrition: { protein: 13, carbs: 4, fat: 26 },
     per100g: { protein: 13, carbs: 4, fat: 26 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
 
   /* ---------------- therapy 食疗食补（1 道） ---------------- */
@@ -375,7 +375,7 @@ export const lxjExtra = [
     nutrition: { protein: 0, carbs: 15, fat: 0 },
     per100g: { protein: 0, carbs: 5, fat: 0 },
     servingSize: { amount: 300, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
 
   /* ---------------- nutrition 营养主食（1 道） ---------------- */

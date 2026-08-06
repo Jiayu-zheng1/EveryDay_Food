@@ -115,24 +115,19 @@ export default function DailyPlan({
                       {item.meals.map((meal) => (
                         <li
                           key={meal.id}
-                          role={onOpen ? 'button' : undefined}
-                          tabIndex={onOpen ? 0 : undefined}
-                          aria-label={onOpen ? `查看做法：${meal.name}` : undefined}
-                          onClick={onOpen ? () => onOpen(meal) : undefined}
-                          onKeyDown={
-                            onOpen
-                              ? (e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault()
-                                    onOpen(meal)
-                                  }
-                                }
-                              : undefined
-                          }
-                          className={`flex items-center gap-3 rounded-lg py-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grape ${
+                          className={`relative flex items-center gap-3 rounded-lg py-2.5 transition-colors duration-200 ${
                             onOpen ? 'cursor-pointer hover:bg-white/5' : ''
                           }`}
                         >
+                          {/* 拉伸按钮：覆盖整行，li 保持 listitem 语义（axe aria-allowed-role / list） */}
+                          {onOpen && (
+                            <button
+                              type="button"
+                              aria-label={`查看做法：${meal.name}`}
+                              onClick={() => onOpen(meal)}
+                              className="absolute inset-0 z-10 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-grape"
+                            />
+                          )}
                           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/5 text-xl">
                             {meal.emoji}
                           </span>

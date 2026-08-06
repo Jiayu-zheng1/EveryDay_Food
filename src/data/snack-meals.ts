@@ -60,7 +60,7 @@ export const snackMeals = [
     nutrition: { protein: 14, carbs: 77, fat: 1 },
     per100g: { protein: 4, carbs: 22, fat: 0.4 },
     servingSize: { amount: 350, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-4',
@@ -80,7 +80,7 @@ export const snackMeals = [
     nutrition: { protein: 8, carbs: 77, fat: 3 },
     per100g: { protein: 5, carbs: 48, fat: 2 },
     servingSize: { amount: 160, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-5',
@@ -100,7 +100,7 @@ export const snackMeals = [
     nutrition: { protein: 1, carbs: 87, fat: 0 },
     per100g: { protein: 0.5, carbs: 79, fat: 0.3 },
     servingSize: { amount: 110, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-6',
@@ -120,7 +120,7 @@ export const snackMeals = [
     nutrition: { protein: 30, carbs: 4, fat: 10 },
     per100g: { protein: 15, carbs: 2, fat: 5 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-7',
@@ -140,7 +140,7 @@ export const snackMeals = [
     nutrition: { protein: 13, carbs: 55, fat: 18 },
     per100g: { protein: 6, carbs: 25, fat: 8 },
     servingSize: { amount: 220, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-8',
@@ -160,7 +160,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 72, fat: 2 },
     per100g: { protein: 4, carbs: 45, fat: 1.5 },
     servingSize: { amount: 160, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-9',
@@ -180,7 +180,7 @@ export const snackMeals = [
     nutrition: { protein: 9, carbs: 54, fat: 9 },
     per100g: { protein: 3, carbs: 18, fat: 3 },
     servingSize: { amount: 300, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-10',
@@ -200,7 +200,7 @@ export const snackMeals = [
     nutrition: { protein: 12, carbs: 60, fat: 14 },
     per100g: { protein: 5, carbs: 25, fat: 6 },
     servingSize: { amount: 240, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-11',
@@ -220,7 +220,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 44, fat: 16 },
     per100g: { protein: 3, carbs: 22, fat: 8 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-12',
@@ -240,7 +240,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 66, fat: 9 },
     per100g: { protein: 4, carbs: 44, fat: 6 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-13',
@@ -260,7 +260,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 35, fat: 8 },
     per100g: { protein: 6, carbs: 35, fat: 8 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast'],
   },
   {
     id: 'snack-14',
@@ -280,7 +280,7 @@ export const snackMeals = [
     nutrition: { protein: 2, carbs: 44, fat: 1 },
     per100g: { protein: 1, carbs: 22, fat: 0.5 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-15',
@@ -300,7 +300,7 @@ export const snackMeals = [
     nutrition: { protein: 19, carbs: 7, fat: 12 },
     per100g: { protein: 8, carbs: 3, fat: 5 },
     servingSize: { amount: 240, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-16',
@@ -361,7 +361,7 @@ export const snackMeals = [
     nutrition: { protein: 4, carbs: 50, fat: 1 },
     per100g: { protein: 4, carbs: 50, fat: 1 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-19',
@@ -381,7 +381,7 @@ export const snackMeals = [
     nutrition: { protein: 4, carbs: 62, fat: 1 },
     per100g: { protein: 3, carbs: 52, fat: 0.5 },
     servingSize: { amount: 120, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-20',
@@ -401,7 +401,7 @@ export const snackMeals = [
     nutrition: { protein: 9, carbs: 38, fat: 18 },
     per100g: { protein: 6, carbs: 25, fat: 12 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast'],
   },
   {
     id: 'snack-21',
@@ -421,7 +421,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 40, fat: 15 },
     per100g: { protein: 6, carbs: 40, fat: 15 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast'],
   },
   {
     id: 'snack-22',
@@ -440,7 +440,7 @@ export const snackMeals = [
     nutrition: { protein: 5, carbs: 60, fat: 1 },
     per100g: { protein: 2, carbs: 25, fat: 0.5 },
     servingSize: { amount: 240, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-23',
@@ -460,7 +460,7 @@ export const snackMeals = [
     nutrition: { protein: 3, carbs: 48, fat: 2 },
     per100g: { protein: 3, carbs: 48, fat: 2 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-24',
@@ -540,7 +540,7 @@ export const snackMeals = [
     nutrition: { protein: 9, carbs: 25, fat: 9 },
     per100g: { protein: 5, carbs: 14, fat: 5 },
     servingSize: { amount: 180, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-28',
@@ -560,7 +560,7 @@ export const snackMeals = [
     nutrition: { protein: 7, carbs: 22, fat: 7 },
     per100g: { protein: 4, carbs: 12, fat: 4 },
     servingSize: { amount: 180, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-29',
@@ -580,7 +580,7 @@ export const snackMeals = [
     nutrition: { protein: 4, carbs: 50, fat: 10 },
     per100g: { protein: 1.5, carbs: 20, fat: 4 },
     servingSize: { amount: 250, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-30',
@@ -600,7 +600,7 @@ export const snackMeals = [
     nutrition: { protein: 2, carbs: 51, fat: 1 },
     per100g: { protein: 1, carbs: 34, fat: 0.5 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-31',
@@ -640,7 +640,7 @@ export const snackMeals = [
     nutrition: { protein: 2, carbs: 60, fat: 0 },
     per100g: { protein: 1, carbs: 40, fat: 0.3 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-33',
@@ -660,7 +660,7 @@ export const snackMeals = [
     nutrition: { protein: 1, carbs: 30, fat: 0 },
     per100g: { protein: 1, carbs: 30, fat: 0.4 },
     servingSize: { amount: 100, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-34',
@@ -680,7 +680,7 @@ export const snackMeals = [
     nutrition: { protein: 5, carbs: 36, fat: 12 },
     per100g: { protein: 4, carbs: 30, fat: 10 },
     servingSize: { amount: 120, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-35',
@@ -700,7 +700,7 @@ export const snackMeals = [
     nutrition: { protein: 24, carbs: 20, fat: 24 },
     per100g: { protein: 12, carbs: 10, fat: 12 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-36',
@@ -720,7 +720,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 66, fat: 9 },
     per100g: { protein: 4, carbs: 44, fat: 6 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-37',
@@ -819,7 +819,7 @@ export const snackMeals = [
     nutrition: { protein: 18, carbs: 44, fat: 20 },
     per100g: { protein: 9, carbs: 22, fat: 10 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-42',
@@ -839,7 +839,7 @@ export const snackMeals = [
     nutrition: { protein: 16, carbs: 40, fat: 30 },
     per100g: { protein: 8, carbs: 20, fat: 15 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast', 'dinner'],
   },
   {
     id: 'snack-43',
@@ -859,7 +859,7 @@ export const snackMeals = [
     nutrition: { protein: 2, carbs: 56, fat: 1 },
     per100g: { protein: 1, carbs: 28, fat: 0.5 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-44',
@@ -879,7 +879,7 @@ export const snackMeals = [
     nutrition: { protein: 30, carbs: 3, fat: 18 },
     per100g: { protein: 20, carbs: 2, fat: 12 },
     servingSize: { amount: 150, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-45',
@@ -899,7 +899,7 @@ export const snackMeals = [
     nutrition: { protein: 16, carbs: 96, fat: 4 },
     per100g: { protein: 8, carbs: 48, fat: 2 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
   {
     id: 'snack-46',
@@ -939,7 +939,7 @@ export const snackMeals = [
     nutrition: { protein: 2, carbs: 40, fat: 0 },
     per100g: { protein: 1, carbs: 20, fat: 0.2 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['dinner'],
   },
   {
     id: 'snack-48',
@@ -958,7 +958,7 @@ export const snackMeals = [
     nutrition: { protein: 6, carbs: 44, fat: 3 },
     per100g: { protein: 3, carbs: 22, fat: 1.5 },
     servingSize: { amount: 200, unit: 'g' },
-    mealType: [],
+    mealType: ['breakfast'],
   },
   {
     id: 'snack-49',
@@ -998,6 +998,6 @@ export const snackMeals = [
     nutrition: { protein: 10, carbs: 42, fat: 17 },
     per100g: { protein: 7, carbs: 30, fat: 12 },
     servingSize: { amount: 140, unit: 'g' },
-    mealType: [],
+    mealType: ['lunch', 'dinner'],
   },
 ] satisfies Meal[]

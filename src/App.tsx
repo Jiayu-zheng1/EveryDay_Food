@@ -39,6 +39,20 @@ import type {
  * 数据全部来自 src/api/meals.js（v1 返回本地数据，将来可直接换真实接口）
  * 热量计算 / BMI / 智能搭配来自 src/lib/nutrition.js（纯算法，可换服务端实现）
  */
+
+/** 合法模块 hash 值 → 模块 key（U11：手写 hash 路由，不引 react-router） */
+const MODULE_HASHES: Record<string, ModuleKey> = {
+  home: 'home',
+  library: 'library',
+  newyear: 'newyear',
+  table: 'table',
+}
+
+/** 从 location.hash 解析模块；空值 / 非法值（如 #top、#calculator 等页面锚点）回退首页 */
+function moduleFromHash(hash: string): ModuleKey {
+  return MODULE_HASHES[hash.replace(/^#/, '')] ?? 'home'
+}
+
 export default function App() {
   const { meals, loading } = useMeals()
   const nutrition = useNutrition()
@@ -56,7 +70,19 @@ export default function App() {
   const sentinelRef = useRef<HTMLDivElement | null>(null) // 网格末尾哨兵：进入视口时加载更多
   const cursorLightRef = useRef<HTMLDivElement | null>(null) // 全屏鼠标跟随光源层
   // 模块化视图：home 首页 / library 菜谱库 / newyear 年夜饭 / table 我的餐桌
-  const [activeModule, setActiveModule] = useState<ModuleKey>('home')
+  // 与 URL hash 同步（#home/#library/#newyear/#table，U11 手写路由）：
+  // 初始读 hash 定模块 → 刷新保持；导航写 hash → 链接可分享；监听 hashchange → 前进/后退同步
+  const [activeModule, setActiveModule] = useState<ModuleKey>(() =>
+    moduleFromHash(window.location.hash)
+  )
+
+  // hash 变化（浏览器前进/后退、手改地址、外部链接）时同步模块状态；
+  // 非模块 hash（#top / #calculator 等页面锚点）忽略，避免锚点滚动打断当前模块
+  useEffect(() => {
+    const onHashChange = () => setActiveModule(moduleFromHash(window.location.hash))
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   // 全局鼠标跟随光源：把鼠标坐标写入 --mx/--my（相对 viewport 的 px），驱动 .cursor-light
   useEffect(() => {
@@ -104,9 +130,13 @@ export default function App() {
       const cuisineOk =
         !cuisineFilter || cuisineFilter === 'all' || meal.cuisine === cuisineFilter
       if (!categoryOk || !typeOk || !cuisineOk) return false
-      // 中文直接 includes 匹配菜名或简介
+      // 中文直接 includes 匹配菜名、简介或食材（食材匹配支持「冰箱搜菜」）
       if (!q) return true
-      return (meal.name ?? '').includes(q) || (meal.desc ?? '').includes(q)
+      return (
+        (meal.name ?? '').includes(q) ||
+        (meal.desc ?? '').includes(q) ||
+        (meal.ingredients ?? []).some((ing) => ing.includes(q))
+      )
     })
     if (sortKey === 'default') return filtered
     const sorted = [...filtered] // 复制后再排序，避免原地修改数据源
@@ -157,9 +187,24 @@ export default function App() {
     return result
   }, [meals])
 
-  // 模块导航：切换视图并回到页面顶部（'instant' 立即回顶，不触发平滑滚动动画）
+  // 跨分类同名变体数（U8）：全库按菜名统计，MealModal 展示「同款变体 N 个」供对比做法
+  const nameVariantCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const meal of meals) {
+      counts.set(meal.name, (counts.get(meal.name) ?? 0) + 1)
+    }
+    return counts
+  }, [meals])
+
+  // 模块导航：切换视图、写入 URL hash（可分享 / 刷新保持）、回到页面顶部
+  // （'instant' 立即回顶，不触发平滑滚动动画）
   const navigate = (module: ModuleKey) => {
     setActiveModule(module)
+    // 直接赋值 location.hash 触发 hashchange 事件，由监听器同步 state；
+    // 已是当前 hash 则跳过赋值，避免无谓事件与历史记录
+    if (window.location.hash !== `#${module}`) {
+      window.location.hash = `#${module}`
+    }
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
@@ -193,6 +238,8 @@ export default function App() {
               onSubmit={nutrition.submit}
               onGenerate={() => nutrition.generatePlan(meals)}
               hasSmartPlan={nutrition.smartPlan !== null}
+              error={nutrition.error}
+              onReset={nutrition.reset}
             />
 
             <DailyPlan
@@ -216,7 +263,7 @@ export default function App() {
             <Reveal>
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-black sm:text-3xl">菜谱库</h2>
+                  <h1 className="text-2xl font-black sm:text-3xl">菜谱库</h1>
                   <p className="mt-2 text-sm text-mist">独立浏览全部做法，不限于搭配推荐</p>
                 </div>
                 {/* 过滤后的总道数（实时更新） */}
@@ -293,6 +340,7 @@ export default function App() {
                     setSearch('')
                     setActiveCategory('all')
                     setMealTypeFilter('all')
+                    setCuisineFilter('all')
                   }}
                   className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-snow transition-colors hover:bg-white/10"
                 >
@@ -365,9 +413,15 @@ export default function App() {
       <Footer />
       <BackToTop />
 
-      {/* 详情弹窗 */}
+      {/* 详情弹窗：onAdd 支持从弹窗加入餐桌（移动端），variants 显示跨分类同名变体数 */}
       {selectedMeal && (
-        <MealModal meal={selectedMeal} categoryMeta={categoryMeta} onClose={() => setSelectedMeal(null)} />
+        <MealModal
+          meal={selectedMeal}
+          categoryMeta={categoryMeta}
+          onClose={() => setSelectedMeal(null)}
+          onAdd={table.add}
+          variants={nameVariantCounts.get(selectedMeal.name) ?? 1}
+        />
       )}
     </div>
   )

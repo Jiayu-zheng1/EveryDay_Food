@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# 构建期临时产物（scripts/export-data.mjs）
+scripts/.export-data.tmp.cjs
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

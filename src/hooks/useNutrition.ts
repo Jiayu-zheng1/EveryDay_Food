@@ -5,6 +5,7 @@ import {
   generateSmartPlan,
   MEAL_SPLIT,
   suggestGoal,
+  validateNutritionForm,
 } from '../lib/nutrition'
 import type {
   BmiResult,
@@ -26,8 +27,12 @@ interface UseNutritionResult {
   mealSplit: MealSplitItem[]
   smartPlan: PlanSlot[] | null
   generatePlan: (meals: Meal[]) => PlanSlot[] | null
-  bmi: BmiResult
+  bmi: BmiResult | null
   suggestedGoal: Goal
+  /** 提交校验失败时的中文错误提示（通过校验后为 null） */
+  error: string | null
+  /** 重置：清除 localStorage 持久化状态并把表单恢复默认值 */
+  reset: () => void
 }
 
 /** localStorage 持久化结构（与 useNutrition 的状态一一对应） */
@@ -113,6 +118,7 @@ export default function useNutrition(): UseNutritionResult {
     saved ? saved.smartPlan : null
   ) // null = 未生成，DailyPlan 保持随机模式
   const [goalTouched, setGoalTouched] = useState(() => (saved ? saved.goalTouched : false)) // 用户是否手动改过目标
+  const [error, setError] = useState<string | null>(null) // 提交校验失败的中文提示
 
   // 状态变化即持久化：提交结果（submitted=true）、智能搭配与表单草稿都会保存；
   // 每次写入的都是最新完整状态，重新计算后旧 smartPlan 已在上一步被清空，不会残留
@@ -133,29 +139,56 @@ export default function useNutrition(): UseNutritionResult {
     }
   }, [form, submitted, smartPlan, goalTouched])
 
-  // BMI 与建议目标（随身高体重实时计算）
+  // BMI 与建议目标（随身高体重实时计算）；
+  // 身高/体重为空或非正数时 calculateBMI 返回 null（除零保护），建议目标保持当前选择、不覆盖
   const bmi = useMemo(
     () => calculateBMI(form.weightKg, form.heightCm),
     [form.weightKg, form.heightCm]
   )
-  const suggestedGoal = useMemo(() => suggestGoal(bmi.bmi), [bmi])
+  const suggestedGoal = useMemo(
+    () => (bmi ? suggestGoal(bmi.bmi) : form.goal),
+    [bmi, form.goal]
+  )
 
-  // 更新单个字段；表单变化后旧的智能搭配作废（热量目标已变）
+  // 更新单个字段；表单变化后旧的智能搭配作废（热量目标已变），同时清除校验错误
   const update = (patch: Partial<NutritionForm>) => {
     if ('goal' in patch) setGoalTouched(true) // 手动点过目标分段按钮
     setForm((prev) => ({ ...prev, ...patch }))
     setSmartPlan(null)
+    setError(null)
   }
 
-  // BMI 异常时自动跟随建议目标；用户手动改过目标则不覆盖
+  // BMI 异常时自动跟随建议目标；用户手动改过目标则不覆盖（BMI 无效时不触发）
   useEffect(() => {
-    if (!goalTouched && suggestedGoal !== form.goal) {
+    if (bmi && !goalTouched && suggestedGoal !== form.goal) {
       setForm((prev) => ({ ...prev, goal: suggestedGoal }))
     }
-  }, [suggestedGoal, goalTouched, form.goal])
+  }, [bmi, suggestedGoal, goalTouched, form.goal])
 
-  // 提交：显示结果卡片（结果随表单实时计算）
-  const submit = () => setSubmitted(true)
+  // 提交：先校验年龄/身高/体重范围（违反时给出中文提示、不计算），通过后显示结果卡片
+  const submit = () => {
+    const message = validateNutritionForm(form)
+    if (message) {
+      setError(message)
+      return
+    }
+    setError(null)
+    setSubmitted(true)
+  }
+
+  // 重置：清除 localStorage 持久化状态（moments-food-nutrition-v1）+ 表单恢复默认值
+  const reset = () => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // localStorage 不可用：仅重置内存状态
+    }
+    setForm(DEFAULT_FORM)
+    setSubmitted(false)
+    setSmartPlan(null)
+    setGoalTouched(false)
+    setError(null)
+  }
 
   // 每日热量目标（始终按当前表单实时计算，展示与否由 submitted 控制）
   const results = useMemo(() => calculateDailyTargets(form), [form])
@@ -194,5 +227,7 @@ export default function useNutrition(): UseNutritionResult {
     generatePlan,
     bmi,
     suggestedGoal,
+    error,
+    reset,
   }
 }
