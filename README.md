@@ -1,6 +1,6 @@
 # 🍜 每日食光 · EveryDay Food
 
-> 深夜食堂风的暗色玻璃拟态中文美食应用 —— 917 道家常菜、营养食谱与食疗/烘焙/小吃，热量计算、智能三餐搭配、年夜饭生成器、家庭餐桌与购物清单，一个纯前端 SPA 全搞定。
+> 深夜食堂风的暗色玻璃拟态中文美食应用 —— 1077 道家常菜、营养食谱与食疗/烘焙/小吃，热量计算、智能三餐搭配、年夜饭生成器、家庭餐桌与购物清单，一个纯前端 SPA 全搞定。
 
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
@@ -14,8 +14,8 @@
 
 ## ✨ 功能特性
 
-- 📚 **917 道食谱库**：减脂 / 增肌 / 维持 / 营养四大类各 50+ 道，外加 527 道家常菜，以及食疗食补 51 道 / 烘焙 50 道 / 小吃 79 道，每道菜含食材、做法步骤与完整营养数据
-- 🔍 **四维筛选**：分类（减脂 / 增肌 / 维持 / 营养 / 家常 / 食疗食补 / 烘焙 / 小吃）+ 餐次（早 / 午 / 晚）+ 地区菜系（川 / 湘 / 粤 / 鄂 / 鲁 / 苏浙 / 北方 / **徽菜 / 闽菜 / 东北**）+ 关键词搜索（匹配菜名、简介与**食材**）与 kcal / 蛋白质排序，组合过滤即时生效
+- 📚 **1077 道食谱库**：减脂 / 增肌 / 维持 / 营养四大类各 50+ 道，外加 672 道家常菜，以及食疗食补 51 道 / 烘焙 50 道 / 小吃 94 道，每道菜含食材、做法步骤与完整营养数据
+- 🔍 **四维筛选**：分类（减脂 / 增肌 / 维持 / 营养 / 家常 / 食疗食补 / 烘焙 / 小吃）+ 餐次（早 / 午 / 晚）+ 地区菜系（川 / 湘 / 粤 / 鄂 / 鲁 / 苏浙 / 北方 / **徽菜 / 闽菜 / 东北 / 滇菜 / 陕菜 / 新疆**）+ 关键词搜索（匹配菜名、简介与**食材**）与 kcal / 蛋白质排序，组合过滤即时生效
 - 🔥 **热量计算器**：输入身体参数 → BMI（中国成人标准）、BMR（Mifflin-St Jeor 公式）、TDEE、目标热量、宏量克数（4-4-9 法则）与三餐热量分配；带**表单校验、重置与 NaN 防护**（无效输入给提示而非 NaN），结果自动持久化到 localStorage，刷新不丢
 - 🍽️ **每日三餐智能搭配**：按「早餐 / 午餐 / 晚餐」餐次从全库抽取，三餐互不重复；**按日期种子随机**（同一天内多次刷新结果稳定）；热量计算器一键「生成今日搭配」，结果即替换当日计划
 - 🧧 **年夜饭生成器**：凉菜 / 硬菜 / 热菜 / 汤 / 主食 / 甜品六池随机配出一桌 11 道菜（2+3+3+1+1+1），支持整桌重抽与单道「换一道」，配好一键加入家庭餐桌；**热菜池候选已扩充**（通用技法关键词，候选约 195 道），**所选菜系某池无候选时提示已用全库补充**，不再静默回退
@@ -46,7 +46,7 @@
 | TypeScript ✓ | 全库静态类型（strict 模式） |
 | [Vitest](https://vitest.dev/) ✓ | 单元测试（44 用例，见下方「测试」） |
 | PWA ✓ | `manifest.json` + Service Worker，生产可安装 / 离线 |
-| 纯前端 SPA | 无后端依赖；917 道食谱数据以静态 JSON（`public/data/meals.json`）运行时加载，不打包进 JS bundle |
+| 纯前端 SPA | 无后端依赖；1077 道食谱数据以静态 JSON（`public/data/meals.json`）运行时加载，不打包进 JS bundle |
 
 ## 🚀 快速开始
 
@@ -112,7 +112,7 @@ npx wrangler pages deploy dist --project-name everyday-food
 
 ## 📊 数据说明
 
-数据源为 `src/data/*.ts`（TypeScript 分批文件）；`npm run dev` / `npm run build` 时由 `scripts/export-data.mjs` 用 esbuild 打包后导出为 `public/data/meals.json`（917 道，约 706KB）。运行时由 `src/api/meals.ts` fetch 加载并内存缓存 —— **数据不打包进 JS bundle**（主 chunk 806KB → 约 200KB），静态托管可 gzip。
+数据源为 `src/data/*.ts`（TypeScript 分批文件）；`npm run dev` / `npm run build` 时由 `scripts/export-data.mjs` 用 esbuild 打包后导出为 `public/data/meals.json`（1077 道，约 827KB）。运行时由 `src/api/meals.ts` fetch 加载并内存缓存 —— **数据不打包进 JS bundle**（主 chunk 806KB → 约 200KB），静态托管可 gzip。
 
 ### 食谱总量与分类
 
@@ -122,11 +122,11 @@ npx wrangler pages deploy dist --project-name everyday-food
 | 增肌餐（muscle-gain） | 52 |
 | 维持餐（maintain） | 52 |
 | 营养餐（nutrition） | 53 |
-| 家常菜（home） | 527 |
+| 家常菜（home） | 672 |
 | 食疗食补（therapy） | 51 |
 | 烘焙（bakery） | 50 |
-| 小吃（snack） | 79 |
-| **合计** | **917** |
+| 小吃（snack） | 94 |
+| **合计** | **1077** |
 
 其中家常菜 118 道 / 小吃 18 道 / 食疗食补 1 道 / 营养餐 1 道（共 138 道）收录自《老乡鸡菜品溯源报告》整理菜品（Gar-b-age/CookLikeHOC）做法要点（家庭份重写，商业份量换算为家庭份）。
 
@@ -134,14 +134,17 @@ npx wrangler pages deploy dist --project-name everyday-food
 
 | 菜系 | 数量 | | 菜系 | 数量 |
 | --- | --- | --- | --- | --- |
-| 家常 generic | 500 | | 苏浙 suzhe | 42 |
-| 北方 bei | 78 | | 湘菜 xiang | 14 |
-| 粤菜 yue | 79 | | 鲁菜 lu | 11 |
-| 川菜 chuan | 53 | | 鄂菜 e | 9 |
-| 徽菜 hui | 49 | | 闽菜 min | 42 |
-| 东北菜 dongbei | 40 | | | |
+| 家常 generic | 493 | | 湘菜 xiang | 54 |
+| 北方 bei | 78 | | 鲁菜 lu | 11 |
+| 粤菜 yue | 79 | | 鄂菜 e | 9 |
+| 川菜 chuan | 53 | | 闽菜 min | 42 |
+| 徽菜 hui | 49 | | 滇菜 dian | 45 |
+| 东北菜 dongbei | 40 | | 陕菜 shan | 40 |
+| 苏浙 suzhe | 42 | | 新疆 xinjiang | 42 |
 
-其中徽菜 49 道（9 道既有菜重标 + 新增 40 道）、闽菜 42 道（2 道既有菜重标 + 新增 40 道）、东北菜 40 道（本次新增），合计新增 120 道（徽 / 闽 / 东北各 40 道）。
+轮 1（徽 / 闽 / 东北，各 40 道）：徽菜 49 道（9 道既有菜重标 + 新增 40 道）、闽菜 42 道（2 道既有菜重标 + 新增 40 道）、东北菜 40 道（本次新增），合计新增 120 道。
+轮 2（滇 / 陕 / 新疆 / 湘，各 40 道）：滇菜 45 道（5 道既有菜重标 + 新增 40 道）、陕菜 40 道（本次新增）、新疆菜 42 道（2 道既有菜重标 + 新增 40 道）、湘菜 54 道（既有 14 道 + 新增 40 道），合计新增 160 道。
+两轮累计新增 280 道，菜系筛选共 14 项（含家常）。
 
 ### 数据字段 Schema
 
@@ -152,7 +155,7 @@ npx wrangler pages deploy dist --project-name everyday-food
 | `id` | `string` | 唯一标识（全库唯一） |
 | `name` | `string` | 中文菜名 |
 | `category` | `string` | 分类：`fat-loss` / `muscle-gain` / `maintain` / `nutrition` / `home` / `therapy` / `bakery` / `snack` |
-| `cuisine` | `string` | 地区菜系：`chuan` / `xiang` / `yue` / `e` / `lu` / `suzhe` / `bei` / `hui` / `min` / `dongbei` / `generic` |
+| `cuisine` | `string` | 地区菜系：`chuan` / `xiang` / `yue` / `e` / `lu` / `suzhe` / `bei` / `hui` / `min` / `dongbei` / `dian` / `shan` / `xinjiang` / `generic` |
 | `emoji` | `string` | 食物图标（渐变底色 + emoji 代替真实图片） |
 | `kcal` | `number` | 每份热量（kcal） |
 | `desc` | `string` | 一句话简介 |
@@ -163,11 +166,11 @@ npx wrangler pages deploy dist --project-name everyday-food
 | `servingSize` | `{ amount, unit }` | 每份的克数与单位 |
 | `mealType` | `Array<'breakfast'\|'lunch'\|'dinner'>` | 适合的餐次（支撑三餐搭配按餐次抽取） |
 
-`mealType` 全库 917 道均非空（早 / 午 / 晚至少一项），三餐搭配按餐次抽取无盲区。
+`mealType` 全库 1077 道均非空（早 / 午 / 晚至少一项），三餐搭配按餐次抽取无盲区。
 
 ### 营养自洽规则（由测试断言）
 
-- 每份三大营养素 ≈ `per100g × servingSize.amount / 100`（四舍五入）：全量 917 道中 ≥90% 宏量单元精确相等，抽样 20 道容差 20%
+- 每份三大营养素 ≈ `per100g × servingSize.amount / 100`（四舍五入）：全量 1077 道中 ≥90% 宏量单元精确相等，抽样 20 道容差 20%
 - 每份热量 ≈ `蛋白质 × 4 + 碳水 × 4 + 脂肪 × 9`：≥95% 菜品误差 ≤10%（抽样 20 道同样容差 10%）
 
 ## 📁 目录结构
@@ -184,7 +187,7 @@ EveryDay_Food/
 │   ├── sw.js                     # Service Worker（构建产物缓存优先，数据网络优先 + 离线回退）
 │   ├── favicon.svg               # SVG 站点图标
 │   ├── data/
-│   │   └── meals.json            # 全量数据产物（917 道 706KB，构建时由 export-data.mjs 生成）
+│   │   └── meals.json            # 全量数据产物（1077 道 827KB，构建时由 export-data.mjs 生成）
 │   └── redesign/                 # 设计方案展示页（多风格对比）
 ├── scripts/
 │   └── export-data.mjs           # 把 src/data/*.ts 导出为 public/data/meals.json
@@ -192,12 +195,13 @@ EveryDay_Food/
 │   ├── api/
 │   │   └── meals.ts              # 数据访问层（fetch /data/meals.json + 内存缓存 + 可播种随机数）
 │   ├── components/               # UI 组件：卡片 / 弹窗 / 计算器 / 年夜饭 / 家庭餐桌…
-│   ├── data/                     # 917 道食谱数据（分批 TS 文件合并）
+│   ├── data/                     # 1077 道食谱数据（分批 TS 文件合并）
 │   │   ├── meals.ts              # 合并入口 + 基础菜谱 + 分类展示元信息
 │   │   ├── category-expansion.ts # 四大分类首轮扩充
 │   │   ├── category-extra-*.ts   # 四大分类二次扩充
 │   │   ├── therapy-meals.ts / bakery-meals.ts / snack-meals.ts  # 食疗食补 / 烘焙 / 小吃
 │   │   ├── cuisine-hui.ts / cuisine-min.ts / cuisine-dongbei.ts # 徽菜 / 闽菜 / 东北菜（各 40 道）
+│   │   ├── cuisine-dian.ts / cuisine-shan.ts / cuisine-xinjiang.ts / cuisine-xiang2.ts # 滇菜 / 陕菜 / 新疆菜 / 湘菜加深（各 40 道）
 │   │   ├── lxj-home-a~c.ts / lxj-extra.ts   # 老乡鸡收录 138 道（家庭份重写）
 │   │   └── home-meals/           # a~f 六批家常菜（每批 50 道）
 │   ├── hooks/                    # useMeals / useNutrition / useFamilyTable / useDailyPlan / useTilt…

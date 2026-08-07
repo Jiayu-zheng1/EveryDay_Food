@@ -26,6 +26,9 @@ export const CUISINE_META: Record<CuisineFilter, CuisineMeta> = {
   hui: { label: '徽菜', emoji: '🏮' },
   min: { label: '闽菜', emoji: '🦪' },
   dongbei: { label: '东北', emoji: '🧊' },
+  dian: { label: '滇菜', emoji: '🍄' },
+  shan: { label: '陕菜', emoji: '🥙' },
+  xinjiang: { label: '新疆', emoji: '🍢' },
   generic: { label: '家常', emoji: '🍳' },
 }
 

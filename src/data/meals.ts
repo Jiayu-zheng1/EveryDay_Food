@@ -9,7 +9,8 @@
  *   - therapy-meals.ts / bakery-meals.ts / snack-meals.ts（therapyMeals / bakeryMeals / snackMeals）：食疗食补 / 烘焙 / 小吃（各 50 道，共 150 道）
  *   - lxj-home-a~c.ts / lxj-extra.ts（lxjHomeA~C / lxjExtra）：收录《老乡鸡菜品溯源报告》整理菜品（家常菜 118 / 小吃 18 / 食疗食补 1 / 营养餐 1，共 138 道）
  *   - cuisine-hui.ts / cuisine-min.ts / cuisine-dongbei.ts（huiMeals / minMeals / dongbeiMeals）：徽菜 / 闽菜 / 东北菜（各 40 道，共 120 道）
- * 全库合计 917 道
+ *   - cuisine-dian.ts / cuisine-shan.ts / cuisine-xinjiang.ts / cuisine-xiang2.ts（dianMeals / shanMeals / xinjiangMeals / xiang2Meals）：滇菜 / 陕菜 / 新疆菜 / 湘菜加深（各 40 道，共 160 道）
+ * 全库合计 1077 道
  *
  * schema: {
  *   id: string,                    // 唯一标识（全库唯一）
@@ -52,6 +53,10 @@ import { lxjExtra } from './lxj-extra'
 import { huiMeals } from './cuisine-hui'
 import { minMeals } from './cuisine-min'
 import { dongbeiMeals } from './cuisine-dongbei'
+import { dianMeals } from './cuisine-dian'
+import { shanMeals } from './cuisine-shan'
+import { xinjiangMeals } from './cuisine-xinjiang'
+import { xiang2Meals } from './cuisine-xiang2'
 
 export const meals = [
   /* ---------------- 减脂餐 fat-loss ---------------- */
@@ -908,6 +913,11 @@ export const meals = [
   ...huiMeals,
   ...minMeals,
   ...dongbeiMeals,
+  /* ---------------- 轮 2 新增菜系：滇菜 / 陕菜 / 新疆菜 / 湘菜加深（cuisine-dian/shan/xinjiang/xiang2.ts，各 40 道，共 160 道） ---------------- */
+  ...dianMeals,
+  ...shanMeals,
+  ...xinjiangMeals,
+  ...xiang2Meals,
 ] satisfies Meal[]
 
 /** 分类展示元信息：标签 / 图标 / 卡片渐变色 / 分类徽章配色（纯展示配置，不参与业务逻辑） */
