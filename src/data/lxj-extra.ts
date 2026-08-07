@@ -85,7 +85,7 @@ export const lxjExtra = [
     id: 'lxj-snack-5',
     name: '凤凰蛋（活珠子）',
     category: 'snack',
-    cuisine: 'generic',
+    cuisine: 'hui',
     emoji: '🥚',
     kcal: 148,
     desc: '孵化十余天的受精鸡蛋，清水慢煮后蘸椒盐食用，蛋白Q弹、蛋黄绵密，安徽街头特色小吃。',

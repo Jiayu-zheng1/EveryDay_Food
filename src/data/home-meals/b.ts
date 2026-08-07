@@ -467,7 +467,7 @@ export const homeDishes = [
     id: 'ginger-duck',
     name: '姜母鸭',
     category: 'home',
-    cuisine: 'generic',
+    cuisine: 'min',
     emoji: '🦆',
     kcal: 615,
     desc: '闽南秋冬滋补锅，老姜麻油煸出浓香，鸭肉暖身驱寒。',

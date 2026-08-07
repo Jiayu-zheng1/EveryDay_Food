@@ -12,8 +12,8 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner'
 /** 食谱分类（新增食疗食补/烘焙/小吃） */
 export type Category = 'fat-loss' | 'muscle-gain' | 'maintain' | 'nutrition' | 'home' | 'therapy' | 'bakery' | 'snack'
 
-/** 地区菜系 */
-export type Cuisine = 'chuan' | 'xiang' | 'yue' | 'e' | 'lu' | 'suzhe' | 'bei' | 'generic'
+/** 地区菜系（8 大传统菜系 + 徽/闽/东北，其余为家常 generic） */
+export type Cuisine = 'chuan' | 'xiang' | 'yue' | 'e' | 'lu' | 'suzhe' | 'bei' | 'hui' | 'min' | 'dongbei' | 'generic'
 
 /** 每份 / 每 100g 三大营养素（克） */
 export interface Nutrition {

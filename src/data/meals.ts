@@ -8,7 +8,8 @@
  *   - home-meals/a~f.js（homeDishesA~F）：家常菜六批（每批 50 道，共 300 道）
  *   - therapy-meals.ts / bakery-meals.ts / snack-meals.ts（therapyMeals / bakeryMeals / snackMeals）：食疗食补 / 烘焙 / 小吃（各 50 道，共 150 道）
  *   - lxj-home-a~c.ts / lxj-extra.ts（lxjHomeA~C / lxjExtra）：收录《老乡鸡菜品溯源报告》整理菜品（家常菜 118 / 小吃 18 / 食疗食补 1 / 营养餐 1，共 138 道）
- * 全库合计 797 道
+ *   - cuisine-hui.ts / cuisine-min.ts / cuisine-dongbei.ts（huiMeals / minMeals / dongbeiMeals）：徽菜 / 闽菜 / 东北菜（各 40 道，共 120 道）
+ * 全库合计 917 道
  *
  * schema: {
  *   id: string,                    // 唯一标识（全库唯一）
@@ -48,6 +49,9 @@ import { lxjHomeA } from './lxj-home-a'
 import { lxjHomeB } from './lxj-home-b'
 import { lxjHomeC } from './lxj-home-c'
 import { lxjExtra } from './lxj-extra'
+import { huiMeals } from './cuisine-hui'
+import { minMeals } from './cuisine-min'
+import { dongbeiMeals } from './cuisine-dongbei'
 
 export const meals = [
   /* ---------------- 减脂餐 fat-loss ---------------- */
@@ -900,6 +904,10 @@ export const meals = [
   ...lxjHomeB,
   ...lxjHomeC,
   ...lxjExtra,
+  /* ---------------- 新增菜系：徽菜 / 闽菜 / 东北菜（cuisine-hui/min/dongbei.ts，各 40 道，共 120 道） ---------------- */
+  ...huiMeals,
+  ...minMeals,
+  ...dongbeiMeals,
 ] satisfies Meal[]
 
 /** 分类展示元信息：标签 / 图标 / 卡片渐变色 / 分类徽章配色（纯展示配置，不参与业务逻辑） */

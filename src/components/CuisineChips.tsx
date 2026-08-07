@@ -23,6 +23,9 @@ export const CUISINE_META: Record<CuisineFilter, CuisineMeta> = {
   lu: { label: '鲁菜', emoji: '🥘' },
   suzhe: { label: '苏浙', emoji: '🍃' },
   bei: { label: '北方', emoji: '🥟' },
+  hui: { label: '徽菜', emoji: '🏮' },
+  min: { label: '闽菜', emoji: '🦪' },
+  dongbei: { label: '东北', emoji: '🧊' },
   generic: { label: '家常', emoji: '🍳' },
 }
 

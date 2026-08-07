@@ -805,7 +805,7 @@ export const snackMeals = [
     id: 'snack-41',
     name: '蚵仔煎',
     category: 'snack',
-    cuisine: 'generic',
+    cuisine: 'min',
     emoji: '🦪',
     kcal: 428,
     desc: '海蛎裹红薯粉浆煎至焦脆，淋甜辣酱，鲜嫩多汁，闽南台湾夜市人气王。',
