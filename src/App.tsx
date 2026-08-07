@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header'
 import Hero from './components/Hero'
-import CalorieCalculator from './components/CalorieCalculator'
-import DailyPlan from './components/DailyPlan'
+import DailyPlanner from './components/DailyPlanner'
 import CategoryTabs from './components/CategoryTabs'
 import MealTypeChips from './components/MealTypeChips'
 import CuisineChips, { CUISINE_META } from './components/CuisineChips'
 import MealCard from './components/MealCard'
 import MealModal from './components/MealModal'
 import Footer from './components/Footer'
+import GoalsModule from './components/GoalsModule'
 import Reveal from './components/Reveal'
 import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
@@ -16,7 +16,7 @@ import TableBar from './components/TableBar'
 import NewYearDinner from './components/NewYearDinner'
 import TableModule from './components/TableModule'
 import useMeals from './hooks/useMeals'
-import useDailyPlan from './hooks/useDailyPlan'
+import useDailyPlanner from './hooks/useDailyPlanner'
 import useNutrition from './hooks/useNutrition'
 import useFamilyTable from './hooks/useFamilyTable'
 import { getCategoryMeta } from './api/meals'
@@ -30,7 +30,6 @@ import type {
   Meal,
   MealTypeFilter,
   ModuleKey,
-  PlanSlot,
   SortKey,
 } from './types'
 
@@ -44,11 +43,12 @@ import type {
 const MODULE_HASHES: Record<string, ModuleKey> = {
   home: 'home',
   library: 'library',
+  goals: 'goals',
   newyear: 'newyear',
   table: 'table',
 }
 
-/** 从 location.hash 解析模块；空值 / 非法值（如 #top、#calculator 等页面锚点）回退首页 */
+/** 从 location.hash 解析模块；空值 / 非法值（如 #top、#daily 等页面锚点）回退首页 */
 function moduleFromHash(hash: string): ModuleKey {
   return MODULE_HASHES[hash.replace(/^#/, '')] ?? 'home'
 }
@@ -102,23 +102,14 @@ export default function App() {
     : undefined
   const goalLabel = nutrition.submitted ? GOAL_LABELS[nutrition.form.goal] : null
 
-  const { plan, loading: planLoading, refresh: refreshPlan } = useDailyPlan(goalCategory)
+  const planner = useDailyPlanner({
+    meals,
+    goalCategory,
+    smartPlan: nutrition.smartPlan,
+  })
 
   // 分类展示元信息（来自 API 模块，不直接 import 数据文件）
   const categoryMeta: Record<Category, CategoryMeta> = getCategoryMeta()
-
-  // 今日搭配：优先展示智能搭配（smartPlan），否则回退随机搭配
-  const effectivePlan: PlanSlot[] = nutrition.smartPlan ?? plan
-  const planMode = nutrition.smartPlan ? 'smart' : 'random'
-  // 全天合计热量：遍历每餐的每道菜求和（结构统一为 { slot, meals: [] }）
-  const totalKcal = useMemo(
-    () =>
-      effectivePlan.reduce(
-        (sum, item) => sum + item.meals.reduce((s, m) => s + m.kcal, 0),
-        0
-      ),
-    [effectivePlan]
-  )
 
   // 菜谱库：分类 tab 与餐次 chips 组合过滤 → 关键词搜索 → 排序（默认保持原序）
   const visibleMeals = useMemo(() => {
@@ -196,16 +187,29 @@ export default function App() {
     return counts
   }, [meals])
 
-  // 模块导航：切换视图、写入 URL hash（可分享 / 刷新保持）、回到页面顶部
-  // （'instant' 立即回顶，不触发平滑滚动动画）
-  const navigate = (module: ModuleKey) => {
+  // 模块导航：切换视图、写入 URL hash（可分享 / 刷新保持）
+  // scrollToId 传入时（如「今日搭配」入口 → #daily 搭配区）：等 React 提交新模块后平滑滚动到目标区，
+  // 否则回到页面顶部（'instant' 立即回顶，不触发平滑滚动动画）
+  const navigate = (module: ModuleKey, scrollToId?: string) => {
     setActiveModule(module)
     // 直接赋值 location.hash 触发 hashchange 事件，由监听器同步 state；
     // 已是当前 hash 则跳过赋值，避免无谓事件与历史记录
     if (window.location.hash !== `#${module}`) {
       window.location.hash = `#${module}`
     }
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    if (scrollToId) {
+      // 双 rAF：等新模块 DOM 挂载且布局稳定后再滚动（切换模块瞬间目标元素尚不存在）
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.getElementById(scrollToId)?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          })
+        })
+      })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
   }
 
   return (
@@ -216,44 +220,60 @@ export default function App() {
       <Header
         activeModule={activeModule}
         tableCount={table.items.length}
-        onNavigate={navigate}
+        // 「今日搭配」tab 与 logo 都回 home；tab 需滚动到搭配区（#daily），logo 回页面顶部
+        onNavigate={(module) => navigate(module, module === 'home' ? 'daily' : undefined)}
       />
 
       <main>
-        {/* 首页模块：Hero（精简）+ 热量计算器 + 今日三餐搭配 */}
+        {/* 首页模块：Hero（精简）+ 「生成今日搭配」功能区（热量计算器已移至健康目标模块） */}
         {activeModule === 'home' && (
           <>
             <Hero mealCount={meals.length} onNavigate={navigate} />
 
-            {/* 热量计算器（BMI + 每日目标 + 生成智能搭配） */}
-            <CalorieCalculator
-              meals={meals}
-              form={nutrition.form}
-              update={nutrition.update}
-              results={nutrition.results}
-              submitted={nutrition.submitted}
-              mealSplit={nutrition.mealSplit}
-              bmi={nutrition.bmi}
-              suggestedGoal={nutrition.suggestedGoal}
-              onSubmit={nutrition.submit}
-              onGenerate={() => nutrition.generatePlan(meals)}
-              hasSmartPlan={nutrition.smartPlan !== null}
-              error={nutrition.error}
-              onReset={nutrition.reset}
-            />
-
-            <DailyPlan
-              plan={effectivePlan}
-              loading={planLoading}
-              mode={planMode}
-              totalKcal={totalKcal}
-              categoryMeta={categoryMeta}
+            <DailyPlanner
+              people={planner.people}
+              onPeopleChange={planner.setPeople}
+              mealCounts={planner.mealCounts}
+              onMealCountChange={planner.setMealCount}
+              plan={planner.plan}
+              loading={planner.loading}
+              mode={planner.mode}
               goalLabel={goalLabel}
-              onShuffle={refreshPlan}
-              onRegenerate={() => nutrition.generatePlan(meals)}
+              hasSmartPlan={planner.hasSmartPlan}
+              totalKcal={planner.totalKcal}
+              categoryMeta={categoryMeta}
+              onGenerate={planner.generate}
+              onShuffle={planner.shuffle}
+              onBackToSmart={planner.backToSmart}
               onOpen={setSelectedMeal}
+              onAdd={table.add}
+              addedIds={tableItemIds}
             />
           </>
+        )}
+
+        {/* 健康目标模块：热量计算器（BMI / 每日目标 / 智能搭配）+ 目标菜谱浏览 */}
+        {activeModule === 'goals' && (
+          <GoalsModule
+            meals={meals}
+            form={nutrition.form}
+            update={nutrition.update}
+            results={nutrition.results}
+            submitted={nutrition.submitted}
+            mealSplit={nutrition.mealSplit}
+            bmi={nutrition.bmi}
+            suggestedGoal={nutrition.suggestedGoal}
+            onSubmit={nutrition.submit}
+            onGenerate={() => nutrition.generatePlan(meals)}
+            hasSmartPlan={nutrition.smartPlan !== null}
+            error={nutrition.error}
+            onReset={nutrition.reset}
+            categoryMeta={categoryMeta}
+            onOpen={setSelectedMeal}
+            onAdd={table.add}
+            addItemIds={tableItemIds}
+            onNavigate={navigate}
+          />
         )}
 
         {/* 菜谱库模块：分类 tab + 餐次 chips + 卡片网格（筛选/搜索/排序/分批渲染逻辑全部保留） */}

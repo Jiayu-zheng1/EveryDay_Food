@@ -8,12 +8,12 @@ interface HeroProps {
   onNavigate: (module: ModuleKey) => void
 }
 
-// 快捷入口卡配置：key 传给 onNavigate 切换全局模块（今日搭配回首页）
+// 快捷入口卡配置：key 传给 onNavigate 切换全局模块（「今日搭配」即当前页，不再设卡）
 const QUICK_LINKS: Array<{ key: ModuleKey; emoji: string; title: string; desc: string }> = [
   { key: 'library', emoji: '📚', title: '逛菜谱库', desc: '分类 / 餐次 / 地区多维筛选' },
+  { key: 'goals', emoji: '🎯', title: '健康目标', desc: '计算热量目标，生成智能搭配' },
   { key: 'newyear', emoji: '🧧', title: '配一桌年夜饭', desc: '凉菜硬菜热菜汤品，一键配齐' },
   { key: 'table', emoji: '🛒', title: '我的餐桌', desc: '已选菜汇总营养，生成购物清单' },
-  { key: 'home', emoji: '🍽️', title: '今日搭配', desc: '今日三餐搭配，每道菜 kcal 一目了然' },
 ]
 
 /**
@@ -122,14 +122,14 @@ export default function Hero({ mealCount, onNavigate }: HeroProps) {
         </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-          {/* 主 CTA：光晕跟随鼠标 */}
+          {/* 主 CTA：光晕跟随鼠标，指向「生成今日搭配」功能区锚点（#daily） */}
           <a
             ref={primaryRef}
-            href="#calculator"
+            href="#daily"
             onMouseMove={handlePrimaryMove}
             className="glow-follow rounded-full bg-gradient-brand px-7 py-3 font-semibold text-white shadow-xl shadow-berry/25 transition-transform duration-300 hover:scale-105 active:scale-95"
           >
-            计算我的热量
+            ✨ 生成今日搭配
           </a>
           {/* 次 CTA：切到菜谱库模块（原 #meals 锚点已随模块化改造移除） */}
           <button

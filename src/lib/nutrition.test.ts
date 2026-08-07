@@ -5,6 +5,7 @@ import {
   calculateBMR,
   calculateDailyTargets,
   calculateTDEE,
+  generateDailyPlan,
   generateSmartPlan,
   suggestGoal,
   validateNutritionForm,
@@ -269,5 +270,64 @@ describe('营养数据自洽（public/data/meals.json）', () => {
     }
     expect(exact / cells).toBeGreaterThanOrEqual(0.9)
     expect(kcalOk / MEALS.length).toBeGreaterThanOrEqual(0.95)
+  })
+})
+
+describe('generateDailyPlan（今日搭配自定义生成）', () => {
+  const counts = { breakfast: 2, lunch: 3, dinner: 3 }
+
+  it('按每餐菜数抽取，三餐结构完整（早餐 2 / 午餐 3 / 晚餐 3）', () => {
+    const plan = generateDailyPlan(MEALS, counts, { seed: 20260807 })
+    expect(plan.map((s) => s.slot)).toEqual(['早餐', '午餐', '晚餐'])
+    expect(plan[0].meals).toHaveLength(2)
+    expect(plan[1].meals).toHaveLength(3)
+    expect(plan[2].meals).toHaveLength(3)
+  })
+
+  it('按 mealType 匹配餐次：早餐只抽早餐菜、午餐只抽午餐菜、晚餐只抽晚餐菜', () => {
+    const plan = generateDailyPlan(MEALS, counts, { seed: 20260807 })
+    for (const slot of plan) {
+      const expectedType = slot.slot === '早餐' ? 'breakfast' : slot.slot === '午餐' ? 'lunch' : 'dinner'
+      for (const m of slot.meals) {
+        expect(m.mealType, `${m.id} 不在 ${expectedType} 餐次`).toContain(expectedType)
+      }
+    }
+  })
+
+  it('同餐不重复、三餐不重复（全库 797 道下无重复 id）', () => {
+    const plan = generateDailyPlan(MEALS, counts, { seed: 20260807 })
+    const allIds = plan.flatMap((s) => s.meals.map((m) => m.id))
+    expect(new Set(allIds).size).toBe(allIds.length)
+  })
+
+  it('同日种子稳定：同 seed 两次结果完全一致（可复用日期种子）', () => {
+    const a = generateDailyPlan(MEALS, counts, { seed: 20260807 })
+    const b = generateDailyPlan(MEALS, counts, { seed: 20260807 })
+    expect(a).toEqual(b)
+  })
+
+  it('不同种子倾向给出不同组合', () => {
+    const a = generateDailyPlan(MEALS, counts, { seed: 1 })
+    const b = generateDailyPlan(MEALS, counts, { seed: 2 })
+    expect(a).not.toEqual(b)
+  })
+
+  it('category 过滤候选池：结果全部属于该分类', () => {
+    const plan = generateDailyPlan(MEALS, counts, { seed: 20260807, category: 'fat-loss' })
+    const all = plan.flatMap((s) => s.meals)
+    expect(all.length).toBeGreaterThan(0)
+    for (const m of all) expect(m.category).toBe('fat-loss')
+  })
+
+  it('候选池不足时按实际可抽道数返回（不填充、不报错）', () => {
+    const tiny = makePlanMeals().filter((m) => m.mealType[0] !== 'dinner') // 晚餐池为空
+    const plan = generateDailyPlan(tiny, counts, { seed: 1 })
+    expect(plan[0].meals.length).toBeGreaterThan(0) // 早餐有菜
+    expect(plan[2].meals).toHaveLength(0) // 晚餐无候选 → 空
+  })
+
+  it('mealCounts 变化即改变每餐道数（如午餐 1-4 范围内 1 道）', () => {
+    const plan = generateDailyPlan(MEALS, { breakfast: 1, lunch: 1, dinner: 1 }, { seed: 20260807 })
+    expect(plan.map((s) => s.meals.length)).toEqual([1, 1, 1])
   })
 })

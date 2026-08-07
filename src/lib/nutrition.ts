@@ -327,3 +327,71 @@ export function generateSmartPlan(
 
   return plan
 }
+
+/* ---------------- 今日搭配自定义生成（主页 DailyPlanner） ---------------- */
+
+/** mulberry32 可播种随机数：与 api/meals.ts 同款算法，换种子即得到新序列 */
+export function mulberry32(seed: number): () => number {
+  let a = seed >>> 0
+  return function () {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/** YYYYMMDD 数字种子：同一天内多次生成「今日搭配」结果稳定 */
+export function dateSeed(): number {
+  const now = new Date()
+  return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate()
+}
+
+/** 今日搭配生成选项 */
+export interface DailyPlanOptions {
+  /** 随机种子：缺省用 YYYYMMDD（同日刷新稳定）；调用方传 Date.now() 即换出新组合 */
+  seed?: number
+  /** 可选：按分类过滤候选池（如 'fat-loss'，已提交健康目标时随机搭配按目标筛选） */
+  category?: Category
+}
+
+/**
+ * 自定义今日三餐搭配：按 mealType 匹配餐次从全库（或目标分类池）抽取，
+ * 每餐取 mealCounts 指定的道数；同餐不重复、三餐跨餐不重复。
+ * 纯函数、可播种：同 seed + 同参数结果完全一致（同日刷新稳定，测试可复现）。
+ * 候选池不足时该餐按实际可抽到的道数返回（不做填充）。
+ */
+export function generateDailyPlan(
+  meals: Meal[],
+  mealCounts: Record<MealType, number>,
+  options: DailyPlanOptions = {}
+): PlanSlot[] {
+  const rand = mulberry32(options.seed ?? dateSeed())
+  const { category } = options
+  const used = new Set<string>()
+  const slots: Array<{ slot: PlanSlot['slot']; type: MealType }> = [
+    { slot: '早餐', type: 'breakfast' },
+    { slot: '午餐', type: 'lunch' },
+    { slot: '晚餐', type: 'dinner' },
+  ]
+  const result: PlanSlot[] = []
+  for (const { slot, type } of slots) {
+    const pool = meals.filter(
+      (m) =>
+        (m.mealType ?? []).includes(type) &&
+        !used.has(m.id) &&
+        (!category || m.category === category)
+    )
+    const mealsForSlot: Meal[] = []
+    const count = Math.max(0, Math.floor(mealCounts[type] ?? 0))
+    while (mealsForSlot.length < count && pool.length > 0) {
+      const index = Math.floor(rand() * pool.length)
+      const picked = pool.splice(index, 1)[0]
+      used.add(picked.id)
+      mealsForSlot.push(picked)
+    }
+    result.push({ slot, meals: mealsForSlot })
+  }
+  return result
+}

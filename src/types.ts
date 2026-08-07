@@ -120,7 +120,7 @@ export interface SmartPlanOptions {
 /* ---------------- 视图 / 筛选相关 ---------------- */
 
 /** 全局模块视图（App 导航） */
-export type ModuleKey = 'home' | 'library' | 'newyear' | 'table'
+export type ModuleKey = 'home' | 'library' | 'goals' | 'newyear' | 'table'
 
 /** 分类筛选（含「全部」） */
 export type CategoryFilter = 'all' | Category

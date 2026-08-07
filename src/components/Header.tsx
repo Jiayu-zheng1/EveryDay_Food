@@ -9,15 +9,16 @@ interface HeaderProps {
 }
 
 /**
- * 顶部导航：吸顶，滚动后叠加毛玻璃背景；含 logo 与 4 个模块 tab
- * 模块导航（首页 / 菜谱库 / 年夜饭 / 我的餐桌）由 App 统一管理：
+ * 顶部导航：吸顶，滚动后叠加毛玻璃背景；含 logo 与 5 个模块 tab
+ * 模块导航（今日搭配 / 健康目标 / 菜谱库 / 年夜饭 / 我的餐桌）由 App 统一管理：
  * 点击 tab 调用 onNavigate 切换 activeModule 并回到页面顶部，纯展示组件
  * 视觉参考 public/redesign/modular.html 的 .mod-tab：胶囊 tab + 激活态渐变高亮
  */
 
 // 模块 tab 配置：key 与 App.activeModule 一一对应
 const TABS: Array<{ key: ModuleKey; label: string }> = [
-  { key: 'home', label: '🏠 首页' },
+  { key: 'home', label: '🏠 今日搭配' },
+  { key: 'goals', label: '🎯 健康目标' },
   { key: 'library', label: '📚 菜谱库' },
   { key: 'newyear', label: '🧧 年夜饭' },
   { key: 'table', label: '🛒 我的餐桌' },
@@ -58,7 +59,7 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
           <span className="text-lg font-bold tracking-wide">每日食光</span>
         </a>
 
-        {/* 4 个模块 tab：移动端横向滚动，激活态品牌渐变高亮，非激活态弱化 */}
+        {/* 5 个模块 tab：移动端横向滚动，激活态品牌渐变高亮，非激活态弱化 */}
         <nav
           role="tablist"
           aria-label="模块导航"
