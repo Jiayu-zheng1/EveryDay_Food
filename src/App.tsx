@@ -20,7 +20,6 @@ import useDailyPlanner from './hooks/useDailyPlanner'
 import useNutrition from './hooks/useNutrition'
 import useFamilyTable from './hooks/useFamilyTable'
 import { getCategoryMeta } from './api/meals'
-import { GOAL_CATEGORY, GOAL_LABELS } from './lib/nutrition'
 import type {
   Category,
   CategoryFilter,
@@ -96,17 +95,8 @@ export default function App() {
     return () => document.removeEventListener('mousemove', onMove)
   }, [])
 
-  // 已提交目标后：随机搭配也按目标分类过滤（如减脂 → 只出减脂餐）；未提交则全库
-  const goalCategory = nutrition.submitted
-    ? GOAL_CATEGORY[nutrition.form.goal]
-    : undefined
-  const goalLabel = nutrition.submitted ? GOAL_LABELS[nutrition.form.goal] : null
-
-  const planner = useDailyPlanner({
-    meals,
-    goalCategory,
-    smartPlan: nutrition.smartPlan,
-  })
+  // 今日搭配只做随机生成，与健康目标 / 智能搭配完全解耦（智能搭配只在健康目标页展示）
+  const planner = useDailyPlanner({ meals })
 
   // 分类展示元信息（来自 API 模块，不直接 import 数据文件）
   const categoryMeta: Record<Category, CategoryMeta> = getCategoryMeta()
@@ -237,14 +227,10 @@ export default function App() {
               onMealCountChange={planner.setMealCount}
               plan={planner.plan}
               loading={planner.loading}
-              mode={planner.mode}
-              goalLabel={goalLabel}
-              hasSmartPlan={planner.hasSmartPlan}
               totalKcal={planner.totalKcal}
               categoryMeta={categoryMeta}
               onGenerate={planner.generate}
               onShuffle={planner.shuffle}
-              onBackToSmart={planner.backToSmart}
               onOpen={setSelectedMeal}
               onAdd={table.add}
               addedIds={tableItemIds}
@@ -252,7 +238,7 @@ export default function App() {
           </>
         )}
 
-        {/* 健康目标模块：热量计算器（BMI / 每日目标 / 智能搭配）+ 目标菜谱浏览 */}
+        {/* 健康目标模块：热量计算器（BMI / 每日目标 / 智能搭配）+ 智能搭配结果（本页下方）+ 目标菜谱浏览 */}
         {activeModule === 'goals' && (
           <GoalsModule
             meals={meals}
@@ -266,13 +252,13 @@ export default function App() {
             onSubmit={nutrition.submit}
             onGenerate={() => nutrition.generatePlan(meals)}
             hasSmartPlan={nutrition.smartPlan !== null}
+            smartPlan={nutrition.smartPlan}
             error={nutrition.error}
             onReset={nutrition.reset}
             categoryMeta={categoryMeta}
             onOpen={setSelectedMeal}
             onAdd={table.add}
             addItemIds={tableItemIds}
-            onNavigate={navigate}
           />
         )}
 

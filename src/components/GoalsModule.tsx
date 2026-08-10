@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import CalorieCalculator from './CalorieCalculator'
+import DailyPlan from './DailyPlan'
 import MealCard from './MealCard'
 import Reveal from './Reveal'
 import type {
@@ -10,8 +11,8 @@ import type {
   Goal,
   Meal,
   MealSplitItem,
-  ModuleKey,
   NutritionForm,
+  PlanSlot,
 } from '../types'
 
 /** 健康目标模块的 props */
@@ -27,8 +28,10 @@ interface GoalsModuleProps {
   suggestedGoal: Goal
   onSubmit: () => void
   onGenerate: () => void
-  /** 是否已生成过智能搭配（驱动「去今日搭配查看」提示） */
+  /** 是否已生成过智能搭配（结果区展示开关） */
   hasSmartPlan: boolean
+  /** 智能搭配三餐（来自热量计算器 useNutrition）；null = 未生成 */
+  smartPlan: PlanSlot[] | null
   error: string | null
   onReset: () => void
 
@@ -36,19 +39,17 @@ interface GoalsModuleProps {
   categoryMeta: Record<Category, CategoryMeta>
   onOpen: (meal: Meal) => void
   onAdd: (meal: Meal) => void
-  /** 已加入餐桌的菜 id 集合（MealCard 的 added 状态用） */
-  addItemIds: ReadonlySet<string>
-
-  /** 模块导航（智能搭配生成后跳回首页「今日搭配」查看） */
-  onNavigate: (module: ModuleKey) => void
+  /** 已加入餐桌的菜 id 集合（MealCard / DailyPlan 的 added 状态用） */
+  addItemIds: Set<string>
 }
 
 /** 四张目标卡对应的分类（顺序即卡片展示顺序） */
 const GOAL_CATEGORIES: Category[] = ['fat-loss', 'muscle-gain', 'maintain', 'nutrition']
 
 /**
- * 健康目标模块：热量计算器（BMI / 每日目标 / 智能搭配）+ 目标菜谱浏览
+ * 健康目标模块：热量计算器（BMI / 每日目标 / 智能搭配）+ 智能搭配结果 + 目标菜谱浏览
  * - 热量计算器直接复用 CalorieCalculator 组件（props 原样转发，不复制组件代码）
+ * - 智能搭配生成后直接展示在本页下方（DailyPlan 渲染三餐卡），不再跳回首页
  * - 目标菜谱用四张目标卡做分类选择器（轻量实现，不引 CategoryTabs 全量筛选逻辑），
  *   点卡切换下方分类菜谱网格，复用 MealCard 打开详情 / 加入餐桌
  * 纯展示组件：所有数据与交互回调均来自 props，本地只维护「选中的目标分类」一个状态
@@ -65,13 +66,13 @@ export default function GoalsModule({
   onSubmit,
   onGenerate,
   hasSmartPlan,
+  smartPlan,
   error,
   onReset,
   categoryMeta,
   onOpen,
   onAdd,
   addItemIds,
-  onNavigate,
 }: GoalsModuleProps) {
   // 选中的目标分类：点目标卡切换，下方网格展示该分类菜谱（默认减脂，保证首屏有内容）
   const [goalCategory, setGoalCategory] = useState<Category>('fat-loss')
@@ -89,6 +90,18 @@ export default function GoalsModule({
   const goalMeals = useMemo(
     () => meals.filter((meal) => meal.category === goalCategory),
     [meals, goalCategory]
+  )
+
+  // 智能搭配全天合计热量（单份）：遍历每餐每道菜求和（与 useDailyPlanner 中逻辑一致）
+  const smartTotalKcal = useMemo(
+    () =>
+      smartPlan
+        ? smartPlan.reduce(
+            (sum, item) => sum + item.meals.reduce((s, m) => s + m.kcal, 0),
+            0
+          )
+        : 0,
+    [smartPlan]
   )
 
   return (
@@ -118,20 +131,27 @@ export default function GoalsModule({
           onReset={onReset}
         />
 
-        {/* 智能搭配生成提示：生成后引导回首页「今日搭配」查看（首页优先展示智能搭配） */}
-        {hasSmartPlan && (
-          <Reveal>
-            <div className="mt-2 flex flex-wrap items-center gap-3 rounded-2xl border border-grape/25 bg-grape/10 px-5 py-4 backdrop-blur-xl">
-              <span aria-hidden="true" className="text-2xl">🎉</span>
-              <p className="text-sm font-semibold text-snow">已生成智能搭配，去「今日搭配」查看</p>
-              <button
-                type="button"
-                onClick={() => onNavigate('home')}
-                className="ml-auto rounded-full bg-gradient-brand px-5 py-2 text-sm font-bold text-white shadow-lg shadow-grape/25 transition-all duration-300 hover:scale-[1.03] active:scale-95"
-              >
-                🍱 去「今日搭配」查看
-              </button>
-            </div>
+        {/* 智能搭配结果区：生成后直接展示在本页下方（三餐卡 + 全天合计） */}
+        {hasSmartPlan && smartPlan && (
+          <Reveal delay={100}>
+            <h2 className="mt-4 flex items-center gap-2.5 text-2xl font-black sm:text-3xl">
+              <span
+                aria-hidden="true"
+                className="inline-block h-5 w-1.5 rounded-full bg-gradient-to-b from-tangerine to-grape"
+              />
+              🥗 智能搭配三餐
+            </h2>
+            <p className="mt-2 text-sm text-mist">根据你的热量目标生成，每餐 2-3 道菜凑近目标热量</p>
+            <DailyPlan
+              plan={smartPlan}
+              loading={false}
+              people={1}
+              totalKcal={smartTotalKcal}
+              categoryMeta={categoryMeta}
+              onOpen={onOpen}
+              onAdd={onAdd}
+              addedIds={addItemIds}
+            />
           </Reveal>
         )}
 

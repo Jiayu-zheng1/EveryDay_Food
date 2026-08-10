@@ -109,7 +109,7 @@ function Segmented<T extends string>({
 
 /**
  * 热量计算器：输入身体参数 → 展示 BMI / TDEE / 目标热量 / 宏量克数 / 三餐分配
- * 支持「生成今日搭配」：调用智能搭配算法，结果交给 App 替换 DailyPlan
+ * 支持「生成智能三餐搭配」：调用智能搭配算法，结果直接展示在本页下方（GoalsModule 渲染）
  */
 export default function CalorieCalculator({
   meals,
@@ -348,7 +348,7 @@ export default function CalorieCalculator({
                       )
                     })}
 
-                    {/* 生成今日搭配 */}
+                    {/* 生成智能三餐搭配 */}
                     <div className="mt-1 flex flex-wrap items-center gap-3 border-t border-white/8 pt-3">
                       <button
                         type="button"
@@ -356,7 +356,7 @@ export default function CalorieCalculator({
                         disabled={meals.length === 0}
                         className="rounded-full bg-gradient-brand px-5 py-2 text-sm font-bold text-white shadow-lg shadow-berry/25 transition-all duration-300 hover:scale-[1.03] active:scale-95 disabled:opacity-50"
                       >
-                        🎯 生成今日搭配
+                        🥗 生成智能三餐搭配
                       </button>
                       {hasSmartPlan && (
                         <span className="text-xs text-grape">已生成，展示在下方搭配区（可点击重新生成）</span>

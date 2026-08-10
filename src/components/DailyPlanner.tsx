@@ -17,15 +17,13 @@ interface DailyPlannerProps {
   onMealCountChange: (type: MealType, count: number) => void
   plan: PlanSlot[]
   loading: boolean
-  mode: PlannerMode
-  goalLabel: string | null
-  hasSmartPlan: boolean
+  /** 展示模式：custom 自定义 / random 随机（不传则按随机文案展示） */
+  mode?: PlannerMode
   /** 全天合计热量（单份），展示时按 people 换算 */
   totalKcal: number
   categoryMeta: Record<Category, CategoryMeta>
   onGenerate: () => void
   onShuffle: () => void
-  onBackToSmart: () => void
   onOpen: (meal: Meal) => void
   onAdd: (meal: Meal) => void
   addedIds: Set<string>
@@ -45,10 +43,10 @@ const STEP_BTN =
 /**
  * 「生成今日搭配」功能区（主页核心区，id=daily 供「今日搭配」入口滚动定位）：
  * 人口数步进器（1-6，默认 1）+ 每餐菜数步进器（早 1-3 / 午 1-4 / 晚 1-4，默认 2/3/3）
- * + 「✨ 生成今日搭配」主按钮 + 模式徽章/提示 + 搭配结果（DailyPlan）
+ * + 「✨ 生成今日搭配」主按钮 + 搭配结果（DailyPlan）
  * 纯展示组件：全部状态与回调来自 props（逻辑在 useDailyPlanner hook）
- * 模式联动：smartPlan 存在时显示「智能搭配模式」徽章；点生成后切换为自定义模式（覆盖显示），
- * 可「恢复智能搭配」；随机/自定义模式保留「🎲 换一批」
+ * 今日搭配只做随机生成，与健康目标 / 智能搭配完全解耦；
+ * 「🎲 换一批」与「✨ 生成今日搭配」恒可用（加载中禁用）
  */
 export default function DailyPlanner({
   people,
@@ -58,18 +56,14 @@ export default function DailyPlanner({
   plan,
   loading,
   mode,
-  goalLabel,
-  hasSmartPlan,
   totalKcal,
   categoryMeta,
   onGenerate,
   onShuffle,
-  onBackToSmart,
   onOpen,
   onAdd,
   addedIds,
 }: DailyPlannerProps) {
-  const isSmart = mode === 'smart'
   const isCustom = mode === 'custom'
 
   return (
@@ -83,49 +77,20 @@ export default function DailyPlanner({
                 生成今日搭配
               </h2>
               <p className="mt-2 text-sm text-mist">
-                {isSmart
-                  ? '根据你的热量目标智能生成，每餐 2-3 道菜凑近目标热量'
-                  : isCustom
-                    ? '按人口数与每餐菜数自定义搭配，也可以随机换一批'
-                    : '每天换一组均衡搭配，也可以随机换一批'}
-                {!isSmart && goalLabel && (
-                  <span className="ml-2 inline-block rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-grape">
-                    当前按 {goalLabel} 筛选
-                  </span>
-                )}
+                {isCustom
+                  ? '按人口数与每餐菜数自定义搭配，也可以随机换一批'
+                  : '每天换一组均衡搭配，也可以随机换一批'}
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {/* 智能搭配徽章：存在 smartPlan 且未切换自定义时展示 */}
-              {isSmart && goalLabel && (
-                <span className="rounded-full border border-grape/30 bg-grape/10 px-3 py-1.5 text-xs font-semibold text-grape">
-                  ⚡ {goalLabel}搭配 · 智能搭配模式
-                </span>
-              )}
-              {isCustom && hasSmartPlan && (
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-mist">
-                  🎛️ 自定义搭配模式
-                </span>
-              )}
-              {/* 自定义模式且存在智能搭配时：可切回 */}
-              {isCustom && hasSmartPlan && (
-                <button
-                  onClick={onBackToSmart}
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-mist transition-all hover:border-grape/40 hover:text-snow active:scale-95"
-                >
-                  ⚡ 恢复智能搭配
-                </button>
-              )}
-              {/* 随机 / 自定义模式保留换一批（智能模式无换一批） */}
-              {!isSmart && (
-                <button
-                  onClick={onShuffle}
-                  disabled={loading}
-                  className="rounded-full border border-berry/40 bg-berry/10 px-5 py-2 text-sm font-semibold text-berry transition-all hover:bg-berry/20 hover:shadow-lg hover:shadow-berry/20 active:scale-95 disabled:opacity-50"
-                >
-                  🎲 换一批
-                </button>
-              )}
+              {/* 「🎲 换一批」：随机 / 自定义模式恒可用（加载中禁用） */}
+              <button
+                onClick={onShuffle}
+                disabled={loading}
+                className="rounded-full border border-berry/40 bg-berry/10 px-5 py-2 text-sm font-semibold text-berry transition-all hover:bg-berry/20 hover:shadow-lg hover:shadow-berry/20 active:scale-95 disabled:opacity-50"
+              >
+                🎲 换一批
+              </button>
             </div>
           </div>
         </Reveal>
@@ -201,7 +166,7 @@ export default function DailyPlanner({
               })}
             </div>
 
-            {/* 生成按钮：智能模式点击后切换为自定义模式（覆盖显示） */}
+            {/* 生成按钮：点后切换为自定义模式并换新种子（结果必然变化） */}
             <button
               type="button"
               onClick={onGenerate}
