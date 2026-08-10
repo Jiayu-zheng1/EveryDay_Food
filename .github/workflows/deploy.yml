@@ -40,6 +40,16 @@ jobs:
           path: dist/
           retention-days: 7
 
+      # 确保 Pages 项目存在：首次部署时自动创建（Cloudflare 新版 UI 已无法手动新建 Pages 项目，
+      # 项目不存在时 wrangler pages deploy 在 CI 非交互环境直接报 8000007）
+      - name: Create Cloudflare Pages project
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create everyday-food --production-branch=main
+        continue-on-error: true
+
       # Cloudflare Pages 部署（需先在 Cloudflare 创建 Pages 项目 everyday-food，
       # 并在仓库 Settings → Secrets and variables → Actions 配置以下两个 secret：
       #   CLOUDFLARE_API_TOKEN   — Cloudflare API Token（权限：Cloudflare Pages → Edit）
