@@ -42,7 +42,7 @@ export interface ServingSize {
   unit: string
 }
 
-/** 食谱（13 字段，与数据文件 schema 完全一致） */
+/** 食谱（15 字段，与数据文件 schema 完全一致） */
 export interface Meal {
   id: string
   name: string
@@ -57,6 +57,10 @@ export interface Meal {
   per100g: Nutrition
   servingSize: ServingSize
   mealType: MealType[]
+  /** 做法标签（可选，取值必须来自 src/lib/tags.ts 的 METHODS，如 '炒' / '蒸' / '烘焙'） */
+  methods?: string[]
+  /** 口味标签（可选，取值必须来自 src/lib/tags.ts 的 FLAVORS，如 '辣' / '清淡' / '甜'） */
+  flavors?: string[]
 }
 
 /** 分类展示元信息：标签 / 图标 / 卡片渐变色 / 分类徽章配色 */
@@ -144,6 +148,54 @@ export type MealTypeFilter = 'all' | MealType
 
 /** 菜系筛选（含「全部」） */
 export type CuisineFilter = 'all' | Cuisine
+
+/** 做法（取值见 src/lib/tags.ts 的 METHODS；值即中文标签，如 '炒'） */
+export type MealMethod =
+  | '炒'
+  | '蒸'
+  | '煮'
+  | '炖'
+  | '红烧'
+  | '煎'
+  | '炸'
+  | '烤'
+  | '焖'
+  | '凉拌'
+  | '卤'
+  | '煲汤'
+  | '烩'
+  | '干锅'
+  | '火锅'
+  | '涮'
+  | '腌'
+  | '烘焙'
+  | '熬'
+  | '熬粥'
+
+/** 口味（取值见 src/lib/tags.ts 的 FLAVORS；值即中文标签，如 '辣'） */
+export type MealFlavor =
+  | '辣'
+  | '麻辣'
+  | '酸辣'
+  | '酸甜'
+  | '糖醋'
+  | '咸鲜'
+  | '清淡'
+  | '酱香'
+  | '孜然'
+  | '鱼香'
+  | '蒜香'
+  | '五香'
+  | '奶香'
+  | '咖喱'
+  | '鲜香'
+  | '甜'
+
+/** 做法筛选（含「全部」） */
+export type MethodFilter = 'all' | MealMethod
+
+/** 口味筛选（含「全部」） */
+export type FlavorFilter = 'all' | MealFlavor
 
 /** 菜谱库排序方式 */
 export type SortKey = 'default' | 'kcal-asc' | 'kcal-desc' | 'protein-desc'

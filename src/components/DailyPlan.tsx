@@ -6,7 +6,7 @@ interface DailyPlanProps {
   plan: PlanSlot[]
   /** 数据加载中（全量食谱未就绪） */
   loading: boolean
-  /** 人口数：份量与 kcal 按此换算展示（1 人份原始值 × people） */
+  /** 人口数：分量按每多一人每道菜 +200g 线性换算；kcal 仍按 × people 换算 */
   people: number
   /** 全天合计热量（单份，1 人份原始值） */
   totalKcal: number
@@ -28,7 +28,8 @@ const SLOT_ACCENTS = ['border-l-tangerine/70', 'border-l-grape/70', 'border-l-ta
 /**
  * 今日三餐搭配（结果区）：早餐 / 午餐 / 晚餐三餐卡 + 全天合计热量
  * 纯展示组件：搭配数据与回调全部来自 props（生成逻辑在 useDailyPlanner hook）
- * 人口数换算：每道菜份量 = servingSize.amount × people；餐卡小计与全天合计 = 单份 kcal × people，
+ * 人口数换算：每道菜分量 = servingSize.amount + (people - 1) × 200g（每多一人 +200g，线性增量）；
+ * 餐卡小计与全天合计 = 单份 kcal × people，
  * 保留单份原始 kcal 标注（people > 1 时以「（单份 N kcal）」小字展示）
  * 每道菜可点开做法详情（onOpen），可一键加入餐桌（onAdd，已加入显示 ✓）
  */
@@ -42,9 +43,10 @@ export default function DailyPlan({
   onAdd,
   addedIds,
 }: DailyPlanProps) {
-  // 份量换算文案：2 人份 · 每份 600g（= servingSize.amount × people）
+  // 份量换算文案：每多一人每道菜 +200g（线性增量，不按人数翻倍）；1 人时即原始单份量
   const portionLabel = (meal: Meal): string => {
-    const amount = meal.servingSize.amount * people
+    // 每多一人每道菜 +200g（线性增量，不按人数翻倍）；1 人时即原始单份量
+    const amount = meal.servingSize.amount + (people - 1) * 200
     const unit = meal.servingSize.unit
     return people > 1 ? `${people} 人份 · 每份 ${amount}${unit}` : `每份 ${amount}${unit}`
   }

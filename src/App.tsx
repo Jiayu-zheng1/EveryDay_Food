@@ -5,6 +5,8 @@ import DailyPlanner from './components/DailyPlanner'
 import CategoryTabs from './components/CategoryTabs'
 import MealTypeChips from './components/MealTypeChips'
 import CuisineChips, { CUISINE_META } from './components/CuisineChips'
+import MethodChips from './components/MethodChips'
+import FlavorChips from './components/FlavorChips'
 import MealCard from './components/MealCard'
 import MealModal from './components/MealModal'
 import Footer from './components/Footer'
@@ -26,8 +28,10 @@ import type {
   CategoryMeta,
   Cuisine,
   CuisineFilter,
+  FlavorFilter,
   Meal,
   MealTypeFilter,
+  MethodFilter,
   ModuleKey,
   SortKey,
 } from './types'
@@ -58,6 +62,8 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all')
   const [mealTypeFilter, setMealTypeFilter] = useState<MealTypeFilter>('all') // 菜谱库餐次筛选
   const [cuisineFilter, setCuisineFilter] = useState<CuisineFilter>('all') // 菜谱库地区筛选（年夜饭生成也按此优先）
+  const [methodFilter, setMethodFilter] = useState<MethodFilter>('all') // 菜谱库做法筛选
+  const [flavorFilter, setFlavorFilter] = useState<FlavorFilter>('all') // 菜谱库口味筛选
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const table = useFamilyTable() // 家庭餐桌：加入 / 移除 / 清空 + 营养汇总
   // 已加入餐桌的菜 id 集合（MealCard 的 added 状态用）
@@ -110,7 +116,11 @@ export default function App() {
         mealTypeFilter === 'all' || (meal.mealType ?? []).includes(mealTypeFilter)
       const cuisineOk =
         !cuisineFilter || cuisineFilter === 'all' || meal.cuisine === cuisineFilter
-      if (!categoryOk || !typeOk || !cuisineOk) return false
+      const methodOk =
+        methodFilter === 'all' || (meal.methods ?? []).includes(methodFilter)
+      const flavorOk =
+        flavorFilter === 'all' || (meal.flavors ?? []).includes(flavorFilter)
+      if (!categoryOk || !typeOk || !cuisineOk || !methodOk || !flavorOk) return false
       // 中文直接 includes 匹配菜名、简介或食材（食材匹配支持「冰箱搜菜」）
       if (!q) return true
       return (
@@ -126,7 +136,7 @@ export default function App() {
     else if (sortKey === 'protein-desc')
       sorted.sort((a, b) => (b.nutrition?.protein ?? 0) - (a.nutrition?.protein ?? 0))
     return sorted
-  }, [meals, activeCategory, mealTypeFilter, cuisineFilter, search, sortKey])
+  }, [meals, activeCategory, mealTypeFilter, cuisineFilter, methodFilter, flavorFilter, search, sortKey])
 
   // 分批渲染：哨兵进入视口时追加 24 道；数据到底后停止观察
   // 依赖包含筛选/搜索/排序：网格 key 变化会整体重建（哨兵换成新元素），
@@ -143,12 +153,12 @@ export default function App() {
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [visibleCount, visibleMeals.length, activeCategory, mealTypeFilter, cuisineFilter, search, sortKey])
+  }, [visibleCount, visibleMeals.length, activeCategory, mealTypeFilter, cuisineFilter, methodFilter, flavorFilter, search, sortKey])
 
   // 筛选 / 搜索 / 排序变化时，从第一页重新分批渲染
   useEffect(() => {
     setVisibleCount(24)
-  }, [activeCategory, mealTypeFilter, cuisineFilter, search, sortKey])
+  }, [activeCategory, mealTypeFilter, cuisineFilter, methodFilter, flavorFilter, search, sortKey])
 
   // 各分类的食物数量（tab 角标用）
   const counts = useMemo(() => {
@@ -316,6 +326,14 @@ export default function App() {
                 <div className="mt-3">
                   <CuisineChips active={cuisineFilter} counts={cuisineCounts} onChange={setCuisineFilter} />
                 </div>
+                {/* 做法筛选：与分类 / 餐次 / 地区 / 口味组合过滤 */}
+                <div className="mt-3">
+                  <MethodChips active={methodFilter} onChange={setMethodFilter} />
+                </div>
+                {/* 口味筛选：与分类 / 餐次 / 地区 / 做法组合过滤 */}
+                <div className="mt-3">
+                  <FlavorChips active={flavorFilter} onChange={setFlavorFilter} />
+                </div>
                 {/* 餐次筛选：与分类 tab 组合过滤 */}
                 <div className="mt-3">
                   <MealTypeChips active={mealTypeFilter} onChange={setMealTypeFilter} />
@@ -347,6 +365,8 @@ export default function App() {
                     setActiveCategory('all')
                     setMealTypeFilter('all')
                     setCuisineFilter('all')
+                    setMethodFilter('all')
+                    setFlavorFilter('all')
                   }}
                   className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-snow transition-colors hover:bg-white/10"
                 >
@@ -355,7 +375,7 @@ export default function App() {
               </div>
             ) : (
               <div
-                key={`${activeCategory}-${mealTypeFilter}-${cuisineFilter}-${sortKey}`}
+                key={`${activeCategory}-${mealTypeFilter}-${cuisineFilter}-${methodFilter}-${flavorFilter}-${sortKey}`}
                 className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {visibleMeals.slice(0, visibleCount).map((meal, i) => (
