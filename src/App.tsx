@@ -9,6 +9,7 @@ import MethodChips from './components/MethodChips'
 import FlavorChips from './components/FlavorChips'
 import MealCard from './components/MealCard'
 import MealModal from './components/MealModal'
+import AnnouncementModal from './components/AnnouncementModal'
 import Footer from './components/Footer'
 import GoalsModule from './components/GoalsModule'
 import Reveal from './components/Reveal'
@@ -449,6 +450,9 @@ export default function App() {
           variants={nameVariantCounts.get(selectedMeal.name) ?? 1}
         />
       )}
+
+      {/* 首次进入公告弹窗：同一浏览器会话只弹出一次 */}
+      <AnnouncementModal />
     </div>
   )
 }
