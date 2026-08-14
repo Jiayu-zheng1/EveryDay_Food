@@ -12,6 +12,14 @@
 ![PWA](https://img.shields.io/badge/PWA-可安装-5B21B6)
 ![SPA](https://img.shields.io/badge/SPA-纯前端-8B5CF6)
 
+## ⭐ 支持项目
+
+> 创作不易，如果这个项目对你有帮助，可以帮忙去 [GitHub](https://github.com/Jiayu-zheng1/EveryDay_Food) 点一个 **Star** ⭐ 支持一下，谢谢！
+
+[![GitHub stars](https://img.shields.io/github/stars/Jiayu-zheng1/EveryDay_Food?style=social&label=Star)](https://github.com/Jiayu-zheng1/EveryDay_Food)
+[![GitHub forks](https://img.shields.io/github/forks/Jiayu-zheng1/EveryDay_Food?style=social&label=Fork)](https://github.com/Jiayu-zheng1/EveryDay_Food)
+[![GitHub](https://img.shields.io/badge/GitHub-Jiayu--zheng1%2FEveryDay__Food-8B5CF6?logo=github&logoColor=white)](https://github.com/Jiayu-zheng1/EveryDay_Food)
+
 ## ✨ 功能特性
 
 - 📚 **1077 道食谱库**：减脂 / 增肌 / 维持 / 营养四大类各 50+ 道，外加 672 道家常菜，以及食疗食补 51 道 / 烘焙 50 道 / 小吃 94 道，每道菜含食材、做法步骤与完整营养数据
