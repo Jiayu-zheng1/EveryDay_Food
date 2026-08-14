@@ -10,6 +10,7 @@
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 ![Deploy](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020?logo=cloudflare&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-可安装-5B21B6)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## 支持一下
 
