@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { dateSeed, generateDailyPlan } from '../lib/nutrition'
+import { dateSeed, generateDailyPlan, replacePlanDish } from '../lib/nutrition'
 import type { Meal, MealType, PlanSlot } from '../types'
 
 /** 搭配展示模式：custom 用户自定义（点过「生成」） / random 随机（未点生成） */
@@ -48,6 +48,8 @@ export interface UseDailyPlannerResult {
   generate: () => void
   /** 「🎲 换一批」：换新种子重新生成 */
   shuffle: () => void
+  /** 单道菜独立置换 */
+  replaceDish: (type: MealType, mealId: string) => void
 }
 
 /**
@@ -82,7 +84,13 @@ export default function useDailyPlanner({ meals }: UseDailyPlannerOptions): UseD
   /** 「🎲 换一批」：换新种子重新生成（随机 / 自定义模式） */
   const shuffle = useCallback(() => setSeed(Date.now()), [])
 
-  /** 修改某餐菜数：在范围 [min, max] 内截断 */
+  /** 单道菜独立置换（保持其它餐次及该餐其余菜品不变） */
+  const replaceDish = useCallback(
+    (type: MealType, mealId: string) => {
+      setCustomPlan((prev) => replacePlanDish(prev, type, mealId, meals))
+    },
+    [meals]
+  )
   const setMealCount = useCallback((type: MealType, count: number) => {
     setMealCounts((prev) => {
       const range = MEAL_COUNT_RANGE[type]
@@ -113,5 +121,6 @@ export default function useDailyPlanner({ meals }: UseDailyPlannerOptions): UseD
     totalKcal,
     generate,
     shuffle,
+    replaceDish,
   }
 }

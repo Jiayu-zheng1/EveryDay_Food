@@ -17,6 +17,43 @@ interface TableDish {
   poolKey: string
   meal: Meal
 }
+export type BanquetMode = 'four' | 'six' | 'grand'
+
+export interface BanquetConfig {
+  key: BanquetMode
+  title: string
+  subtitle: string
+  emoji: string
+  dishCount: number
+  counts: Record<string, number>
+}
+
+export const BANQUET_MODES: BanquetConfig[] = [
+  {
+    key: 'four',
+    title: '四菜一汤 · 家常小聚',
+    subtitle: '适合 2-3 人好友小酌或温馨晚餐',
+    emoji: '🥢',
+    dishCount: 5,
+    counts: { cold: 1, main: 1, hot: 2, soup: 1, staple: 0, dessert: 0 },
+  },
+  {
+    key: 'six',
+    title: '六菜一汤 · 阖家欢聚',
+    subtitle: '荤素得宜、浓淡相宜，适合 4-6 人家庭聚会',
+    emoji: '🏮',
+    dishCount: 7,
+    counts: { cold: 1, main: 2, hot: 3, soup: 1, staple: 0, dessert: 0 },
+  },
+  {
+    key: 'grand',
+    title: '十全十美 · 节庆年夜饭',
+    subtitle: '冷热荤素甜汤齐备，适合节日大宴团圆桌',
+    emoji: '🧧',
+    dishCount: 11,
+    counts: { cold: 2, main: 3, hot: 3, soup: 1, staple: 1, dessert: 1 },
+  },
+]
 
 // 菜品池配置：每池取 count 道，按菜名关键词从全库匹配候选
 const POOLS: Array<{ key: string; label: string; count: number; keywords: string[] }> = [
@@ -112,20 +149,21 @@ function pickFromPool(
   return { meal: pickOne(available, rand), fellBack: false }
 }
 
-// 按六个池子顺序抽满一桌：池内不重复、整桌 id 不重复；
-// 返回一桌 + 因所选菜系无候选而回退全库的池 key 列表（供「已用全库补充」提示）
 function generateTable(
   meals: Meal[],
   cuisineFilter: CuisineFilter,
-  seed: number
+  seed: number,
+  modeCounts: Record<string, number>
 ): { table: TableDish[]; fallbackPools: string[] } {
   const rand = mulberry32(seed)
   const usedIds = new Set<string>()
   const table: TableDish[] = []
   const fallbackPools: string[] = []
   for (const pool of POOLS) {
+    const targetCount = modeCounts[pool.key] ?? pool.count
+    if (targetCount <= 0) continue
     let poolFellBack = false
-    for (let i = 0; i < pool.count; i += 1) {
+    for (let i = 0; i < targetCount; i += 1) {
       const { meal, fellBack } = pickFromPool(pool.key, meals, cuisineFilter, rand, usedIds)
       if (!meal) break // 该池候选用尽，跳过剩余名额
       poolFellBack = poolFellBack || fellBack
@@ -158,23 +196,27 @@ function replaceDish(
  * 纯展示 + 内部状态组件：菜品数据、地区筛选与加入回调来自 props。
  */
 export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }: NewYearDinnerProps) {
+  // 宴席规格模式：四菜一汤 / 六菜一汤 / 节庆年夜饭（默认六菜一汤）
+  const [mode, setMode] = useState<BanquetMode>('six')
   // 当前一桌（{ poolKey, meal }[]），重新配一桌时通过 rollVersion 触发 effect 重抽
   const [table, setTable] = useState<TableDish[]>([])
   const [rollVersion, setRollVersion] = useState(0)
-  // 所选菜系下无候选、已用全库补充的池 key 列表（U9：空池不再静默回退，展示提示）
+  // 所选菜系下无候选、已用全库补充的池 key 列表
   const [fallbackPools, setFallbackPools] = useState<string[]>([])
 
-  // meals 加载完成 / 地区筛选变化 / 点击「重新配一桌」时整桌重抽
-  // 用 Date.now() 作随机种子：每次重抽都是新的一桌，不追求可复现
+  const currentConfig = BANQUET_MODES.find((m) => m.key === mode) ?? BANQUET_MODES[1]
+
+  // meals 加载完成 / 地区筛选变化 / 模式变化 / 点击「重新配一桌」时整桌重抽
   useEffect(() => {
     const { table: nextTable, fallbackPools: nextFallbacks } = generateTable(
       meals,
       cuisineFilter,
-      Date.now()
+      Date.now(),
+      currentConfig.counts
     )
     setTable(nextTable)
     setFallbackPools(nextFallbacks)
-  }, [meals, cuisineFilter, rollVersion])
+  }, [meals, cuisineFilter, mode, rollVersion])
 
   // 汇总一行：对当前一桌的 kcal 与三大营养素求和（缺字段按 0 处理）
   const totals = table.reduce(
@@ -215,19 +257,54 @@ export default function NewYearDinner({ meals, cuisineFilter, onAddAll, onOpen }
   return (
     <section id="newyear" className="scroll-mt-24 px-5 py-16">
       <div className="mx-auto max-w-6xl">
-        {/* 标题区：标题 + 副标题 + 整桌重抽按钮（玻璃风） */}
+        {/* 标题区：标题 + 规格切换 + 整桌重抽按钮 */}
         <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-black sm:text-3xl">🧧 年夜饭</h1>
-              <p className="mt-2 text-sm text-mist">一桌团圆饭，从选菜到上桌都替你配好</p>
+              <h1 className="flex items-center gap-2 text-2xl font-black sm:text-3xl">
+                <span>🏮 家宴聚餐</span>
+                <span className="rounded-full border border-grape/40 bg-grape/10 px-2.5 py-0.5 text-xs font-semibold text-grape">
+                  含年夜饭
+                </span>
+              </h1>
+              <p className="mt-2 text-sm text-mist">{currentConfig.subtitle}</p>
             </div>
             <button
               onClick={() => setRollVersion((v) => v + 1)}
               className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-mist backdrop-blur transition-all duration-300 hover:border-grape/40 hover:text-snow active:scale-95"
             >
-              🎲 重新配一桌
+              🎲 换一桌
             </button>
+          </div>
+
+          {/* 宴席规格选择器 */}
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            {BANQUET_MODES.map((cfg) => {
+              const isActive = mode === cfg.key
+              return (
+                <button
+                  key={cfg.key}
+                  type="button"
+                  onClick={() => setMode(cfg.key)}
+                  aria-pressed={isActive}
+                  className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-95 ${
+                    isActive
+                      ? 'scale-105 border border-grape/50 bg-gradient-brand text-white shadow-lg shadow-grape/25'
+                      : 'glass-card text-mist hover:border-white/20 hover:text-snow'
+                  }`}
+                >
+                  <span>{cfg.emoji}</span>
+                  <span>{cfg.title}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                      isActive ? 'bg-black/20 text-white' : 'bg-white/10 text-mist'
+                    }`}
+                  >
+                    {cfg.dishCount} 道
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </Reveal>
 

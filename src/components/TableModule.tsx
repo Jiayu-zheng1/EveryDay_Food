@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Reveal from './Reveal'
 import { buildShoppingList, formatAmount } from '../lib/shoppingList'
 import type { ShoppingList } from '../lib/shoppingList'
@@ -36,22 +36,38 @@ const VIEW_TABS: Array<{ key: 'dishes' | 'shopping'; label: string }> = [
   { key: 'shopping', label: '📋 购物清单' },
 ]
 
+const STORAGE_CHECKED_KEY = 'moments-food-shopping-checked-v1'
+
+function loadCheckedKeys(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = window.localStorage.getItem(STORAGE_CHECKED_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? new Set(parsed) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
 /**
- * 把购物清单拼成可复制的纯文本
- * 数量行：「五花肉 500 克」；调味品行只列名称
+ * 把购物清单拼成可复制的纯文本（按货架分类输出）
  */
 function buildCopyText(list: ShoppingList, dishCount: number): string {
   const lines = [`🛒 每日食光 · 购物清单（${dishCount} 道菜）`]
-  for (const group of list.groups) {
-    lines.push(`—— ${group} ——`)
-    for (const row of list.rows) {
-      if (row.group !== group) continue
-      lines.push(row.amount != null ? `${row.name} ${formatAmount(row.amount)} ${row.unit}` : row.name)
+  const sections = list.aisles && list.aisles.length > 0 ? list.aisles : list.groups
+  for (const section of sections) {
+    const sectionRows = list.rows.filter((row) => (row.aisle ?? row.group) === section)
+    if (sectionRows.length === 0) continue
+    lines.push(`\n—— ${section} ——`)
+    for (const row of sectionRows) {
+      lines.push(
+        row.amount != null ? `${row.name} ${formatAmount(row.amount)} ${row.unit}` : row.name
+      )
     }
   }
   return lines.join('\n')
 }
-
 export default function TableModule({
   items,
   kcalTotal,
@@ -65,6 +81,8 @@ export default function TableModule({
 }: TableModuleProps) {
   // 当前视图：'dishes' 菜品清单 | 'shopping' 购物清单
   const [view, setView] = useState<'dishes' | 'shopping'>('dishes')
+  // 购物清单勾选状态（存储 itemKey：name-unit）
+  const [checkedKeys, setCheckedKeys] = useState<Set<string>>(loadCheckedKeys)
   // 轻量 toast（复制/生成/清空反馈），2.2s 自动消失
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<number | null>(null)
@@ -72,19 +90,50 @@ export default function TableModule({
   // 购物清单由菜品食材实时推导（纯函数，无副作用；items 变化自动重算）
   const list = useMemo(() => buildShoppingList(items), [items])
 
+  // 勾选状态持久化到 localStorage
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_CHECKED_KEY,
+        JSON.stringify(Array.from(checkedKeys))
+      )
+    } catch {
+      // 静默处理
+    }
+  }, [checkedKeys])
+
+  const toggleCheck = (key: string) => {
+    setCheckedKeys((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const handleResetChecked = () => {
+    setCheckedKeys(new Set())
+    showToast('已重置勾选状态')
+  }
+
   const showToast = (msg: string) => {
     setToast(msg)
     window.clearTimeout(toastTimer.current ?? undefined)
     toastTimer.current = window.setTimeout(() => setToast(null), 2200)
   }
 
-  // 清空餐桌：回到菜品视图并提示
+  // 清空餐桌：回到菜品视图并清理勾选记录
   const handleClear = () => {
     onClear?.()
+    setCheckedKeys(new Set())
+    try {
+      window.localStorage.removeItem(STORAGE_CHECKED_KEY)
+    } catch {
+      // 忽略
+    }
     setView('dishes')
     showToast('餐桌已清空 🧹')
   }
-
   // 复制购物清单：优先 Clipboard API，失败降级为隐藏 textarea 选中复制
   const handleCopy = async () => {
     const text = buildCopyText(list, items.length)
@@ -123,7 +172,7 @@ export default function TableModule({
           <Reveal delay={60}>
             <div className="glass-card mt-12 rounded-3xl py-16 text-center">
               <p className="text-5xl">🍽️</p>
-              <p className="mt-4 text-mist">餐桌上还空着，去菜谱库或年夜饭加点菜吧</p>
+              <p className="mt-4 text-mist">餐桌上还空着，去菜谱库或家宴聚餐加点菜吧</p>
               <button
                 type="button"
                 onClick={() => (onNavigate ? onNavigate('library') : (window.location.hash = '#library'))}
@@ -244,67 +293,105 @@ export default function TableModule({
         ) : (
           /* ============ 视图 2：购物清单 ============ */
           <div className="mt-8">
-            {/* 工具行：生成 / 复制 / 清空 + 合并统计 */}
-            <div className="mb-6 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setView('shopping')
-                  showToast('购物清单已生成 📋')
-                }}
-                className="rounded-full bg-gradient-brand px-5 py-2 text-sm font-bold text-white shadow-lg shadow-grape/25 transition-all hover:scale-105 active:scale-95"
-              >
-                📋 生成购物清单
-              </button>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-snow transition-all hover:scale-[1.03] hover:border-grape/40"
-              >
-                复制清单
-              </button>
-              <button
-                type="button"
-                onClick={handleClear}
-                className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-tangerine transition-all hover:scale-[1.03] hover:border-tangerine/40"
-              >
-                清空餐桌
-              </button>
-              <span className="text-sm text-mist">
-                按食材合并去重 · 共 <span className="font-bold text-tangerine">{list.rows.length}</span> 项
-              </span>
+            {/* 工具行：生成 / 复制 / 清空 / 重置勾选 + 进度统计 */}
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="rounded-full bg-gradient-brand px-5 py-2 text-sm font-bold text-white shadow-lg shadow-grape/25 transition-all hover:scale-105 active:scale-95"
+                >
+                  复制清单
+                </button>
+                {checkedKeys.size > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResetChecked}
+                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-mist transition-all hover:scale-[1.03] hover:text-snow"
+                  >
+                    重置打卡
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-tangerine transition-all hover:scale-[1.03] hover:border-tangerine/40"
+                >
+                  清空餐桌
+                </button>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-mist">
+                <span>
+                  已购 <strong className="text-grape">{checkedKeys.size}</strong> / {list.rows.length} 项
+                </span>
+                <span className="text-white/20">|</span>
+                <span>按货架自动分类</span>
+              </div>
             </div>
 
-            {/* 分组列表：每组小标题 + 食材行 */}
-            {list.groups.map((group) => (
-              <div key={group} className="mb-8">
-                <h3 className="mb-3 text-sm font-bold tracking-wide text-mist">
-                  {group === '调味品' ? '🧂 调味品' : '🥬 食材'}
-                </h3>
-                <div className="space-y-2">
-                  {list.rows
-                    .filter((row) => row.group === group)
-                    .map((row) => (
-                      <div
-                        key={`${row.group}-${row.name}-${row.unit ?? 'n'}`}
-                        className="glass-card flex items-center justify-between gap-3 rounded-xl px-4 py-2.5"
-                      >
-                        <span className="min-w-0 flex-1 truncate font-medium text-snow">{row.name}</span>
-                        {row.amount != null ? (
-                          <span className="shrink-0 text-sm text-mist">
-                            × {formatAmount(row.amount)} {row.unit}
-                          </span>
-                        ) : null}
-                      </div>
-                    ))}
+            {/* 货架分区列表：每组小标题 + 带勾选打卡的食材行 */}
+            {(list.aisles && list.aisles.length > 0 ? list.aisles : list.groups).map((section) => {
+              const sectionRows = list.rows.filter((row) => (row.aisle ?? row.group) === section)
+              if (sectionRows.length === 0) return null
+              return (
+                <div key={section} className="mb-8">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-bold tracking-wide text-snow/90">
+                      {section}
+                    </h3>
+                    <span className="text-xs text-mist">{sectionRows.length} 项</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    {sectionRows.map((row) => {
+                      const itemKey = `${row.name}-${row.unit ?? 'n'}`
+                      const isChecked = checkedKeys.has(itemKey)
+                      return (
+                        <div
+                          key={itemKey}
+                          onClick={() => toggleCheck(itemKey)}
+                          className={`glass-card flex cursor-pointer select-none items-center justify-between gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
+                            isChecked
+                              ? 'border-white/5 bg-white/[0.02] opacity-50'
+                              : 'hover:border-grape/40 hover:bg-white/8 hover:shadow-sm'
+                          }`}
+                        >
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <span
+                              className={`grid size-5 shrink-0 place-items-center rounded-md border text-xs font-bold transition-colors ${
+                                isChecked
+                                  ? 'border-grape bg-grape text-white'
+                                  : 'border-white/25 bg-ink-2 text-transparent hover:border-grape'
+                              }`}
+                            >
+                              ✓
+                            </span>
+                            <span
+                              className={`min-w-0 truncate font-medium transition-colors ${
+                                isChecked ? 'text-mist line-through' : 'text-snow'
+                              }`}
+                            >
+                              {row.name}
+                            </span>
+                          </div>
+                          {row.amount != null ? (
+                            <span
+                              className={`shrink-0 text-sm ${
+                                isChecked ? 'text-mist/50' : 'text-mist'
+                              }`}
+                            >
+                              × {formatAmount(row.amount)} {row.unit}
+                            </span>
+                          ) : null}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
-
-      {/* 轻量 toast：复制/生成/清空反馈，不拦截点击 */}
       {toast && (
         <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4">
           <div className="glass-card rounded-full px-5 py-2.5 text-sm font-semibold text-snow shadow-lg">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildShoppingList, formatAmount, toGrams, UNIT_GRAM_TABLES } from './shoppingList'
+import { buildShoppingList, formatAmount, scaleIngredient, toGrams, UNIT_GRAM_TABLES } from './shoppingList'
 
 /** 便捷构造：一行食材 = 一道菜 */
 const dish = (...ingredients: string[]) => ({ ingredients })
@@ -7,12 +7,16 @@ const dish = (...ingredients: string[]) => ({ ingredients })
 describe('buildShoppingList 同单位合并', () => {
   it('鸡蛋 2 个 + 1 个 → 3 个（同名称同单位直接相加）', () => {
     const { rows } = buildShoppingList([dish('鸡蛋 2 个'), dish('鸡蛋 1 个')])
-    expect(rows).toContainEqual({ name: '鸡蛋', amount: 3, unit: '个', raw: '鸡蛋 2 个', group: '食材' })
+    expect(rows).toContainEqual(
+      expect.objectContaining({ name: '鸡蛋', amount: 3, unit: '个', raw: '鸡蛋 2 个', group: '食材' })
+    )
   })
 
   it('黄瓜 100 克 + 半根（≈100 克）→ 200 克（跨单位按归一克数合并）', () => {
     const { rows } = buildShoppingList([dish('黄瓜 100 克'), dish('黄瓜 半根')])
-    expect(rows).toContainEqual({ name: '黄瓜', amount: 200, unit: '克', raw: '黄瓜 100 克', group: '食材' })
+    expect(rows).toContainEqual(
+      expect.objectContaining({ name: '黄瓜', amount: 200, unit: '克', raw: '黄瓜 100 克', group: '食材' })
+    )
   })
 
   it('勺/小勺/瓣 换算后与克合并', () => {
@@ -65,8 +69,12 @@ describe('buildShoppingList 调味品与数量行分离', () => {
   it('「黑胡椒、海盐 适量」归调味品（数量为 null），鸡蛋 3 个归食材', () => {
     const { rows, groups } = buildShoppingList([dish('鸡蛋 3 个', '黑胡椒、海盐 适量')])
     expect(groups).toEqual(['食材', '调味品'])
-    expect(rows).toContainEqual({ name: '黑胡椒', amount: null, unit: null, raw: '黑胡椒、海盐 适量', group: '调味品' })
-    expect(rows).toContainEqual({ name: '海盐', amount: null, unit: null, raw: '黑胡椒、海盐 适量', group: '调味品' })
+    expect(rows).toContainEqual(
+      expect.objectContaining({ name: '黑胡椒', amount: null, unit: null, raw: '黑胡椒、海盐 适量', group: '调味品' })
+    )
+    expect(rows).toContainEqual(
+      expect.objectContaining({ name: '海盐', amount: null, unit: null, raw: '黑胡椒、海盐 适量', group: '调味品' })
+    )
     expect(rows).toContainEqual(expect.objectContaining({ name: '鸡蛋', amount: 3, unit: '个', group: '食材' }))
   })
 
@@ -141,5 +149,49 @@ describe('toGrams / formatAmount / 单位表', () => {
     expect(buildShoppingList([]).rows).toEqual([])
     expect(buildShoppingList([dish()]).rows).toEqual([])
     expect(buildShoppingList([{} as { ingredients?: string[] }]).rows).toEqual([])
+  })
+})
+
+describe('categorizeAisle 食材货架分区分类', () => {
+  it('正确归类肉禽蛋品、水产海鲜、蔬菜菌菇、粮油副食与调味品', () => {
+    const { rows } = buildShoppingList([
+      dish(
+        '五花肉 300 克',
+        '鸡蛋 2 个',
+        '鲈鱼 1 条',
+        '西红柿 2 个',
+        '糙米饭 1 碗',
+        '生抽 1 勺'
+      ),
+    ])
+    const rowMap = new Map(rows.map((r) => [r.name, r.aisle]))
+    expect(rowMap.get('五花肉')).toBe('🥩 肉禽蛋品')
+    expect(rowMap.get('鸡蛋')).toBe('🥩 肉禽蛋品')
+    expect(rowMap.get('鲈鱼')).toBe('🐟 水产海鲜')
+    expect(rowMap.get('西红柿')).toBe('🥬 蔬菜菌菇')
+    expect(rowMap.get('糙米饭')).toBe('🍚 粮油副食')
+    expect(rowMap.get('生抽')).toBe('🧂 调味香料')
+  })
+})
+
+describe('scaleIngredient 食材份量等比缩放', () => {
+  it('常规数量按倍数缩放（如 200克 × 2 → 400克，1个 × 3 → 3个）', () => {
+    expect(scaleIngredient('鸡胸肉 200 克', 2)).toBe('鸡胸肉 400 克')
+    expect(scaleIngredient('鸡蛋 1 个', 3)).toBe('鸡蛋 3 个')
+    expect(scaleIngredient('橄榄油 5 克', 2)).toBe('橄榄油 10 克')
+  })
+
+  it('分数与半量数量正确缩放（如 1/4个 × 2 → 0.5个，半根 × 2 → 1根）', () => {
+    expect(scaleIngredient('洋葱 1/4 个', 2)).toBe('洋葱 0.5 个')
+    expect(scaleIngredient('黄瓜 半根', 2)).toBe('黄瓜 1 根')
+  })
+
+  it('无数字的适量/少许调味品保持原样，不产生 NaN', () => {
+    expect(scaleIngredient('盐 适量', 2)).toBe('盐 适量')
+    expect(scaleIngredient('白胡椒粉 少许', 4)).toBe('白胡椒粉 少许')
+  })
+
+  it('factor 为 1 时返回原字符串', () => {
+    expect(scaleIngredient('生抽 1 勺', 1)).toBe('生抽 1 勺')
   })
 })

@@ -395,3 +395,60 @@ export function generateDailyPlan(
   }
   return result
 }
+
+export interface ReplacePlanDishOptions {
+  seed?: number
+  category?: Category
+}
+
+const SLOT_TYPE_MAP: Record<MealType, PlanSlot['slot']> = {
+  breakfast: '早餐',
+  lunch: '午餐',
+  dinner: '晚餐',
+}
+
+/**
+ * 独立替换三餐搭配中的某道菜（单菜置换）：
+ * 排除全天其它菜品 id，从符合该餐次的候选池中抽取新菜，仅替换该项。
+ */
+export function replacePlanDish(
+  plan: PlanSlot[],
+  type: MealType,
+  dishIdToReplace: string,
+  meals: Meal[],
+  options: ReplacePlanDishOptions = {}
+): PlanSlot[] {
+  const targetSlotName = SLOT_TYPE_MAP[type]
+  const targetSlot = plan.find((s) => s.slot === targetSlotName)
+  if (!targetSlot) return plan
+
+  const used = new Set<string>()
+  for (const s of plan) {
+    for (const m of s.meals) {
+      if (m.id !== dishIdToReplace) {
+        used.add(m.id)
+      }
+    }
+  }
+
+  const rand = mulberry32(options.seed ?? Date.now())
+  const pool = meals.filter(
+    (m) =>
+      (m.mealType ?? []).includes(type) &&
+      !used.has(m.id) &&
+      (!options.category || m.category === options.category)
+  )
+
+  if (pool.length === 0) return plan
+
+  const pickedIndex = Math.floor(rand() * pool.length)
+  const newMeal = pool[pickedIndex]
+
+  return plan.map((slot) => {
+    if (slot.slot !== targetSlotName) return slot
+    return {
+      ...slot,
+      meals: slot.meals.map((m) => (m.id === dishIdToReplace ? newMeal : m)),
+    }
+  })
+}

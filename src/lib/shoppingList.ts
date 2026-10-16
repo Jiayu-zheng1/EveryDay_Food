@@ -39,6 +39,13 @@
  *     隐含两种（红/黄），数量 ×2
  */
 
+export type ShoppingAisle =
+  | '🥩 肉禽蛋品'
+  | '🐟 水产海鲜'
+  | '🥬 蔬菜菌菇'
+  | '🍚 粮油副食'
+  | '🧂 调味香料'
+
 /** 清单行 */
 export interface ShoppingRow {
   name: string
@@ -46,14 +53,35 @@ export interface ShoppingRow {
   unit: string | null
   raw: string
   group: '食材' | '调味品'
+  aisle: ShoppingAisle
 }
 
-/** 购物清单：行 + 非空分组（UI 按 groups 顺序渲染小标题） */
+/** 购物清单：行 + 基础分组 + 货架细分（UI 按 aisles 顺序渲染货架小标题） */
 export interface ShoppingList {
   rows: ShoppingRow[]
   groups: string[]
+  aisles: ShoppingAisle[]
 }
 
+const SEASONING_PATTERN =
+  /盐|糖|醋|抽|酱|酒|胡椒|孜然|八角|桂皮|花椒|香油|料酒|生抽|老抽|蚝油|豆瓣|黄豆酱|鸡精|味精|咖喱|五香|香叶|丁香|百里香|迷迭香/
+const SEAFOOD_PATTERN =
+  /鱼|虾|蟹|贝|蛤|螺|鱿|墨鱼|鳗|鲈|鲫|鳕|三文鱼|牡蛎|扇贝|生蚝|海参|海带|紫菜|鲍鱼/
+const MEAT_PATTERN =
+  /鸡|鸭|鹅|猪|牛|羊|肉|蛋|排骨|里脊|五花|培根|香肠|翅|爪|肝|鸽|肚|肠|肥牛|肥羊|肉馅|肉末/
+const STAPLE_PATTERN =
+  /米|面|粉|饼|燕麦|吐司|面包|意面|粉丝|年糕|饺子|豆皮|腐竹|豆腐|淀粉|馄饨|面条|乌冬|粉条|馒头|花卷|挂面/
+const VEG_PATTERN =
+  /菜|葱|蒜|姜|椒|菇|茄|瓜|豆|萝卜|笋|木耳|银耳|藕|土豆|芋头|马蹄|西兰花|番茄|西红柿|菠菜|芹菜|韭菜|菌|芽|香菜|生菜|油菜|娃娃菜|洋葱|山药|玉米/
+
+export function categorizeAisle(name: string, group: '食材' | '调味品'): ShoppingAisle {
+  if (group === '调味品' || SEASONING_PATTERN.test(name)) return '🧂 调味香料'
+  if (SEAFOOD_PATTERN.test(name)) return '🐟 水产海鲜'
+  if (MEAT_PATTERN.test(name)) return '🥩 肉禽蛋品'
+  if (STAPLE_PATTERN.test(name)) return '🍚 粮油副食'
+  if (VEG_PATTERN.test(name)) return '🥬 蔬菜菌菇'
+  return '🥬 蔬菜菌菇'
+}
 /** 单段解析结果：调味品（无数量）或 名称 + 数量 + 单位 */
 type ParsedQty =
   | { seasoning: true; name: string }
@@ -292,9 +320,15 @@ export function buildShoppingList(items: Array<{ ingredients?: string[] }>): Sho
   const emitSeasoning = (name: string, raw: string) => {
     if (seasoningSeen.has(name)) return
     seasoningSeen.add(name)
-    rows.push({ name, amount: null, unit: null, raw, group: '调味品' })
+    rows.push({
+      name,
+      amount: null,
+      unit: null,
+      raw,
+      group: '调味品',
+      aisle: categorizeAisle(name, '调味品'),
+    })
   }
-
   for (const meal of items ?? []) {
     for (const rawIng of meal.ingredients ?? []) {
       // 1. 去括号注记：「糙米饭 150 克（熟）」→「糙米饭 150 克」
@@ -390,24 +424,84 @@ export function buildShoppingList(items: Array<{ ingredients?: string[] }>): Sho
     for (const cluster of clusters) {
       if (cluster.length === 1) {
         const [unit, v] = cluster[0]
-        rows.push({ name, amount: v.amount, unit, raw: bucket.raw, group: '食材' })
+        rows.push({
+          name,
+          amount: v.amount,
+          unit,
+          raw: bucket.raw,
+          group: '食材',
+          aisle: categorizeAisle(name, '食材'),
+        })
       } else {
         const totalGrams = roundAmount(cluster.reduce((sum, [, v]) => sum + v.grams, 0))
-        rows.push({ name, amount: totalGrams, unit: '克', raw: bucket.raw, group: '食材' })
+        rows.push({
+          name,
+          amount: totalGrams,
+          unit: '克',
+          raw: bucket.raw,
+          group: '食材',
+          aisle: categorizeAisle(name, '食材'),
+        })
       }
     }
     for (const [unit, v] of standalone) {
-      rows.push({ name, amount: v.amount, unit, raw: bucket.raw, group: '食材' })
+      rows.push({
+        name,
+        amount: v.amount,
+        unit,
+        raw: bucket.raw,
+        group: '食材',
+        aisle: categorizeAisle(name, '食材'),
+      })
     }
   }
 
   const groups = ['食材', '调味品'].filter((g) => rows.some((r) => r.group === g))
-  return { rows, groups }
+  const standardAisles: ShoppingAisle[] = [
+    '🥩 肉禽蛋品',
+    '🐟 水产海鲜',
+    '🥬 蔬菜菌菇',
+    '🍚 粮油副食',
+    '🧂 调味香料',
+  ]
+  const aisles = standardAisles.filter((a) => rows.some((r) => r.aisle === a))
+  return { rows, groups, aisles }
 }
-
 /**
  * 数量展示格式化：去掉多余的尾零（1 → '1'，0.5 → '0.5'，0.25 → '0.25'）
  */
 export function formatAmount(n: number): string {
   return String(roundAmount(n))
+}
+
+/**
+ * 按份量倍数等比缩放单项食材用量（如 1人份 → 2人份）
+ * 无法识别数量的调味品（适量/少许）保持不变，避免 NaN。
+ */
+export function scaleIngredient(raw: string, factor: number): string {
+  if (factor === 1 || !raw) return raw
+  const trimmed = raw.trim()
+
+  const fracMatch = trimmed.match(FRAC_RE)
+  if (fracMatch) {
+    const [, name, num, den, unit] = fracMatch
+    const scaled = (Number(num) / Number(den)) * factor
+    return `${name} ${formatAmount(scaled)} ${unit}`
+  }
+
+  const halfMatch = trimmed.match(HALF_RE)
+  if (halfMatch) {
+    const [, name, unit] = halfMatch
+    const scaled = 0.5 * factor
+    return `${name} ${formatAmount(scaled)} ${unit}`
+  }
+
+  const qtyMatch = trimmed.match(QTY_RE)
+  if (qtyMatch) {
+    const [, name, numStr, unit] = qtyMatch
+    const scaled = Number(numStr) * factor
+    return `${name} ${formatAmount(scaled)} ${unit}`
+  }
+
+  return raw
 }

@@ -65,6 +65,7 @@ export default function App() {
   const [cuisineFilter, setCuisineFilter] = useState<CuisineFilter>('all') // 菜谱库地区筛选（年夜饭生成也按此优先）
   const [methodFilter, setMethodFilter] = useState<MethodFilter>('all') // 菜谱库做法筛选
   const [flavorFilter, setFlavorFilter] = useState<FlavorFilter>('all') // 菜谱库口味筛选
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false) // 菜谱库高级筛选折叠抽屉
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const table = useFamilyTable() // 家庭餐桌：加入 / 移除 / 清空 + 营养汇总
   // 已加入餐桌的菜 id 集合（MealCard 的 added 状态用）
@@ -245,6 +246,10 @@ export default function App() {
               onOpen={setSelectedMeal}
               onAdd={table.add}
               addedIds={tableItemIds}
+              onReplaceDish={planner.replaceDish}
+              activeGoal={nutrition.submitted ? nutrition.results.goal : undefined}
+              targetKcal={nutrition.submitted ? nutrition.results.targetKcal : undefined}
+              onNavigateToGoals={() => navigate('goals')}
             />
           </>
         )}
@@ -323,22 +328,63 @@ export default function App() {
                   categoryMeta={categoryMeta}
                   onChange={setActiveCategory}
                 />
-                {/* 地区筛选：与分类 / 餐次 tab 组合过滤；年夜饭生成也按此优先 */}
-                <div className="mt-3">
-                  <CuisineChips active={cuisineFilter} counts={cuisineCounts} onChange={setCuisineFilter} />
-                </div>
-                {/* 做法筛选：与分类 / 餐次 / 地区 / 口味组合过滤 */}
-                <div className="mt-3">
-                  <MethodChips active={methodFilter} onChange={setMethodFilter} />
-                </div>
-                {/* 口味筛选：与分类 / 餐次 / 地区 / 做法组合过滤 */}
-                <div className="mt-3">
-                  <FlavorChips active={flavorFilter} onChange={setFlavorFilter} />
-                </div>
-                {/* 餐次筛选：与分类 tab 组合过滤 */}
-                <div className="mt-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <MealTypeChips active={mealTypeFilter} onChange={setMealTypeFilter} />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                      aria-expanded={showAdvancedFilters}
+                      className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                        showAdvancedFilters || (cuisineFilter !== 'all' || methodFilter !== 'all' || flavorFilter !== 'all')
+                          ? 'border border-grape/50 bg-grape/15 text-snow shadow-sm'
+                          : 'border border-white/10 bg-white/5 text-mist hover:border-white/20 hover:text-snow'
+                      }`}
+                    >
+                      <span>⚙️ 菜系·做法·口味</span>
+                      {(cuisineFilter !== 'all' || methodFilter !== 'all' || flavorFilter !== 'all') && (
+                        <span className="grid size-4 place-items-center rounded-full bg-grape text-[10px] font-bold text-white">
+                          {(cuisineFilter !== 'all' ? 1 : 0) + (methodFilter !== 'all' ? 1 : 0) + (flavorFilter !== 'all' ? 1 : 0)}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-mist">{showAdvancedFilters ? '▲' : '▼'}</span>
+                    </button>
+                    {(activeCategory !== 'all' || mealTypeFilter !== 'all' || cuisineFilter !== 'all' || methodFilter !== 'all' || flavorFilter !== 'all' || search.trim() !== '') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearch('')
+                          setActiveCategory('all')
+                          setMealTypeFilter('all')
+                          setCuisineFilter('all')
+                          setMethodFilter('all')
+                          setFlavorFilter('all')
+                        }}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-mist hover:border-tangerine/30 hover:text-tangerine transition-colors"
+                      >
+                        清空筛选
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* 高级筛选抽屉（展开显示菜系/做法/口味） */}
+                {showAdvancedFilters && (
+                  <div className="glass-card mt-3 space-y-4 rounded-2xl p-4">
+                    <div>
+                      <div className="mb-2 text-xs font-semibold text-mist">🌏 地区菜系</div>
+                      <CuisineChips active={cuisineFilter} counts={cuisineCounts} onChange={setCuisineFilter} />
+                    </div>
+                    <div>
+                      <div className="mb-2 text-xs font-semibold text-mist">🍳 烹饪做法</div>
+                      <MethodChips active={methodFilter} onChange={setMethodFilter} />
+                    </div>
+                    <div>
+                      <div className="mb-2 text-xs font-semibold text-mist">🌶️ 风味口感</div>
+                      <FlavorChips active={flavorFilter} onChange={setFlavorFilter} />
+                    </div>
+                  </div>
+                )}
               </div>
             </Reveal>
 
@@ -448,9 +494,10 @@ export default function App() {
           onClose={() => setSelectedMeal(null)}
           onAdd={table.add}
           variants={nameVariantCounts.get(selectedMeal.name) ?? 1}
+          allMeals={meals}
+          onSelectMeal={setSelectedMeal}
         />
       )}
-
       {/* 首次进入公告弹窗：同一浏览器会话只弹出一次 */}
       <AnnouncementModal />
     </div>

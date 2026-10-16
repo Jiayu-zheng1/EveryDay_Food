@@ -7,7 +7,8 @@ import {
   type MealCounts,
   type PlannerMode,
 } from '../hooks/useDailyPlanner'
-import type { Category, CategoryMeta, Meal, MealType, PlanSlot } from '../types'
+import { GOAL_LABELS } from '../lib/nutrition'
+import type { Category, CategoryMeta, Goal, Meal, MealType, PlanSlot } from '../types'
 
 /** 「生成今日搭配」功能区 props */
 interface DailyPlannerProps {
@@ -27,8 +28,11 @@ interface DailyPlannerProps {
   onOpen: (meal: Meal) => void
   onAdd: (meal: Meal) => void
   addedIds: Set<string>
+  activeGoal?: Goal
+  targetKcal?: number
+  onNavigateToGoals?: () => void
+  onReplaceDish?: (slot: MealType, mealId: string) => void
 }
-
 // 每餐菜数步进器配置（范围与 useDailyPlanner.MEAL_COUNT_RANGE 一致）
 const MEAL_STEPPERS: Array<{ type: MealType; label: string; icon: string }> = [
   { type: 'breakfast', label: '早餐', icon: '🌅' },
@@ -63,6 +67,10 @@ export default function DailyPlanner({
   onOpen,
   onAdd,
   addedIds,
+  activeGoal,
+  targetKcal,
+  onNavigateToGoals,
+  onReplaceDish,
 }: DailyPlannerProps) {
   const isCustom = mode === 'custom'
 
@@ -81,6 +89,24 @@ export default function DailyPlanner({
                   ? '按人口数与每餐菜数自定义搭配，也可以随机换一批'
                   : '每天换一组均衡搭配，也可以随机换一批'}
               </p>
+              {activeGoal && targetKcal && (
+                <div className="mt-3 flex flex-wrap items-center gap-2.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-grape/40 bg-grape/10 px-3 py-1 text-xs font-semibold text-grape">
+                    <span>🎯 已关联健康目标：{GOAL_LABELS[activeGoal]}</span>
+                    <span className="text-white/40">·</span>
+                    <span>每日建议 {targetKcal} kcal</span>
+                  </span>
+                  {onNavigateToGoals && (
+                    <button
+                      type="button"
+                      onClick={onNavigateToGoals}
+                      className="text-xs text-mist underline-offset-4 hover:text-snow hover:underline"
+                    >
+                      调整身体数据 →
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {/* 「🎲 换一批」：随机 / 自定义模式恒可用（加载中禁用） */}
@@ -188,6 +214,7 @@ export default function DailyPlanner({
           onOpen={onOpen}
           onAdd={onAdd}
           addedIds={addedIds}
+          onReplaceDish={onReplaceDish}
         />
       </div>
     </section>

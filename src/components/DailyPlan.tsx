@@ -1,6 +1,5 @@
 import Reveal from './Reveal'
-import type { Category, CategoryMeta, Meal, PlanSlot } from '../types'
-
+import type { Category, CategoryMeta, Meal, MealType, PlanSlot } from '../types'
 /** 今日三餐搭配（结果区）的 props */
 interface DailyPlanProps {
   plan: PlanSlot[]
@@ -15,8 +14,9 @@ interface DailyPlanProps {
   onOpen?: (meal: Meal) => void
   /** 可选：每道菜旁的「加入餐桌」按钮（不传则不渲染） */
   onAdd?: (meal: Meal) => void
-  /** 已加入餐桌的菜 id 集合（按钮态展示） */
   addedIds?: Set<string>
+  /** 可选：单道菜独立置换回调 */
+  onReplaceDish?: (slot: MealType, mealId: string) => void
 }
 
 // 三餐时段对应的图标
@@ -42,8 +42,8 @@ export default function DailyPlan({
   onOpen,
   onAdd,
   addedIds,
+  onReplaceDish,
 }: DailyPlanProps) {
-  // 份量换算文案：每多一人每道菜 +200g（线性增量，不按人数翻倍）；1 人时即原始单份量
   const portionLabel = (meal: Meal): string => {
     // 每多一人每道菜 +200g（线性增量，不按人数翻倍）；1 人时即原始单份量
     const amount = meal.servingSize.amount + (people - 1) * 200
@@ -120,24 +120,43 @@ export default function DailyPlan({
                             <span className="shrink-0 text-sm font-semibold text-tangerine">
                               {meal.kcal} kcal
                             </span>
-                            {/* 加入餐桌：z 高于拉伸按钮，点击不会触发详情弹窗 */}
-                            {onAdd && (
-                              <button
-                                type="button"
-                                aria-label={added ? `已加入餐桌：${meal.name}` : `加入餐桌：${meal.name}`}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  onAdd(meal)
-                                }}
-                                className={`relative z-10 grid size-7 shrink-0 place-items-center rounded-full border text-sm font-bold transition-all active:scale-90 ${
-                                  added
-                                    ? 'border-tangerine/40 bg-tangerine/15 text-tangerine'
-                                    : 'border-white/15 bg-white/5 text-mist hover:border-grape/50 hover:text-snow'
-                                }`}
-                              >
-                                {added ? '✓' : '+'}
-                              </button>
-                            )}
+                            <div className="relative z-10 flex items-center gap-1.5">
+                              {/* 单道换菜：独立在候选池中重抽该餐菜品 */}
+                              {onReplaceDish && (
+                                <button
+                                  type="button"
+                                  aria-label={`换一道：${meal.name}`}
+                                  title="单道换菜"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    const mealType: MealType =
+                                      item.slot === '早餐' ? 'breakfast' : item.slot === '午餐' ? 'lunch' : 'dinner'
+                                    onReplaceDish(mealType, meal.id)
+                                  }}
+                                  className="grid size-7 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-xs text-mist transition-all hover:border-grape/50 hover:bg-grape/10 hover:text-snow active:scale-90"
+                                >
+                                  🎲
+                                </button>
+                              )}
+                              {/* 加入餐桌：z 高于拉伸按钮，点击不会触发详情弹窗 */}
+                              {onAdd && (
+                                <button
+                                  type="button"
+                                  aria-label={added ? `已加入餐桌：${meal.name}` : `加入餐桌：${meal.name}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    onAdd(meal)
+                                  }}
+                                  className={`grid size-7 shrink-0 place-items-center rounded-full border text-sm font-bold transition-all active:scale-90 ${
+                                    added
+                                      ? 'border-tangerine/40 bg-tangerine/15 text-tangerine'
+                                      : 'border-white/15 bg-white/5 text-mist hover:border-grape/50 hover:text-snow'
+                                  }`}
+                                >
+                                  {added ? '✓' : '+'}
+                                </button>
+                              )}
+                            </div>
                           </li>
                         )
                       })}

@@ -20,7 +20,7 @@ const TABS: Array<{ key: ModuleKey; label: string }> = [
   { key: 'home', label: '🏠 今日搭配' },
   { key: 'goals', label: '🎯 健康目标' },
   { key: 'library', label: '📚 菜谱库' },
-  { key: 'newyear', label: '🧧 年夜饭' },
+  { key: 'newyear', label: '🏮 家宴聚餐' },
   { key: 'table', label: '🛒 我的餐桌' },
 ]
 

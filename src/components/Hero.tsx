@@ -12,7 +12,7 @@ interface HeroProps {
 const QUICK_LINKS: Array<{ key: ModuleKey; emoji: string; title: string; desc: string }> = [
   { key: 'library', emoji: '📚', title: '逛菜谱库', desc: '分类 / 餐次 / 地区多维筛选' },
   { key: 'goals', emoji: '🎯', title: '健康目标', desc: '计算热量目标，生成智能搭配' },
-  { key: 'newyear', emoji: '🧧', title: '配一桌年夜饭', desc: '凉菜硬菜热菜汤品，一键配齐' },
+  { key: 'newyear', emoji: '🏮', title: '家宴聚餐', desc: '四菜一汤 / 阖家欢聚 / 节庆年夜饭' },
   { key: 'table', emoji: '🛒', title: '我的餐桌', desc: '已选菜汇总营养，生成购物清单' },
 ]
 

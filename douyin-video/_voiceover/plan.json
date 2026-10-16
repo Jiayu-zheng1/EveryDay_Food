@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "scene": "S1 Hook",
+    "text": "每天吃什么？别再纠结了！",
+    "start": 0.0,
+    "end": 4.0,
+    "target": 4.0,
+    "out": "_voiceover/seg_01.mp3",
+    "json": "_voiceover/seg_01.json"
+  },
+  {
+    "id": 2,
+    "scene": "S2 品牌",
+    "text": "每日食光，一千零七十七道家常和健康食谱，热量营养都给你算好。",
+    "start": 4.0,
+    "end": 8.5,
+    "target": 4.5,
+    "out": "_voiceover/seg_02.mp3",
+    "json": "_voiceover/seg_02.json"
+  },
+  {
+    "id": 3,
+    "scene": "S3 筛选",
+    "text": "想怎么筛就怎么筛，分类、菜系、口味组合过滤，还能按热量一键排序。",
+    "start": 8.5,
+    "end": 12.5,
+    "target": 4.0,
+    "out": "_voiceover/seg_03.mp3",
+    "json": "_voiceover/seg_03.json"
+  },
+  {
+    "id": 4,
+    "scene": "S5 截图墙",
+    "text": "不是效果图，全是站内实拍，首页、菜谱库、年夜饭、餐桌都能直接看。",
+    "start": 12.5,
+    "end": 16.5,
+    "target": 4.0,
+    "out": "_voiceover/seg_04.mp3",
+    "json": "_voiceover/seg_04.json"
+  },
+  {
+    "id": 5,
+    "scene": "S4 计算器",
+    "text": "吃多少算清楚，输入身高体重，BMI 和三大营养素自动帮你算好。",
+    "start": 16.5,
+    "end": 20.5,
+    "target": 4.0,
+    "out": "_voiceover/seg_05.mp3",
+    "json": "_voiceover/seg_05.json"
+  },
+  {
+    "id": 6,
+    "scene": "S6 年夜饭",
+    "text": "一桌年夜饭一键凑齐，单道不喜欢还能单换。",
+    "start": 20.5,
+    "end": 23.5,
+    "target": 3.0,
+    "out": "_voiceover/seg_06.mp3",
+    "json": "_voiceover/seg_06.json"
+  },
+  {
+    "id": 7,
+    "scene": "S7 数据墙",
+    "text": "十四个菜系，六百七十二道家常，每道都有食材做法和营养。",
+    "start": 23.5,
+    "end": 26.5,
+    "target": 3.0,
+    "out": "_voiceover/seg_07.mp3",
+    "json": "_voiceover/seg_07.json"
+  },
+  {
+    "id": 8,
+    "scene": "S8 技术栈",
+    "text": "开源在 GitHub，PWA 可安装，离线也能打开。",
+    "start": 26.5,
+    "end": 28.5,
+    "target": 2.0,
+    "out": "_voiceover/seg_08.mp3",
+    "json": "_voiceover/seg_08.json"
+  },
+  {
+    "id": 9,
+    "scene": "S9 CTA",
+    "text": "搜每日食光，打开 meirishiguang 点开看看，记得 Star！",
+    "start": 28.5,
+    "end": 30.0,
+    "target": 1.5,
+    "out": "_voiceover/seg_09.mp3",
+    "json": "_voiceover/seg_09.json"
+  }
+]

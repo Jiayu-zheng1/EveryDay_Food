@@ -7,11 +7,11 @@ import {
   calculateTDEE,
   generateDailyPlan,
   generateSmartPlan,
+  replacePlanDish,
   suggestGoal,
   validateNutritionForm,
 } from './nutrition'
 import type { DailyTargets, Goal, Meal } from '../types'
-// ?raw 由 Vite 内联文件内容（node 环境可用，无需 @types/node / fs），与生产 fetch('/data/meals.json') 同源
 import mealsJsonRaw from '../../public/data/meals.json?raw'
 
 /** 构造最小 Meal（仅测试所需字段） */
@@ -329,5 +329,43 @@ describe('generateDailyPlan（今日搭配自定义生成）', () => {
   it('mealCounts 变化即改变每餐道数（如午餐 1-4 范围内 1 道）', () => {
     const plan = generateDailyPlan(MEALS, { breakfast: 1, lunch: 1, dinner: 1 }, { seed: 20260807 })
     expect(plan.map((s) => s.meals.length)).toEqual([1, 1, 1])
+  })
+})
+
+describe('replacePlanDish（三餐单道菜独立置换）', () => {
+  const counts = { breakfast: 2, lunch: 2, dinner: 2 }
+
+  it('仅替换目标菜品，保持其它餐次与其他菜品不变', () => {
+    const initialPlan = generateDailyPlan(MEALS, counts, { seed: 100 })
+    const dishToReplace = initialPlan[1].meals[0]
+
+    const updatedPlan = replacePlanDish(initialPlan, 'lunch', dishToReplace.id, MEALS, { seed: 999 })
+
+    // 早餐与晚餐完全未变
+    expect(updatedPlan[0].meals.map((m) => m.id)).toEqual(initialPlan[0].meals.map((m) => m.id))
+    expect(updatedPlan[2].meals.map((m) => m.id)).toEqual(initialPlan[2].meals.map((m) => m.id))
+    // 午餐数量依然是 2
+    expect(updatedPlan[1].meals).toHaveLength(2)
+    // 被替换的菜已不在午餐中
+    expect(updatedPlan[1].meals.some((m) => m.id === dishToReplace.id)).toBe(false)
+    // 午餐保留未替换的那道菜
+    expect(updatedPlan[1].meals.some((m) => m.id === initialPlan[1].meals[1].id)).toBe(true)
+    // 整日菜品无重复
+    const allIds = updatedPlan.flatMap((s) => s.meals.map((m) => m.id))
+    expect(new Set(allIds).size).toBe(allIds.length)
+  })
+
+  it('当指定 category 限制时，替换出的菜符合该分类', () => {
+    const initialPlan = generateDailyPlan(MEALS, counts, { seed: 100, category: 'fat-loss' })
+    const dishToReplace = initialPlan[0].meals[0]
+
+    const updatedPlan = replacePlanDish(initialPlan, 'breakfast', dishToReplace.id, MEALS, {
+      seed: 888,
+      category: 'fat-loss',
+    })
+
+    const newMeal = updatedPlan[0].meals.find((m) => m.id !== initialPlan[0].meals[1].id)
+    expect(newMeal).toBeDefined()
+    expect(newMeal?.category).toBe('fat-loss')
   })
 })
