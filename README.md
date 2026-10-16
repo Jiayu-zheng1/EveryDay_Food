@@ -14,7 +14,7 @@
 
 ## 支持一下
 
-做这个项目花了不少功夫，如果对你有用，欢迎去 [GitHub](https://github.com/Jiayu-zheng1/EveryDay_Food) 点个 Star ⭐，谢谢！
+做这个项目花了不少功夫，如果对你有用，欢迎点个 Star ⭐，谢谢！
 
 [![GitHub stars](https://img.shields.io/github/stars/Jiayu-zheng1/EveryDay_Food?style=social&label=Star)](https://github.com/Jiayu-zheng1/EveryDay_Food)
 [![GitHub forks](https://img.shields.io/github/forks/Jiayu-zheng1/EveryDay_Food?style=social&label=Fork)](https://github.com/Jiayu-zheng1/EveryDay_Food)
