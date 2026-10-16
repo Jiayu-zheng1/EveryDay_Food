@@ -1,0 +1,15 @@
+# robots.txt for meirishiguang.com
+User-agent: *
+Allow: /
+
+# Baidu & Bing & Google & 360
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://meirishiguang.com/sitemap.xml
