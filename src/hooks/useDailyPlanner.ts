@@ -21,6 +21,27 @@ export const MEAL_COUNT_RANGE: Record<MealType, { min: number; max: number }> = 
   dinner: { min: 1, max: 4 },
 }
 
+
+const STORAGE_PLANNER_KEY = 'moments_food_daily_planner_v1'
+
+interface SavedPlannerState {
+  people?: number
+  mealCounts?: MealCounts
+  seed?: number
+  customActive?: boolean
+  savedDate?: string
+}
+
+function loadSavedPlanner(): SavedPlannerState | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(STORAGE_PLANNER_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as SavedPlannerState
+  } catch {
+    return null
+  }
+}
 /** useDailyPlanner 入参 */
 interface UseDailyPlannerOptions {
   /** 全量食谱（来自 useMeals） */
@@ -61,14 +82,38 @@ export interface UseDailyPlannerResult {
  * 今日搭配只做随机生成，与健康目标 / 智能搭配完全解耦
  */
 export default function useDailyPlanner({ meals }: UseDailyPlannerOptions): UseDailyPlannerResult {
-  const [people, setPeople] = useState(1)
-  const [mealCounts, setMealCounts] = useState<MealCounts>(DEFAULT_MEAL_COUNTS)
-  const [customPlan, setCustomPlan] = useState<PlanSlot[]>([])
-  // 种子：初始为 YYYYMMDD（同日稳定）；generate/shuffle 换 Date.now()（结果变化）
-  const [seed, setSeed] = useState<number>(() => dateSeed())
-  // 用户是否点过「生成今日搭配」：true 时展示自定义搭配，否则展示随机搭配
-  const [customActive, setCustomActive] = useState(false)
+  const saved = useMemo(() => loadSavedPlanner(), [])
+  const today = new Date().toISOString().slice(0, 10)
+  const isToday = saved?.savedDate === today
 
+  const [people, setPeople] = useState<number>(() => {
+    if (saved?.people && saved.people >= PEOPLE_RANGE.min && saved.people <= PEOPLE_RANGE.max) {
+      return saved.people
+    }
+    return 1
+  })
+  const [mealCounts, setMealCounts] = useState<MealCounts>(() => saved?.mealCounts ?? DEFAULT_MEAL_COUNTS)
+  const [customPlan, setCustomPlan] = useState<PlanSlot[]>([])
+  // 种子：若同日且有已存 seed 则恢复，否则初始为 dateSeed()
+  const [seed, setSeed] = useState<number>(() => (isToday && saved?.seed ? saved.seed : dateSeed()))
+  // 用户是否点过「生成今日搭配」：同日内已生成则保持
+  const [customActive, setCustomActive] = useState<boolean>(() => Boolean(isToday && saved?.customActive))
+
+  // 状态变动时持久化到本地 localStorage
+  useEffect(() => {
+    try {
+      const data: SavedPlannerState = {
+        people,
+        mealCounts,
+        seed,
+        customActive,
+        savedDate: today,
+      }
+      window.localStorage.setItem(STORAGE_PLANNER_KEY, JSON.stringify(data))
+    } catch {
+      // 静默处理 localStorage 异常
+    }
+  }, [people, mealCounts, seed, customActive, today])
   // 菜数 / 种子变化（含首次挂载、换一批）时重新生成自定义搭配
   useEffect(() => {
     if (meals.length === 0) return // 数据未就绪，等 useMeals 返回后再生成

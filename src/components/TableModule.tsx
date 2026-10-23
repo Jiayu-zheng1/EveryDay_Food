@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Reveal from './Reveal'
-import { buildShoppingList, formatAmount } from '../lib/shoppingList'
+import { buildMarkdownShoppingList, buildShoppingList, formatAmount } from '../lib/shoppingList'
 import type { ShoppingList } from '../lib/shoppingList'
 import { getCategoryMeta } from '../api/meals'
 import type { Category, CategoryMeta, Meal, ModuleKey } from '../types'
@@ -81,7 +81,8 @@ export default function TableModule({
 }: TableModuleProps) {
   // 当前视图：'dishes' 菜品清单 | 'shopping' 购物清单
   const [view, setView] = useState<'dishes' | 'shopping'>('dishes')
-  // 购物清单勾选状态（存储 itemKey：name-unit）
+  // 购物清单分类筛选：全部 | 🛒 生鲜主料 | 🧂 调味辅料
+  const [listFilter, setListFilter] = useState<'all' | 'ingredients' | 'seasonings'>('all')
   const [checkedKeys, setCheckedKeys] = useState<Set<string>>(loadCheckedKeys)
   // 轻量 toast（复制/生成/清空反馈），2.2s 自动消失
   const [toast, setToast] = useState<string | null>(null)
@@ -89,6 +90,16 @@ export default function TableModule({
 
   // 购物清单由菜品食材实时推导（纯函数，无副作用；items 变化自动重算）
   const list = useMemo(() => buildShoppingList(items), [items])
+
+  // 统计生鲜主料与调味品数量
+  const ingredientsCount = useMemo(
+    () => list.rows.filter((r) => r.group === '食材').length,
+    [list.rows]
+  )
+  const seasoningsCount = useMemo(
+    () => list.rows.filter((r) => r.group === '调味品').length,
+    [list.rows]
+  )
 
   // 勾选状态持久化到 localStorage
   useEffect(() => {
@@ -158,6 +169,33 @@ export default function TableModule({
       }
       document.body.removeChild(ta)
     }
+  }
+
+  // 复制 Markdown 待办清单
+  const handleCopyMarkdown = async () => {
+    const md = buildMarkdownShoppingList(list, items.length)
+    try {
+      await navigator.clipboard.writeText(md)
+      showToast('已复制 Markdown 待办清单')
+    } catch {
+      showToast('复制失败，请重试')
+    }
+  }
+
+  // 导出/下载 .md 文件
+  const handleDownloadMarkdown = () => {
+    const md = buildMarkdownShoppingList(list, items.length)
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const dateStr = new Date().toISOString().slice(0, 10)
+    a.href = url
+    a.download = `每日食光-购物清单-${dateStr}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    showToast('已下载 Markdown 文件 📄')
   }
 
   // 空态：两视图共用（items 为空时没有可展示的菜品/食材）
@@ -299,9 +337,23 @@ export default function TableModule({
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="rounded-full bg-gradient-brand px-5 py-2 text-sm font-bold text-white shadow-lg shadow-grape/25 transition-all hover:scale-105 active:scale-95"
+                  className="rounded-full bg-gradient-brand px-4 py-2 text-sm font-bold text-white shadow-lg shadow-grape/25 transition-all hover:scale-105 active:scale-95"
                 >
-                  复制清单
+                  复制纯文本
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyMarkdown}
+                  className="rounded-full border border-grape/30 bg-grape/15 px-4 py-2 text-sm font-semibold text-snow transition-all hover:scale-[1.03] hover:bg-grape/25"
+                >
+                  复制 Markdown
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadMarkdown}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-mist transition-all hover:scale-[1.03] hover:text-snow"
+                >
+                  导出 .md
                 </button>
                 {checkedKeys.size > 0 && (
                   <button
@@ -329,8 +381,52 @@ export default function TableModule({
               </div>
             </div>
 
+            {/* 分类快捷标签：全部 / 生鲜食材 / 调料辅料 */}
+            <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-white/5 pb-4">
+              <span className="text-xs font-medium text-mist">分类查看：</span>
+              <button
+                type="button"
+                onClick={() => setListFilter('all')}
+                className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+                  listFilter === 'all'
+                    ? 'bg-gradient-brand text-white shadow-sm'
+                    : 'border border-white/10 bg-white/5 text-mist hover:text-snow'
+                }`}
+              >
+                全部 ({list.rows.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setListFilter('ingredients')}
+                className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+                  listFilter === 'ingredients'
+                    ? 'bg-gradient-brand text-white shadow-sm'
+                    : 'border border-white/10 bg-white/5 text-mist hover:text-snow'
+                }`}
+              >
+                🛒 生鲜食材 ({ingredientsCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setListFilter('seasonings')}
+                className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+                  listFilter === 'seasonings'
+                    ? 'bg-gradient-brand text-white shadow-sm'
+                    : 'border border-white/10 bg-white/5 text-mist hover:text-snow'
+                }`}
+              >
+                🧂 调料辅料 ({seasoningsCount})
+              </button>
+            </div>
+
             {/* 货架分区列表：每组小标题 + 带勾选打卡的食材行 */}
-            {(list.aisles && list.aisles.length > 0 ? list.aisles : list.groups).map((section) => {
+            {(list.aisles && list.aisles.length > 0 ? list.aisles : list.groups)
+              .filter((section) => {
+                if (listFilter === 'ingredients') return section !== '🧂 调味香料'
+                if (listFilter === 'seasonings') return section === '🧂 调味香料'
+                return true
+              })
+              .map((section) => {
               const sectionRows = list.rows.filter((row) => (row.aisle ?? row.group) === section)
               if (sectionRows.length === 0) return null
               return (

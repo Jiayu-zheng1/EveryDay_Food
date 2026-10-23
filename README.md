@@ -12,13 +12,21 @@
 ![PWA](https://img.shields.io/badge/PWA-可安装-5B21B6)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## 支持一下
+## ☕️ 支持与赞助
 
-做这个项目花了不少功夫，如果对你有用，欢迎点个 Star ⭐，谢谢！
+独立开发与数据整理不易。为了让大家能吃得健康、做饭省心，本项目收录并整理了 **1090+ 道食谱**，逐一核算热量与三大营养素，手写购物清单智能合并与防息屏烹饪模式，并持续保持纯净无广告体验。
+
+如果你觉得「每日食光」对你的日常生活有所帮助，或者为你解决了一点点“今天吃什么”的烦恼，欢迎请作者喝杯咖啡 ☕ 或加个鸡腿 🍗，非常感谢你的认可与支持！每一份心意都是项目长期维护和迭代的动力。
+
+<div align="center">
+  <img src="docs/screenshots/sponsor.jpg" width="260" alt="微信赞助支持" />
+  <p><sub>推荐使用微信扫码支持作者 · 感谢有你 ❤️</sub></p>
+</div>
+
+欢迎点个 Star ⭐ 或分享给身边的朋友：
 
 [![GitHub stars](https://img.shields.io/github/stars/Jiayu-zheng1/EveryDay_Food?style=social&label=Star)](https://github.com/Jiayu-zheng1/EveryDay_Food)
 [![GitHub forks](https://img.shields.io/github/forks/Jiayu-zheng1/EveryDay_Food?style=social&label=Fork)](https://github.com/Jiayu-zheng1/EveryDay_Food)
-
 ## 功能
 
 - **1093 道食谱**：减脂 / 增肌 / 维持 / 营养四大类各 56–57 道，另有 672 道家常菜、51 道食疗、50 道烘焙、94 道小吃，每道都带食材、做法和营养数据。

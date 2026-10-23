@@ -71,11 +71,49 @@ export default function MealModal({
   const meta = categoryMeta[meal.category]
 
   // 专注烹饪模式状态
+  // 专注烹饪模式状态：当前步骤、计时器、已打勾完成的步骤集合
   const [cookingMode, setCookingMode] = useState(false)
   const [cookingStep, setCookingStep] = useState(0)
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
   const [timerSeconds, setTimerSeconds] = useState<number | null>(null)
   const [timerRunning, setTimerRunning] = useState(false)
 
+  // 注入 Google / 百度 SEO 结构化数据（Recipe Schema JSON-LD）
+  useEffect(() => {
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Recipe',
+      name: meal.name,
+      description: meal.desc,
+      recipeCategory: meal.category,
+      recipeCuisine: meal.cuisine,
+      recipeYield: `${servings}人份`,
+      nutrition: {
+        '@type': 'NutritionInformation',
+        calories: `${meal.kcal * servings} kcal`,
+        proteinContent: `${meal.nutrition.protein * servings}g`,
+        carbohydrateContent: `${meal.nutrition.carbs * servings}g`,
+        fatContent: `${meal.nutrition.fat * servings}g`,
+      },
+      recipeIngredient: meal.ingredients.map((item) => scaleIngredient(item, servings)),
+      recipeInstructions: meal.steps.map((step, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        text: step,
+      })),
+    }
+
+    const script = document.createElement('script')
+    script.type = 'application/ld+json'
+    script.id = 'recipe-schema-jsonld'
+    script.text = JSON.stringify(jsonLd)
+    document.head.appendChild(script)
+
+    return () => {
+      const el = document.getElementById('recipe-schema-jsonld')
+      el?.remove()
+    }
+  }, [meal, servings])
   // 烹饪模式防息屏（Screen Wake Lock API，无 any 声明）
   useEffect(() => {
     if (!cookingMode) return
@@ -278,7 +316,7 @@ export default function MealModal({
               </h3>
               {/* 份量切换胶囊 */}
               <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-0.5 text-xs">
-                {[1, 2, 4].map((s) => (
+                {[1, 2, 3, 4].map((s) => (
                   <button
                     key={s}
                     type="button"
@@ -373,7 +411,7 @@ export default function MealModal({
         {/* ============ 专注下厨模式（全屏大字 / 防息屏 / 步骤计时器） ============ */}
         {cookingMode && (
           <div className="absolute inset-0 z-30 flex flex-col bg-ink-2 p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200">
-            {/* 顶栏：菜名 + 进度 + 退出按钮 */}
+            {/* 顶栏：菜名 + 进度 + 归零重置 + 退出按钮 */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <div className="flex items-center gap-2">
@@ -383,17 +421,32 @@ export default function MealModal({
                     <span>💡 屏幕常亮中</span>
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-mist">
-                  步骤 {cookingStep + 1} / {meal.steps.length}
-                </p>
+                <div className="mt-1 flex items-center gap-3 text-xs text-mist">
+                  <span>步骤 {cookingStep + 1} / {meal.steps.length}</span>
+                  <span>·</span>
+                  <span>已打勾完成 <strong className="text-emerald-400">{completedSteps.size}</strong> 步</span>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setCookingMode(false)}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold text-mist hover:text-snow"
-              >
-                ✕ 退出下厨模式
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCompletedSteps(new Set())
+                    setCookingStep(0)
+                  }}
+                  title="重置所有打勾进度并回到第一步"
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-tangerine hover:bg-tangerine/10"
+                >
+                  🔄 步骤归零
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCookingMode(false)}
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-mist hover:text-snow"
+                >
+                  ✕ 退出
+                </button>
+              </div>
             </div>
 
             {/* 进度条 */}
@@ -412,8 +465,31 @@ export default function MealModal({
               <p className="mt-6 max-w-xl text-xl font-medium leading-relaxed text-snow sm:text-2xl">
                 {meal.steps[cookingStep]}
               </p>
-
-              {/* 步骤检测倒计时器 */}
+              {/* 步骤打勾快捷按钮 */}
+              <div className="mt-6 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const isDone = completedSteps.has(cookingStep)
+                    setCompletedSteps((prev) => {
+                      const next = new Set(prev)
+                      if (isDone) next.delete(cookingStep)
+                      else next.add(cookingStep)
+                      return next
+                    })
+                    if (!isDone && cookingStep < meal.steps.length - 1) {
+                      setCookingStep((s) => s + 1)
+                    }
+                  }}
+                  className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-base font-bold transition-all hover:scale-105 active:scale-95 ${
+                    completedSteps.has(cookingStep)
+                      ? 'border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 shadow-lg shadow-emerald-500/20'
+                      : 'border border-white/15 bg-white/10 text-snow hover:border-emerald-500/50 hover:bg-emerald-500/10'
+                  }`}
+                >
+                  <span>{completedSteps.has(cookingStep) ? '✓ 本步骤已完成' : '○ 打勾完成并进行下一步'}</span>
+                </button>
+              </div>
               {timerSeconds !== null && (
                 <div className="mt-8 flex flex-col items-center rounded-2xl border border-grape/30 bg-grape/10 p-4">
                   <div className="text-xs font-bold text-grape">⏱️ 智能步骤计时器</div>
