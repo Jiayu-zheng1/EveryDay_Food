@@ -63,8 +63,31 @@ export interface ShoppingList {
   aisles: ShoppingAisle[]
 }
 
+/**
+ * 具有海鲜/肉类字样但本质是调味品的词（高优先级精准拦截）
+ * 如：蒸鱼豉油、鱼露、蚝油、虾酱、鲍汁、鸡汁、浓汤宝等
+ */
+const SEASONING_EXACT = /豉油|鱼露|蚝油|虾酱|鲍汁|蟹醋|浓汤宝|鸡汁|牛肉汁/
+
+/**
+ * 调味品模式匹配：
+ * 油类（橄榄油/香油/芝麻油/食用油/菜籽油/辣椒油等）、
+ * 汁类（柠檬汁/青柠汁/照烧汁/黑椒汁/油醋汁/糖醋汁/卤汁等）、
+ * 酱类、醋类、糖类、盐类、酒类、香料粉等
+ */
 const SEASONING_PATTERN =
-  /盐|糖|醋|抽|酱|酒|胡椒|孜然|八角|桂皮|花椒|香油|料酒|生抽|老抽|蚝油|豆瓣|黄豆酱|鸡精|味精|咖喱|五香|香叶|丁香|百里香|迷迭香/
+  /盐|糖|醋|酱|酒|胡椒|孜然|八角|桂皮|花椒|油|料酒|生抽|老抽|豉|鸡精|味精|咖喱|五香|香叶|丁香|百里香|迷迭香|汁|淀粉|生粉|小苏打|泡打粉|酵母|吉利丁|豆瓣|芥末|肉桂|姜黄|红油|辣油|腐乳|花雕|麻油/
+
+/** 排除词：含“椒/油/芥”但属于果蔬主食的词 */
+const SEASONING_EXCLUDE = /彩椒|青椒|红椒|甜椒|螺丝椒|线椒|美人椒|朝天椒|小米椒|牛油果|芥兰|芥蓝|芥菜/
+
+/** 判断食材名称是否属于调味辅料 */
+export function isSeasoning(name: string): boolean {
+  if (SEASONING_EXCLUDE.test(name)) return false
+  if (SEASONING_EXACT.test(name)) return true
+  return SEASONING_PATTERN.test(name)
+}
+
 const SEAFOOD_PATTERN =
   /鱼|虾|蟹|贝|蛤|螺|鱿|墨鱼|鳗|鲈|鲫|鳕|三文鱼|牡蛎|扇贝|生蚝|海参|海带|紫菜|鲍鱼/
 const MEAT_PATTERN =
@@ -74,8 +97,8 @@ const STAPLE_PATTERN =
 const VEG_PATTERN =
   /菜|葱|蒜|姜|椒|菇|茄|瓜|豆|萝卜|笋|木耳|银耳|藕|土豆|芋头|马蹄|西兰花|番茄|西红柿|菠菜|芹菜|韭菜|菌|芽|香菜|生菜|油菜|娃娃菜|洋葱|山药|玉米/
 
-export function categorizeAisle(name: string, group: '食材' | '调味品'): ShoppingAisle {
-  if (group === '调味品' || SEASONING_PATTERN.test(name)) return '🧂 调味香料'
+export function categorizeAisle(name: string, group?: '食材' | '调味品'): ShoppingAisle {
+  if (group === '调味品' || isSeasoning(name)) return '🧂 调味香料'
   if (SEAFOOD_PATTERN.test(name)) return '🐟 水产海鲜'
   if (MEAT_PATTERN.test(name)) return '🥩 肉禽蛋品'
   if (STAPLE_PATTERN.test(name)) return '🍚 粮油副食'
@@ -421,6 +444,11 @@ export function buildShoppingList(items: Array<{ ingredients?: string[] }>): Sho
     }
 
     // c. 生成行：聚类内单位一致 → 保留原单位相加；跨单位 → 合并为总克数
+    const isCondiment = isSeasoning(name)
+    const itemGroup: '食材' | '调味品' = isCondiment ? '调味品' : '食材'
+    const itemAisle = categorizeAisle(name, itemGroup)
+
+    // c. 生成行：聚类内单位一致 → 保留原单位相加；跨单位 → 合并为总克数
     for (const cluster of clusters) {
       if (cluster.length === 1) {
         const [unit, v] = cluster[0]
@@ -429,8 +457,8 @@ export function buildShoppingList(items: Array<{ ingredients?: string[] }>): Sho
           amount: v.amount,
           unit,
           raw: bucket.raw,
-          group: '食材',
-          aisle: categorizeAisle(name, '食材'),
+          group: itemGroup,
+          aisle: itemAisle,
         })
       } else {
         const totalGrams = roundAmount(cluster.reduce((sum, [, v]) => sum + v.grams, 0))
@@ -439,8 +467,8 @@ export function buildShoppingList(items: Array<{ ingredients?: string[] }>): Sho
           amount: totalGrams,
           unit: '克',
           raw: bucket.raw,
-          group: '食材',
-          aisle: categorizeAisle(name, '食材'),
+          group: itemGroup,
+          aisle: itemAisle,
         })
       }
     }
@@ -450,8 +478,8 @@ export function buildShoppingList(items: Array<{ ingredients?: string[] }>): Sho
         amount: v.amount,
         unit,
         raw: bucket.raw,
-        group: '食材',
-        aisle: categorizeAisle(name, '食材'),
+        group: itemGroup,
+        aisle: itemAisle,
       })
     }
   }
@@ -504,4 +532,30 @@ export function scaleIngredient(raw: string, factor: number): string {
   }
 
   return raw
+}
+
+/**
+ * 将购物清单生成为标准 Markdown 任务列表格式
+ * 支持直接导入 Notion、Obsidian、GitHub、手机备忘录并打勾
+ */
+export function buildMarkdownShoppingList(list: ShoppingList, dishCount: number): string {
+  const lines = [
+    `# 🛒 每日食光 · 购物清单（${dishCount} 道菜）`,
+    `> 生成时间：${new Date().toLocaleDateString('zh-CN')} · 每日食光 meirishiguang.com`,
+    '',
+  ]
+
+  const sections = list.aisles && list.aisles.length > 0 ? list.aisles : list.groups
+  for (const section of sections) {
+    const sectionRows = list.rows.filter((row) => (row.aisle ?? row.group) === section)
+    if (sectionRows.length === 0) continue
+    lines.push(`## ${section}`)
+    for (const row of sectionRows) {
+      const text =
+        row.amount != null ? `${row.name} ${formatAmount(row.amount)} ${row.unit}` : row.name
+      lines.push(`- [ ] ${text}`)
+    }
+    lines.push('')
+  }
+  return lines.join('\n').trim() + '\n'
 }

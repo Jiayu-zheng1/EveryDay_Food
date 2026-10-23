@@ -10,7 +10,7 @@
  *   - lxj-home-a~c.ts / lxj-extra.ts（lxjHomeA~C / lxjExtra）：收录《老乡鸡菜品溯源报告》整理菜品（家常菜 118 / 小吃 18 / 食疗食补 1 / 营养餐 1，共 138 道）
  *   - cuisine-hui.ts / cuisine-min.ts / cuisine-dongbei.ts（huiMeals / minMeals / dongbeiMeals）：徽菜 / 闽菜 / 东北菜（各 40 道，共 120 道）
  *   - cuisine-dian.ts / cuisine-shan.ts / cuisine-xinjiang.ts / cuisine-xiang2.ts（dianMeals / shanMeals / xinjiangMeals / xiang2Meals）：滇菜 / 陕菜 / 新疆菜 / 湘菜加深（各 40 道，共 160 道）
- * 全库合计 1077 道
+ * 全库合计 1093 道
  *
  * schema: {
  *   id: string,                    // 唯一标识（全库唯一）

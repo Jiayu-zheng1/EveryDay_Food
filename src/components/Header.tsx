@@ -34,17 +34,38 @@ function GithubIcon({ className }: { className?: string }) {
   )
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
 export default function Header({ activeModule, tableCount, onNavigate }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false))
 
-  // 滚动监听：仅驱动吸顶毛玻璃样式（scroll spy 已随锚点导航一起移除）
+  // 滚动与网络状态监听
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
+    const onOffline = () => setIsOffline(true)
+    const onOnline = () => setIsOffline(false)
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault()
+      setInstallPrompt(e as BeforeInstallPromptEvent)
+    }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('offline', onOffline)
+    window.addEventListener('online', onOnline)
+    window.addEventListener('beforeinstallprompt', onBeforeInstall)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('offline', onOffline)
+      window.removeEventListener('online', onOnline)
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall)
+    }
   }, [])
-
   return (
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
@@ -114,8 +135,28 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
             <GithubIcon className="size-4 transition-transform duration-300 group-hover:scale-110" />
             <span className="hidden sm:inline">Star</span>
           </a>
+
+          {installPrompt && (
+            <button
+              type="button"
+              onClick={async () => {
+                await installPrompt.prompt()
+                const choice = await installPrompt.userChoice
+                if (choice.outcome === 'accepted') setInstallPrompt(null)
+              }}
+              className="flex shrink-0 items-center gap-1 rounded-full border border-grape/40 bg-grape/20 px-3 py-1.5 text-xs font-bold text-snow transition-all hover:scale-105 hover:bg-grape/30"
+            >
+              <span>📲</span>
+              <span className="hidden sm:inline">添加到桌面</span>
+            </button>
+          )}
         </div>
       </div>
+      {isOffline && (
+        <div className="border-t border-amber-500/20 bg-amber-500/20 px-4 py-1.5 text-center text-xs font-medium text-amber-300 backdrop-blur-md">
+          📡 当前处于离线状态，已为您加载离线缓存食谱
+        </div>
+      )}
     </header>
   )
 }

@@ -1,6 +1,6 @@
 # 🍜 每日食光 · EveryDay Food
 
-深夜食堂风格的中文食谱站：1077 道家常菜和健康食谱，热量、营养、做法都替你算好、整理好了。纯前端 SPA，线上在 [meirishiguang.com](https://meirishiguang.com)。
+深夜食堂风格的中文食谱站：1093 道家常菜和健康食谱，热量、营养、做法都替你算好、整理好了。纯前端 SPA，线上在 [meirishiguang.com](https://meirishiguang.com)。
 
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
@@ -14,11 +14,10 @@
 
 ## 支持一下
 
-做这个项目花了不少功夫，如果对你有用，欢迎点个 Star ⭐，谢谢！
+如果这个项目对你的日常下厨或健康饮食有所帮助，欢迎点个 Star ⭐，谢谢！
 
 [![GitHub stars](https://img.shields.io/github/stars/Jiayu-zheng1/EveryDay_Food?style=social&label=Star)](https://github.com/Jiayu-zheng1/EveryDay_Food)
 [![GitHub forks](https://img.shields.io/github/forks/Jiayu-zheng1/EveryDay_Food?style=social&label=Fork)](https://github.com/Jiayu-zheng1/EveryDay_Food)
-
 ## 功能
 
 - **1093 道食谱**：减脂 / 增肌 / 维持 / 营养四大类各 56–57 道，另有 672 道家常菜、51 道食疗、50 道烘焙、94 道小吃，每道都带食材、做法和营养数据。
@@ -95,7 +94,7 @@ npx wrangler pages deploy dist --project-name everyday-food
 
 ## 数据
 
-数据源是 `src/data/*.ts`，构建时由 `scripts/export-data.mjs` 导出成 `public/data/meals.json`（1077 道，约 830KB），运行时由 `src/api/meals.ts` fetch 加载并缓存。
+数据源是 `src/data/*.ts`，构建时由 `scripts/export-data.mjs` 导出成 `public/data/meals.json`（1093 道，约 884KB），运行时由 `src/api/meals.ts` fetch 加载并缓存。
 
 ### 分类数量
 
@@ -143,10 +142,21 @@ npx wrangler pages deploy dist --project-name everyday-food
 ├── src/
 │   ├── api/                      # 数据访问层
 │   ├── components/               # UI 组件
-│   ├── data/                     # 1077 道食谱数据（分批 TS 文件）
+│   ├── data/                     # 1093 道食谱数据（分批 TS 文件）
 │   ├── hooks/                    # 自定义 hooks
 │   ├── lib/                      # 营养算法 / 购物清单解析
 │   ├── App.tsx                   # 入口 + hash 路由
 │   └── index.css                 # Tailwind v4 主题
 └── docs/screenshots/             # README 截图
 ```
+
+## ☕️ 支持与赞助作者
+
+独立开发与长期数据整理不易。为了让大家能吃得健康、做饭省心，本项目收录并整理了 **1093 道食谱**，逐一核算热量与三大营养素，手写购物清单智能合并与防息屏烹饪模式，并持续保持纯净无广告的开源体验。
+
+如果你觉得「每日食光」对你的日常生活有所帮助，或者为你解决了一点点“今天吃什么”的日常烦恼，欢迎请作者喝杯咖啡 ☕ 或加个鸡腿 🍗，非常感谢你的认可与温暖支持！每一份心意都是项目持续维护和优化迭代的最大动力 ❤️
+
+<div align="center">
+  <img src="docs/screenshots/sponsor.jpg" width="280" alt="微信赞助支持" />
+  <p><sub>推荐使用微信扫一扫 · 感谢你的支持与鼓励 ❤️</sub></p>
+</div>

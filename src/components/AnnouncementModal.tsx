@@ -108,7 +108,7 @@ export default function AnnouncementModal() {
           <h2 className="text-xl font-black">欢迎来到每日食光 🍱</h2>
           <div className="space-y-2 text-sm leading-relaxed text-mist">
             <p>
-              本站收录 <span className="font-semibold text-snow">1077 道</span>
+              本站收录 <span className="font-semibold text-snow">1093 道</span>
               家常菜与健康食谱，减脂 / 增肌 / 维持 / 营养四大分类，每道菜的热量、营养与做法都替你算好了。
             </p>
             <ul className="list-inside list-disc space-y-1">

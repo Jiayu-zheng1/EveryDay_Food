@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildShoppingList, formatAmount, scaleIngredient, toGrams, UNIT_GRAM_TABLES } from './shoppingList'
+import { buildMarkdownShoppingList, buildShoppingList, formatAmount, scaleIngredient, toGrams, UNIT_GRAM_TABLES } from './shoppingList'
 
 /** 便捷构造：一行食材 = 一道菜 */
 const dish = (...ingredients: string[]) => ({ ingredients })
@@ -117,6 +117,47 @@ describe('buildShoppingList 调味品与数量行分离', () => {
   })
 })
 
+  it('蒸鱼豉油、橄榄油、柠檬汁、生抽等带数量的调味料必须正确归入调味品和调味香料专区', () => {
+    const { rows } = buildShoppingList([
+      dish(
+        '鲈鱼 1 条',
+        '蒸鱼豉油 1 勺',
+        '橄榄油 8 克',
+        '柠檬汁 1 勺',
+        '鸡胸肉 150 克',
+        '混合生菜 100 克',
+        '彩椒 1 个'
+      ),
+    ])
+
+    // 蒸鱼豉油带“鱼”但必须是调料
+    const zhengYu = rows.find((r) => r.name === '蒸鱼豉油')
+    expect(zhengYu).toBeDefined()
+    expect(zhengYu?.group).toBe('调味品')
+    expect(zhengYu?.aisle).toBe('🧂 调味香料')
+
+    // 橄榄油必须是调料
+    const oliveOil = rows.find((r) => r.name === '橄榄油')
+    expect(oliveOil).toBeDefined()
+    expect(oliveOil?.group).toBe('调味品')
+    expect(oliveOil?.aisle).toBe('🧂 调味香料')
+
+    // 柠檬汁必须是调料
+    const lemon = rows.find((r) => r.name === '柠檬汁')
+    expect(lemon).toBeDefined()
+    expect(lemon?.group).toBe('调味品')
+    expect(lemon?.aisle).toBe('🧂 调味香料')
+
+    // 鲈鱼为海鲜
+    const luyu = rows.find((r) => r.name === '鲈鱼')
+    expect(luyu?.aisle).toBe('🐟 水产海鲜')
+    expect(luyu?.group).toBe('食材')
+
+    // 彩椒为蔬菜
+    const caijiao = rows.find((r) => r.name === '彩椒')
+    expect(caijiao?.aisle).toBe('🥬 蔬菜菌菇')
+  })
+
 describe('toGrams / formatAmount / 单位表', () => {
   it('toGrams：质量单位直换、容器单位查校准表/兜底、包装单位返回 null', () => {
     expect(toGrams('黄瓜', '根', 0.5)).toBe(100) // 校准表：黄瓜 1 根 ≈ 200 克
@@ -193,5 +234,17 @@ describe('scaleIngredient 食材份量等比缩放', () => {
 
   it('factor 为 1 时返回原字符串', () => {
     expect(scaleIngredient('生抽 1 勺', 1)).toBe('生抽 1 勺')
+  })
+})
+
+describe('buildMarkdownShoppingList 导出 Markdown 清单', () => {
+  it('生成带有 Markdown 待办复选框和分区的标准文本', () => {
+    const list = buildShoppingList([dish('鸡蛋 2 个', '黑胡椒 适量')])
+    const md = buildMarkdownShoppingList(list, 1)
+    expect(md).toContain('# 🛒 每日食光 · 购物清单（1 道菜）')
+    expect(md).toContain('## 🥩 肉禽蛋品')
+    expect(md).toContain('- [ ] 鸡蛋 2 个')
+    expect(md).toContain('## 🧂 调味香料')
+    expect(md).toContain('- [ ] 黑胡椒')
   })
 })
