@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import SponsorModal from './SponsorModal'
 
 const GITHUB_URL = 'https://github.com/Jiayu-zheng1/EveryDay_Food'
 /** 公告弹窗会话标记：同一浏览器会话只弹出一次（刷新 / 切换模块不重复打扰） */
@@ -11,6 +12,8 @@ const SESSION_KEY = 'meiri-announcement-shown'
 export default function AnnouncementModal() {
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
+  // 赞助弹窗叠在公告之上，由公告触发
+  const [showSponsor, setShowSponsor] = useState(false)
   const dialogRef = useRef<HTMLDivElement | null>(null)
 
   // 首次进入（本会话未展示过）时弹出，并记录标记
@@ -29,6 +32,8 @@ export default function AnnouncementModal() {
     dialogRef.current?.focus()
 
     const onKey = (e: KeyboardEvent) => {
+      // 赞助弹窗在场时键盘归它接管：按 DOM 判断（同一次 dispatch 内 ref 会被它清掉）
+      if (document.querySelector('[aria-label="支持作者"]')) return
       if (e.key === 'Escape') close()
       if (e.key === 'Tab') {
         const dialog = dialogRef.current
@@ -138,8 +143,19 @@ export default function AnnouncementModal() {
               我知道了
             </button>
           </div>
+
+          {/* 赞助入口：微信 / 支付宝双通道二维码（与页脚共用 SponsorModal） */}
+          <button
+            onClick={() => setShowSponsor(true)}
+            className="w-full rounded-full border border-tangerine/30 bg-tangerine/10 px-4 py-2 text-sm font-semibold text-tangerine transition-all hover:scale-[1.02] hover:bg-tangerine/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tangerine"
+          >
+            🧋 请作者喝杯奶茶 · 微信 / 支付宝
+          </button>
         </div>
       </div>
+
+      {/* 赞助弹窗叠在公告之上 */}
+      <SponsorModal open={showSponsor} onClose={() => setShowSponsor(false)} />
     </div>
   )
 }
