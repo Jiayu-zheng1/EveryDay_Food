@@ -19,7 +19,7 @@ export default function Footer() {
           <button
             type="button"
             onClick={() => setShowSponsor(true)}
-            className="inline-flex items-center gap-1 rounded-full border border-tangerine/30 bg-tangerine/10 px-3 py-1 font-semibold text-tangerine transition-all hover:scale-105 hover:bg-tangerine/20"
+            className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50 px-3.5 py-1 font-bold text-amber-900 shadow-2xs transition-all hover:scale-105 hover:bg-amber-100/90 active:scale-95 cursor-pointer"
           >
             🧋 请作者喝杯奶茶
           </button>
