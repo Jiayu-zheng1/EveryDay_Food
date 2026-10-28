@@ -123,8 +123,11 @@ export default function AnnouncementModal() {
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-tangerine/25 bg-tangerine/10 px-4 py-3 text-xs leading-relaxed text-tangerine">
-            创作不易，如果对你有帮助，可以帮忙 <span className="font-bold">star</span> 一下，谢谢！⭐
+          {/* 创作不易提示条：柔和清爽低饱和底色 + 深色高对比文字，绝不刺眼 */}
+          <div className="rounded-2xl border border-slate-200/90 bg-slate-100/80 px-4 py-3 text-xs leading-relaxed text-slate-700 shadow-2xs">
+            <span>创作不易，如果对你有帮助，可以帮忙 </span>
+            <span className="font-extrabold text-slate-900 underline decoration-amber-400 decoration-2 underline-offset-2">star</span>
+            <span> 一下，谢谢！⭐</span>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:gap-3">
@@ -132,22 +135,23 @@ export default function AnnouncementModal() {
               href={GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 rounded-full bg-gradient-brand px-4 py-2 text-sm font-bold text-white shadow-lg shadow-grape/25 transition-all hover:scale-[1.03] hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grape"
+              className="flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] hover:brightness-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               ⭐ 去 GitHub 点个 Star
             </a>
             <button
               onClick={close}
-              className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-snow transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grape"
+              className="rounded-full border border-slate-200/90 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-100/80 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               我知道了
             </button>
           </div>
 
-          {/* 赞助入口：微信 / 支付宝双通道二维码（与页脚共用 SponsorModal） */}
+          {/* 赞助入口：温暖琥珀色实体渐变按钮 + 白字高对比度，与上方提示框色块完全区分 */}
           <button
+            type="button"
             onClick={() => setShowSponsor(true)}
-            className="w-full rounded-full border border-tangerine/30 bg-tangerine/10 px-4 py-2 text-sm font-semibold text-tangerine transition-all hover:scale-[1.02] hover:bg-tangerine/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tangerine"
+            className="w-full rounded-full border border-amber-400/30 bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm font-extrabold text-white shadow-md shadow-amber-500/25 transition-all hover:scale-[1.02] hover:brightness-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 cursor-pointer"
           >
             🧋 请作者喝杯奶茶 · 微信 / 支付宝
           </button>

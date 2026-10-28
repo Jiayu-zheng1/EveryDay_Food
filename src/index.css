@@ -10,7 +10,7 @@
   --color-mist: #64748b;       /* 次要文字：Slate-500 */
   --color-grape: #3b82f6;      /* 鲜活蓝 Blue-500 */
   --color-berry: #6366f1;      /* 靛蓝 Indigo-500 */
-  --color-tangerine: #f59e0b;  /* 琥珀橙 Amber-500 */
+  --color-tangerine: #d97706;  /* 琥珀暖橙 Amber-600：在浅色玻璃底上保持 4.5:1+ 清晰高对比度，柔和不刺眼 */
 
   /* 系统字体栈，保证中文渲染与数字感 */
   --font-sans: -apple-system, BlinkMacSystemFont, "Noto Sans SC", "PingFang SC",

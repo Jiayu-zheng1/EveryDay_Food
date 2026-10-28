@@ -251,7 +251,7 @@ export default function MealModal({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-black">{meal.name}</h2>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm font-bold text-tangerine">
+              <span className="rounded-full border border-slate-200/80 bg-slate-100/90 px-3 py-1 text-xs font-black text-slate-800 font-display">
                 {meal.kcal * servings} kcal / {servings}人份（约 {meal.servingSize.amount * servings}
                 {meal.servingSize.unit}）
               </span>
@@ -262,10 +262,10 @@ export default function MealModal({
                     onAdd(meal)
                     setAdded(true)
                   }}
-                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-bold transition-all hover:scale-105 active:scale-95 ${
+                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-xs cursor-pointer ${
                     added
-                      ? 'bg-grape/20 text-grape'
-                      : 'bg-tangerine text-ink shadow-lg shadow-tangerine/25 hover:brightness-110'
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-slate-900 text-white hover:bg-slate-800'
                   }`}
                 >
                   {added ? '✓ 已加入' : '＋ 加入餐桌'}
@@ -301,7 +301,7 @@ export default function MealModal({
             </div>
           )}
           {otherVariants.length === 0 && variants && variants > 1 && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl border border-tangerine/25 bg-tangerine/10 px-3 py-2 text-xs font-medium leading-relaxed text-tangerine">
+            <div className="mt-3 flex items-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs font-bold leading-relaxed text-amber-900">
               <span aria-hidden="true" className="text-sm">🔁</span>
               <span>同款变体 {variants} 个：做法与热量略有不同，可在菜谱库中对比</span>
             </div>
