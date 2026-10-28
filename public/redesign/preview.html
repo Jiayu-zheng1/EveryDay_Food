@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · UI 重构设计方案全览</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0c0a09;
+      color: #f5f5f4;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    .preview-card {
+      background: #1c1917;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.25rem;
+      transition: all 0.25s ease;
+    }
+    .preview-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6 md:p-12 max-w-6xl mx-auto">
+  <div class="text-center max-w-2xl mx-auto mb-12">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mb-4">
+      <span>🍱 每日食光 · 2026 UI 重构候选方案</span>
+    </div>
+    <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white">
+      点击直接进入各版设计体验
+    </h1>
+    <p class="text-stone-400 text-sm mt-3">
+      包含交互动效、组件层次与真实菜谱数据排版，可在浏览器中直接缩放窗口测试响应式效果。
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- 全功能主页（方案 5 液态玻璃） -->
+    <a href="/redesign/home-liquid.html" class="preview-card p-6 block group md:col-span-2 border-blue-500/40 bg-gradient-to-r from-blue-950/30 via-slate-900 to-indigo-950/30">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-500 text-white">
+          ✨ 方案 5 · 全功能主页重构落地版 (推荐)
+        </span>
+        <span class="text-blue-400 text-xs font-bold group-hover:translate-x-1 transition-transform">立即体验完整主页 →</span>
+      </div>
+      <h2 class="text-2xl md:text-3xl font-black text-white group-hover:text-blue-300 transition flex items-center gap-2">
+        <span>💧</span> 液态果冻玻璃 · 全功能主页完整预览
+      </h2>
+      <p class="text-slate-300 text-xs md:text-sm mt-2 leading-relaxed">
+        涵盖全部功能：晨光特选 Bento 看板、专属热量目标测算、三餐智能搭配（早中晚单菜置换）、四大厨房王牌矩阵、热门食谱流与底部悬浮灵动餐桌岛。
+      </p>
+    </a>
+
+    <!-- 方案 1 -->
+    <a href="/redesign/fresh-bento.html" class="preview-card p-6 block group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          ⭐ 保留方案 · 最推荐
+        </span>
+        <span class="text-stone-500 text-xs group-hover:text-white transition">立即体验 →</span>
+      </div>
+      <h2 class="text-2xl font-bold text-white group-hover:text-emerald-400 transition flex items-center gap-2">
+        <span>🍱</span> 方案 1：多巴胺便当盒 (Fresh Bento)
+      </h2>
+      <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+        燕麦暖白底 + 纯白便当卡片 + 牛油果绿/番茄红多巴胺撞色。小红书爆款生活美学，食欲感与呼吸感兼具。
+      </p>
+      <div class="mt-4 pt-4 border-t border-white/5 flex gap-2">
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">Bento Grid</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">轻食减脂</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">健康治愈</span>
+      </div>
+    </a>
+
+    <!-- 方案 4 -->
+    <a href="/redesign/warm-zen.html" class="preview-card p-6 block group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          和风物语 · 松弛自炊
+        </span>
+        <span class="text-stone-500 text-xs group-hover:text-white transition">立即体验 →</span>
+      </div>
+      <h2 class="text-2xl font-bold text-white group-hover:text-amber-400 transition flex items-center gap-2">
+        <span>🍵</span> 方案 4：和风日系轻物语 (Warm Zen)
+      </h2>
+      <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+        和纸质感底色 + 极细铅笔线框 + 红色手盖印章（減脂·旬鮮）。独居慢生活，消除一切算卡焦虑。
+      </p>
+      <div class="mt-4 pt-4 border-t border-white/5 flex gap-2">
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">Muji 极简</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">Noto Serif 衬线</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">印章美学</span>
+      </div>
+    </a>
+
+    <!-- 方案 5 -->
+    <a href="/redesign/liquid-glass.html" class="preview-card p-6 block group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+          苹果原生 · 通透轻盈
+        </span>
+        <span class="text-stone-500 text-xs group-hover:text-white transition">立即体验 →</span>
+      </div>
+      <h2 class="text-2xl font-bold text-white group-hover:text-blue-400 transition flex items-center gap-2">
+        <span>💧</span> 方案 5：液态果冻玻璃 (Liquid Glass)
+      </h2>
+      <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+        冰川浅灰蓝底 + 晨光弥散光斑 + 超透光磨砂果冻卡片。VisionOS 2.0 级水润反光与浮动药丸组件。
+      </p>
+      <div class="mt-4 pt-4 border-t border-white/5 flex gap-2">
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">VisionOS</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">液态玻璃</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">现代科技感</span>
+      </div>
+    </a>
+
+    <!-- 方案 6 -->
+    <a href="/redesign/pixel-cafe.html" class="preview-card p-6 block group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30">
+          动森风 · 游戏化打卡
+        </span>
+        <span class="text-stone-500 text-xs group-hover:text-white transition">立即体验 →</span>
+      </div>
+      <h2 class="text-2xl font-bold text-white group-hover:text-pink-400 transition flex items-center gap-2">
+        <span>🎮</span> 方案 6：动森像素料理屋 (Pixel Cafe)
+      </h2>
+      <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+        复古暖木掌机色 + 经典像素描边。营养素变成 HP 蛋白血条与 STA 能量条，做饭打卡如同通关收集料理图鉴。
+      </p>
+      <div class="mt-4 pt-4 border-t border-white/5 flex gap-2">
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">8-Bit Pixel</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">游戏化 HP/耐力</span>
+        <span class="text-[10px] bg-stone-800 text-stone-300 px-2 py-0.5 rounded">Z世代自传播</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="mt-12 text-center text-xs text-stone-500">
+    <p>当前运行服务端口：5173 · Vite 服务已持久化常驻</p>
+  </div>
+</body>
+</html>

@@ -259,7 +259,7 @@ export function generateSmartPlan(
   const sum = (arr: Meal[]) => arr.reduce((total, m) => total + m.kcal, 0)
   const used = new Set<string>()
   const plan: PlanSlot[] = []
-
+  let hasRiceDish = false
   for (const { slot, type, share } of slots) {
     const slotGoal = targetKcal * share
     // 候选池：该餐次 mealType 匹配 + 目标分类匹配（可选）+ 跨餐未使用
@@ -276,23 +276,28 @@ export function generateSmartPlan(
     // 池超上限（正常路径各池 ≤ 48 道，不会触发）时跳过组合枚举，
     // 直接取热量最接近该餐目标的 2 道，O(n log n) 毫秒级返回，确定性不依赖随机。
     let chosen: Meal[]
+    const maxAllowedRice = hasRiceDish ? 0 : 1
     if (pool.length > MAX_POOL_SIZE) {
-      chosen = [...pool]
+      const filteredPool = hasRiceDish ? pool.filter((m) => !isRiceDish(m)) : pool
+      chosen = [...filteredPool]
         .sort((a, b) => Math.abs(a.kcal - slotGoal) - Math.abs(b.kcal - slotGoal))
-        .slice(0, Math.min(2, pool.length))
+        .slice(0, Math.min(2, filteredPool.length))
     } else if (pool.length < 2) {
-      // 池不足 2 道：退化出 1 道（kcal 最接近目标的）
+      // 池不足 2 道：退化出 1 道（kcal 最接近目标的，若已有饭则不选饭）
+      const filteredPool = hasRiceDish ? pool.filter((m) => !isRiceDish(m)) : pool
+      const targetPool = filteredPool.length > 0 ? filteredPool : pool
       chosen = [
-        pool.reduce((best, m) =>
+        targetPool.reduce((best, m) =>
           Math.abs(m.kcal - slotGoal) < Math.abs(best.kcal - slotGoal) ? m : best
         ),
       ]
     } else {
-      // 枚举 2 道与 3 道的所有组合（规模被 MAX_POOL_SIZE 约束，MAX_COMBOS 兜底）
-      const combos = [...combinations(pool, 2), ...combinations(pool, 3)]
+      // 枚举 2 道与 3 道的所有组合（过滤掉含多个饭或已有饭时还包含饭的组合）
+      const rawCombos = [...combinations(pool, 2), ...combinations(pool, 3)]
+      const combos = rawCombos.filter((c) => c.filter(isRiceDish).length <= maxAllowedRice)
       if (combos.length > MAX_COMBOS) {
-        // 双保险：超出枚举预算（正常路径不可能）直接退化为热量最高的 3 道
-        chosen = [...pool].sort((a, b) => b.kcal - a.kcal).slice(0, Math.min(3, pool.length))
+        const filteredPool = hasRiceDish ? pool.filter((m) => !isRiceDish(m)) : pool
+        chosen = [...filteredPool].sort((a, b) => b.kcal - a.kcal).slice(0, Math.min(3, filteredPool.length))
       } else {
         // 合计 ≥ 目标 70% 的组合（不低于下限）
         const eligible = combos.filter((c) => sum(c) >= slotGoal * 0.7)
@@ -321,11 +326,26 @@ export function generateSmartPlan(
       }
     }
 
-    chosen.forEach((m) => used.add(m.id))
+    chosen.forEach((m) => {
+      used.add(m.id)
+      if (isRiceDish(m)) hasRiceDish = true
+    })
     plan.push({ slot, meals: chosen })
   }
 
   return plan
+}
+
+/**
+ * 判断是否为「饭类」（炒饭/盖饭/焖饭/烩饭/抓饭/糙米饭/饭团/饭包等米饭主食）
+ * 排除以电饭煲/电饭锅为烹饪工具的肉菜（如电饭煲焖鸡）
+ */
+export function isRiceDish(meal: { name: string }): boolean {
+  const name = meal.name
+  if (name.includes('电饭煲') || name.includes('电饭锅')) {
+    return /焖饭|炒饭|盖饭|烩饭|抓饭|紫米饭|杂粮饭|糙米饭/.test(name)
+  }
+  return name.includes('饭') || name.includes('糙米碗')
 }
 
 /* ---------------- 今日搭配自定义生成（主页 DailyPlanner） ---------------- */
@@ -376,6 +396,8 @@ export function generateDailyPlan(
     { slot: '晚餐', type: 'dinner' },
   ]
   const result: PlanSlot[] = []
+  let hasRiceDish = false
+
   for (const { slot, type } of slots) {
     const pool = meals.filter(
       (m) =>
@@ -386,10 +408,21 @@ export function generateDailyPlan(
     const mealsForSlot: Meal[] = []
     const count = Math.max(0, Math.floor(mealCounts[type] ?? 0))
     while (mealsForSlot.length < count && pool.length > 0) {
-      const index = Math.floor(rand() * pool.length)
-      const picked = pool.splice(index, 1)[0]
+      // 饭类约束：全天最多出现 1 道饭，若已选过饭，后续候选池排除所有饭类
+      const availablePool = hasRiceDish ? pool.filter((m) => !isRiceDish(m)) : pool
+      if (availablePool.length === 0) break
+
+      const index = Math.floor(rand() * availablePool.length)
+      const picked = availablePool[index]
+      const poolIdx = pool.indexOf(picked)
+      if (poolIdx >= 0) pool.splice(poolIdx, 1)
+
       used.add(picked.id)
       mealsForSlot.push(picked)
+
+      if (isRiceDish(picked)) {
+        hasRiceDish = true
+      }
     }
     result.push({ slot, meals: mealsForSlot })
   }
@@ -423,10 +456,14 @@ export function replacePlanDish(
   if (!targetSlot) return plan
 
   const used = new Set<string>()
+  let hasOtherRiceDish = false
   for (const s of plan) {
     for (const m of s.meals) {
       if (m.id !== dishIdToReplace) {
         used.add(m.id)
+        if (isRiceDish(m)) {
+          hasOtherRiceDish = true
+        }
       }
     }
   }
@@ -436,10 +473,9 @@ export function replacePlanDish(
     (m) =>
       (m.mealType ?? []).includes(type) &&
       !used.has(m.id) &&
-      (!options.category || m.category === options.category)
+      (!options.category || m.category === options.category) &&
+      (!hasOtherRiceDish || !isRiceDish(m))
   )
-
-  if (pool.length === 0) return plan
 
   const pickedIndex = Math.floor(rand() * pool.length)
   const newMeal = pool[pickedIndex]

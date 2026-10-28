@@ -42,8 +42,7 @@ const MEAL_STEPPERS: Array<{ type: MealType; label: string; icon: string }> = [
 
 // 步进器按钮基础样式
 const STEP_BTN =
-  'grid size-8 place-items-center rounded-full border border-white/10 bg-white/5 text-lg font-bold text-snow transition-all hover:border-grape/40 hover:bg-white/10 active:scale-90 disabled:pointer-events-none disabled:opacity-30'
-
+  'grid size-8 place-items-center rounded-full border border-slate-200 bg-white/90 text-sm font-bold text-slate-800 transition-all hover:bg-slate-100 hover:border-blue-400 active:scale-90 disabled:pointer-events-none disabled:opacity-30 shadow-xs cursor-pointer'
 /**
  * 「生成今日搭配」功能区（主页核心区，id=daily 供「今日搭配」入口滚动定位）：
  * 人口数步进器（1-6，默认 1）+ 每餐菜数步进器（早 1-3 / 午 1-4 / 晚 1-4，默认 2/3/3）
@@ -80,14 +79,16 @@ export default function DailyPlanner({
         <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="flex items-center gap-2.5 text-2xl font-black sm:text-3xl">
-                <span aria-hidden="true" className="inline-block h-5 w-1.5 rounded-full bg-gradient-to-b from-tangerine to-grape" />
-                生成今日搭配
+              <div className="flex items-center gap-2 text-xs font-extrabold text-blue-600 uppercase tracking-wider">
+                <span>🌅 DAILY MEAL PLANNER</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-slate-900 mt-1">
+                今日三餐智能搭配
               </h2>
-              <p className="mt-2 text-sm text-mist">
+              <p className="mt-1 text-xs text-slate-500">
                 {isCustom
-                  ? '按人口数与每餐菜数自定义搭配，也可以随机换一批'
-                  : '每天换一组均衡搭配，也可以随机换一批'}
+                  ? '按人口数与每餐菜数自定义搭配，也可随时随机换一批'
+                  : '每天换一组均衡搭配，也可随时随机换一批'}
               </p>
               {activeGoal && targetKcal && (
                 <div className="mt-3 flex flex-wrap items-center gap-2.5">
@@ -111,11 +112,13 @@ export default function DailyPlanner({
             <div className="flex items-center gap-3">
               {/* 「🎲 换一批」：随机 / 自定义模式恒可用（加载中禁用） */}
               <button
+                type="button"
                 onClick={onShuffle}
                 disabled={loading}
-                className="rounded-full border border-berry/40 bg-berry/10 px-5 py-2 text-sm font-semibold text-berry transition-all hover:bg-berry/20 hover:shadow-lg hover:shadow-berry/20 active:scale-95 disabled:opacity-50"
+                className="jelly-pill px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50 cursor-pointer"
               >
-                🎲 换一批
+                <span>🎲</span>
+                <span>换一批</span>
               </button>
             </div>
           </div>
@@ -123,7 +126,7 @@ export default function DailyPlanner({
 
         {/* 生成控制区：人口数 + 每餐菜数步进器 + 生成按钮 */}
         <Reveal delay={80}>
-          <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-white/8 bg-white/4 p-5 backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-white/90 bg-white/80 p-5 shadow-xs backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               {/* 人口数步进器：1-6 人 */}
               <div className="flex items-center gap-3">
@@ -197,9 +200,10 @@ export default function DailyPlanner({
               type="button"
               onClick={onGenerate}
               disabled={loading}
-              className="shrink-0 rounded-full bg-gradient-brand px-7 py-3 font-semibold text-white shadow-xl shadow-berry/25 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-berry/30 active:scale-95 disabled:opacity-50"
+              className="jelly-btn px-6 py-3 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              ✨ 生成今日搭配
+              <span>✨</span>
+              <span>重新生成搭配</span>
             </button>
           </div>
         </Reveal>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { ModuleKey } from '../types'
 
-/** 顶部导航的 props */
 interface HeaderProps {
   activeModule: ModuleKey
   tableCount: number
   onNavigate: (module: ModuleKey) => void
+  onOpenSponsor?: () => void
 }
 
 /**
@@ -39,7 +39,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-export default function Header({ activeModule, tableCount, onNavigate }: HeaderProps) {
+export default function Header({ activeModule, tableCount, onNavigate, onOpenSponsor }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false))
@@ -67,14 +67,8 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
     }
   }, [])
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? 'border-b border-white/5 bg-ink/70 py-3 shadow-lg shadow-black/20 backdrop-blur-xl'
-          : 'bg-transparent py-5'
-      }`}
-    >
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5">
+    <header className={`fixed inset-x-0 top-3 z-40 px-3 sm:px-6 transition-all duration-300 ${scrolled ? 'shadow-xs' : ''}`}>
+      <div className={`mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-white/90 bg-white/80 px-3 py-2 shadow-lg shadow-slate-200/50 backdrop-blur-2xl transition-all sm:px-5 ${scrolled ? 'bg-white/95 shadow-md shadow-slate-200/70' : ''}`}>
         {/* logo：点击回首页 */}
         <a
           href="#top"
@@ -82,20 +76,23 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
             e.preventDefault()
             onNavigate('home')
           }}
-          className="flex shrink-0 items-center gap-2.5"
+          className="flex shrink-0 items-center gap-2"
         >
-          <span className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-grape via-berry to-tangerine text-xl shadow-lg shadow-berry/30">
+          <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-amber-500 text-lg shadow-sm">
             🍱
           </span>
-          <span className="text-lg font-bold tracking-wide">每日食光</span>
+          <span className="font-extrabold tracking-tight text-slate-900">每日食光</span>
+          <span className="hidden sm:inline-block rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-500/20 whitespace-nowrap">
+            1093 道热量全算好
+          </span>
         </a>
 
-        {/* 右侧：模块导航（移动端横向滚动）+ GitHub Star 按钮（右上角） */}
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+        {/* 模块导航 */}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
           <nav
             role="tablist"
             aria-label="模块导航"
-            className="flex items-center gap-1 overflow-x-auto"
+            className="flex items-center gap-1 overflow-x-auto rounded-full bg-slate-100/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {TABS.map((tab) => {
               const active = activeModule === tab.key
@@ -106,16 +103,16 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
                   role="tab"
                   aria-selected={active}
                   onClick={() => onNavigate(tab.key)}
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition-all duration-300 sm:px-4 ${
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs transition-all duration-200 sm:px-4 ${
                     active
-                      ? 'bg-gradient-brand font-bold text-white shadow-lg shadow-grape/25'
-                      : 'text-mist hover:bg-white/5 hover:text-snow'
+                      ? 'bg-slate-900 font-extrabold text-white shadow-xs'
+                      : 'font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
                 >
                   {tab.label}
-                  {/* 我的餐桌数量角标：餐桌非空时显示已选道数 */}
+                  {/* 我的餐桌数量角标 */}
                   {tab.key === 'table' && tableCount > 0 && (
-                    <span className="ml-1 rounded-full bg-tangerine px-1.5 text-xs font-bold text-ink">
+                    <span className="ml-1 rounded-full bg-amber-400 px-1.5 py-0.2 text-[10px] font-black text-slate-950">
                       {tableCount}
                     </span>
                   )}
@@ -124,15 +121,26 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
             })}
           </nav>
 
+          {onOpenSponsor && (
+            <button
+              type="button"
+              onClick={onOpenSponsor}
+              className="hidden md:inline-flex shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:shadow-md transition active:scale-95"
+            >
+              <span>🧋</span>
+              <span>请喝奶茶</span>
+            </button>
+          )}
+
           <a
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
             title="GitHub：Jiayu-zheng1/EveryDay_Food —— 创作不易，如果对你有帮助，可以帮忙 star 一下，谢谢！"
             aria-label="GitHub 仓库 Jiayu-zheng1/EveryDay_Food，创作不易，如果对你有帮助，可以帮忙 star 一下，谢谢！"
-            className="group flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-snow transition-all duration-300 hover:border-tangerine/50 hover:bg-tangerine/10 hover:text-tangerine hover:shadow-[0_8px_24px_-8px_rgba(245,165,36,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grape"
+            className="group flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs transition-all hover:border-amber-400 hover:text-amber-600 active:scale-95"
           >
-            <GithubIcon className="size-4 transition-transform duration-300 group-hover:scale-110" />
+            <GithubIcon className="size-3.5 transition-transform duration-300 group-hover:scale-110" />
             <span className="hidden sm:inline">Star</span>
           </a>
 
@@ -144,10 +152,10 @@ export default function Header({ activeModule, tableCount, onNavigate }: HeaderP
                 const choice = await installPrompt.userChoice
                 if (choice.outcome === 'accepted') setInstallPrompt(null)
               }}
-              className="flex shrink-0 items-center gap-1 rounded-full border border-grape/40 bg-grape/20 px-3 py-1.5 text-xs font-bold text-snow transition-all hover:scale-105 hover:bg-grape/30"
+              className="flex shrink-0 items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-bold text-blue-700 transition-all hover:scale-105"
             >
               <span>📲</span>
-              <span className="hidden sm:inline">添加到桌面</span>
+              <span className="hidden sm:inline">桌面版</span>
             </button>
           )}
         </div>

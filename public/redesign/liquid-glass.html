@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 5：液态果冻玻璃 (Liquid Glass / VisionOS)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F0F4F8; /* 冰川浅灰蓝 */
+      color: #0F172A;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .num { font-family: 'Plus Jakarta Sans', sans-serif; }
+    /* 液态果冻玻璃卡片 */
+    .liquid-card {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 1.75rem;
+      box-shadow: 0 8px 32px 0 rgba(148, 163, 184, 0.12), 0 1px 2px 0 rgba(255, 255, 255, 0.6) inset;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .liquid-card:hover {
+      transform: translateY(-4px) scale(1.005);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 20px 48px -12px rgba(100, 116, 139, 0.2), 0 1px 2px 0 rgba(255, 255, 255, 0.9) inset;
+    }
+    .jelly-pill {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative">
+  <!-- 柔和漂浮光斑环境底 -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-200/50 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 -right-32 w-[30rem] h-[30rem] bg-rose-200/40 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-amber-200/40 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- 浮动毛玻璃顶栏 -->
+  <header class="sticky top-4 z-40 max-w-5xl mx-auto px-4">
+    <div class="liquid-card px-6 py-3 flex items-center justify-between !rounded-full">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-1 bg-white/80 rounded-full shadow-xs">🥗</span>
+        <span class="font-extrabold text-base tracking-tight text-slate-800">每日食光</span>
+        <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600">Vision 2.0</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="#" class="px-4 py-1.5 rounded-full bg-slate-900 text-white font-bold text-xs shadow-sm">
+          本日推荐
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 font-semibold text-xs transition">
+          健康目标
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 font-semibold text-xs transition">
+          万道食谱
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 font-semibold text-xs transition">
+          餐桌清单
+        </a>
+      </nav>
+
+      <button class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition">
+        🧋 请喝奶茶
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="max-w-5xl mx-auto px-6 pt-12 pb-24">
+    <!-- 标语区 -->
+    <div class="text-center max-w-xl mx-auto mb-12">
+      <span class="jelly-pill px-3.5 py-1 text-xs font-bold text-slate-600 inline-block mb-3">
+        💧 纯净 · 通透 · 毫无算法负担
+      </span>
+      <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+        每一克营养，<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-500">都如水滴般清澈分明</span>
+      </h1>
+      <p class="text-xs text-slate-500 mt-3">轻盈如果冻的下厨伴侣 · 为高品质生活青年定制</p>
+    </div>
+
+    <!-- 晨光液态特选大卡 -->
+    <div class="liquid-card p-8 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <div class="md:col-span-5 h-60 rounded-3xl bg-gradient-to-br from-white/90 to-blue-50/60 border border-white flex items-center justify-center text-7xl shadow-inner relative">
+          🥑
+          <span class="jelly-pill absolute top-4 left-4 px-3 py-1 text-xs font-bold text-emerald-700">
+            清爽减脂
+          </span>
+          <span class="num absolute bottom-4 right-4 text-xs font-black text-slate-400">
+            15 MINS
+          </span>
+        </div>
+
+        <div class="md:col-span-7">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-blue-600">CHEF'S SIGNATURE</span>
+            <span class="num text-3xl font-black text-slate-900">
+              340 <span class="text-xs font-semibold text-slate-400">kcal</span>
+            </span>
+          </div>
+
+          <h2 class="text-2xl font-extrabold text-slate-900">牛油果低温浸慢煎三文鱼</h2>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+            富含天然优质 Omega-3 与不饱和脂肪酸。三文鱼皮慢煎至酥脆金黄，肉质粉嫩多汁，搭配丝滑牛油果泥。
+          </p>
+
+          <!-- 水滴果冻药丸微指标 -->
+          <div class="grid grid-cols-3 gap-3 mt-6">
+            <div class="jelly-pill p-3 text-center">
+              <div class="text-[10px] text-slate-400 font-bold">高蛋白</div>
+              <div class="num text-base font-black text-slate-800 mt-0.5">36.5g</div>
+            </div>
+            <div class="jelly-pill p-3 text-center">
+              <div class="text-[10px] text-slate-400 font-bold">低碳水</div>
+              <div class="num text-base font-black text-slate-800 mt-0.5">8.2g</div>
+            </div>
+            <div class="jelly-pill p-3 text-center">
+              <div class="text-[10px] text-slate-400 font-bold">好脂肪</div>
+              <div class="num text-base font-black text-slate-800 mt-0.5">14.0g</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
+            <span class="text-xs text-slate-400">一键配置 1 人份食材用量</span>
+            <button class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-full text-xs font-bold transition shadow-sm">
+              + 加入今日菜单
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 果冻卡片三联 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="liquid-card p-6">
+        <div class="h-40 rounded-2xl bg-gradient-to-br from-white to-emerald-50/60 border border-white flex items-center justify-center text-5xl mb-4 relative">
+          🥣
+          <span class="jelly-pill absolute top-3 left-3 px-2 py-0.5 text-[11px] font-bold text-emerald-600">减脂</span>
+          <span class="num absolute bottom-3 right-3 text-xs font-bold text-slate-500">220 kcal</span>
+        </div>
+        <h3 class="font-extrabold text-base text-slate-900">鲜虾秋葵滑蛋燕麦粥</h3>
+        <p class="text-xs text-slate-500 mt-1 line-clamp-2">暖胃饱腹慢碳首选，高膳食纤维，清爽不油腻。</p>
+        <div class="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between text-xs font-bold">
+          <span class="num text-slate-400 font-medium">P: 22g · C: 26g</span>
+          <button class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition">+</button>
+        </div>
+      </div>
+
+      <div class="liquid-card p-6">
+        <div class="h-40 rounded-2xl bg-gradient-to-br from-white to-rose-50/60 border border-white flex items-center justify-center text-5xl mb-4 relative">
+          🥩
+          <span class="jelly-pill absolute top-3 left-3 px-2 py-0.5 text-[11px] font-bold text-rose-600">增肌</span>
+          <span class="num absolute bottom-3 right-3 text-xs font-bold text-slate-500">540 kcal</span>
+        </div>
+        <h3 class="font-extrabold text-base text-slate-900">黑椒原切嫩牛柳盖饭</h3>
+        <p class="text-xs text-slate-500 mt-1 line-clamp-2">原切无腌制科技，大火快炒肉汁充盈，健身黄金搭档。</p>
+        <div class="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between text-xs font-bold">
+          <span class="num text-slate-400 font-medium">P: 44g · C: 48g</span>
+          <button class="w-7 h-7 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white flex items-center justify-center transition">+</button>
+        </div>
+      </div>
+
+      <div class="liquid-card p-6">
+        <div class="h-40 rounded-2xl bg-gradient-to-br from-white to-amber-50/60 border border-white flex items-center justify-center text-5xl mb-4 relative">
+          🍲
+          <span class="jelly-pill absolute top-3 left-3 px-2 py-0.5 text-[11px] font-bold text-amber-600">家常</span>
+          <span class="num absolute bottom-3 right-3 text-xs font-bold text-slate-500">320 kcal</span>
+        </div>
+        <h3 class="font-extrabold text-base text-slate-900">慢煲板栗走地鸡煲</h3>
+        <p class="text-xs text-slate-500 mt-1 line-clamp-2">粉糯板栗吸收浓缩鸡汁，无多余香精油盐，鲜美入骨。</p>
+        <div class="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between text-xs font-bold">
+          <span class="num text-slate-400 font-medium">P: 35g · C: 18g</span>
+          <button class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white flex items-center justify-center transition">+</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

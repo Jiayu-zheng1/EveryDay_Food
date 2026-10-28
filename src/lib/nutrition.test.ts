@@ -7,11 +7,12 @@ import {
   calculateTDEE,
   generateDailyPlan,
   generateSmartPlan,
+  isRiceDish,
   replacePlanDish,
   suggestGoal,
   validateNutritionForm,
 } from './nutrition'
-import type { DailyTargets, Goal, Meal } from '../types'
+import type { DailyTargets, Goal, Meal, PlanSlot } from '../types'
 import mealsJsonRaw from '../../public/data/meals.json?raw'
 
 /** 构造最小 Meal（仅测试所需字段） */
@@ -367,5 +368,74 @@ describe('replacePlanDish（三餐单道菜独立置换）', () => {
     const newMeal = updatedPlan[0].meals.find((m) => m.id !== initialPlan[0].meals[1].id)
     expect(newMeal).toBeDefined()
     expect(newMeal?.category).toBe('fat-loss')
+  })
+})
+
+describe('饭类单次出现约束（硬性要求：生成随机搭配时饭类不能同时出现，全天至多1个饭）', () => {
+  it('isRiceDish 能正确识别饭类并排除电饭煲工具菜', () => {
+    expect(isRiceDish({ name: '黑椒牛柳炒饭' })).toBe(true)
+    expect(isRiceDish({ name: '牛肉糙米饭' })).toBe(true)
+    expect(isRiceDish({ name: '滑蛋牛肉饭' })).toBe(true)
+    expect(isRiceDish({ name: '菌菇鸡肉焖饭' })).toBe(true)
+    expect(isRiceDish({ name: '手抓饭' })).toBe(true)
+    expect(isRiceDish({ name: '饭团' })).toBe(true)
+    expect(isRiceDish({ name: '东北饭包' })).toBe(true)
+    expect(isRiceDish({ name: '电饭煲焖鸡' })).toBe(false)
+    expect(isRiceDish({ name: '清蒸鲈鱼' })).toBe(false)
+  })
+
+  it('generateDailyPlan 生成的搭配中饭类至多出现 1 道（不能同时出现多道饭）', () => {
+    const counts = { breakfast: 2, lunch: 3, dinner: 3 }
+    for (let seed = 1; seed <= 50; seed++) {
+      const plan = generateDailyPlan(MEALS, counts, { seed })
+      const allMeals = plan.flatMap((s) => s.meals)
+      const riceDishes = allMeals.filter(isRiceDish)
+      expect(
+        riceDishes.length,
+        `seed ${seed} 出现了多个饭: ${riceDishes.map((r) => r.name).join(', ')}`
+      ).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('replacePlanDish 替换单菜时，若已有饭类则不能再替换出新饭', () => {
+    const plan: PlanSlot[] = [
+      { slot: '早餐', meals: [makeMeal({ id: 'm1', name: '无糖豆浆', kcal: 100, mealType: ['breakfast'] })] },
+      {
+        slot: '午餐',
+        meals: [
+          makeMeal({ id: 'm2', name: '蛋炒饭', kcal: 500, mealType: ['lunch'] }),
+          makeMeal({ id: 'm3', name: '清炒时蔬', kcal: 150, mealType: ['lunch'] }),
+        ],
+      },
+      { slot: '晚餐', meals: [makeMeal({ id: 'm4', name: '清蒸鲈鱼', kcal: 280, mealType: ['dinner'] })] },
+    ]
+    const pool = [
+      makeMeal({ id: 'r1', name: '扬州炒饭', kcal: 520, mealType: ['lunch'] }),
+      makeMeal({ id: 'r2', name: '卤肉饭', kcal: 600, mealType: ['lunch'] }),
+      makeMeal({ id: 'c1', name: '西蓝花炒虾仁', kcal: 200, mealType: ['lunch'] }),
+    ]
+    const updated = replacePlanDish(plan, 'lunch', 'm3', pool, { seed: 1 })
+    const allMeals = updated.flatMap((s) => s.meals)
+    const riceDishes = allMeals.filter(isRiceDish)
+    expect(riceDishes.length).toBeLessThanOrEqual(1)
+    expect(updated[1].meals.find((m) => m.id === 'c1')).toBeDefined()
+  })
+
+  it('generateSmartPlan 生成的健康目标智能搭配中饭类至多 1 道', () => {
+    const targets: DailyTargets = {
+      bmr: 1600,
+      tdee: 2000,
+      targetKcal: 2000,
+      goal: 'maintenance',
+      proteinG: 120,
+      carbsG: 220,
+      fatG: 55,
+    }
+    for (let i = 0; i < 20; i++) {
+      const plan = generateSmartPlan(MEALS, targets, { goal: 'maintenance', random: true })
+      const allMeals = plan.flatMap((s) => s.meals)
+      const riceDishes = allMeals.filter(isRiceDish)
+      expect(riceDishes.length).toBeLessThanOrEqual(1)
+    }
   })
 })

@@ -11,6 +11,7 @@ import MealCard from './components/MealCard'
 import MealModal from './components/MealModal'
 import AnnouncementModal from './components/AnnouncementModal'
 import Footer from './components/Footer'
+import SponsorModal from './components/SponsorModal'
 import GoalsModule from './components/GoalsModule'
 import Reveal from './components/Reveal'
 import ScrollProgress from './components/ScrollProgress'
@@ -82,7 +83,29 @@ export default function App() {
   const [activeModule, setActiveModule] = useState<ModuleKey>(() =>
     moduleFromHash(window.location.hash)
   )
+  const [showHeaderSponsor, setShowHeaderSponsor] = useState(false)
 
+  // 首页特选菜（优选高分代表菜）
+  const featuredMeal = useMemo(() => {
+    if (meals.length === 0) return undefined
+    return (
+      meals.find((m) => m.name.includes('三文鱼') || m.name.includes('鲈鱼') || m.name.includes('鸡胸')) ??
+      meals[0]
+    )
+  }, [meals])
+
+  // 首页精选食谱流（四大分类各取两道）
+  const curatedMeals = useMemo(() => {
+    if (meals.length === 0) return []
+    const categories: Category[] = ['fat-loss', 'muscle-gain', 'maintain', 'nutrition']
+    const result: Meal[] = []
+    for (const cat of categories) {
+      const match = meals.filter((m) => m.category === cat)
+      if (match.length > 0) result.push(match[0])
+      if (match.length > 1) result.push(match[1])
+    }
+    return result.slice(0, 8)
+  }, [meals])
   // hash 变化（浏览器前进/后退、手改地址、外部链接）时同步模块状态；
   // 非模块 hash（#top / #calculator 等页面锚点）忽略，避免锚点滚动打断当前模块
   useEffect(() => {
@@ -215,22 +238,37 @@ export default function App() {
   }
 
   return (
-    <div id="top" className="min-h-screen bg-ink font-sans text-snow">
+    <div id="top" className="min-h-screen bg-ink font-sans text-snow relative">
+      {/* 柔和漂浮渐变光斑层（极柔和的晨曦蓝、微红、柠檬黄环境反射） */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-40 -left-40 size-[36rem] rounded-full bg-sky-200/40 blur-[110px]" />
+        <div className="absolute top-1/4 -right-40 size-[32rem] rounded-full bg-indigo-200/30 blur-[120px]" />
+        <div className="absolute top-2/3 -left-20 size-[30rem] rounded-full bg-amber-100/40 blur-[100px]" />
+        <div className="absolute -bottom-32 right-1/4 size-[34rem] rounded-full bg-rose-200/30 blur-[120px]" />
+      </div>
+
       <ScrollProgress />
-      {/* 全屏鼠标跟随光源：纯视觉层（pointer-events:none），不拦截任何交互 */}
+      {/* 全屏鼠标环境微高光 */}
       <div ref={cursorLightRef} className="cursor-light" aria-hidden="true" />
       <Header
         activeModule={activeModule}
         tableCount={table.items.length}
-        // 「今日搭配」tab 与 logo 都回 home；tab 需滚动到搭配区（#daily），logo 回页面顶部
         onNavigate={(module) => navigate(module, module === 'home' ? 'daily' : undefined)}
+        onOpenSponsor={() => setShowHeaderSponsor(true)}
       />
 
       <main>
         {/* 首页模块：Hero（精简）+ 「生成今日搭配」功能区（热量计算器已移至健康目标模块） */}
         {activeModule === 'home' && (
           <>
-            <Hero mealCount={meals.length} onNavigate={navigate} />
+            <Hero
+              mealCount={meals.length}
+              onNavigate={navigate}
+              featuredMeal={featuredMeal}
+              onAddMeal={table.add}
+              onOpenMeal={setSelectedMeal}
+              isAdded={featuredMeal ? tableItemIds.has(featuredMeal.id) : false}
+            />
 
             <DailyPlanner
               people={planner.people}
@@ -251,6 +289,37 @@ export default function App() {
               targetKcal={nutrition.submitted ? nutrition.results.targetKcal : undefined}
               onNavigateToGoals={() => navigate('goals')}
             />
+
+            {/* 首页精选食谱流 */}
+            {curatedMeals.length > 0 && (
+              <section className="mx-auto max-w-6xl px-5 py-10">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-black text-slate-900">大家都在做的热门好菜</h3>
+                    <p className="text-xs text-slate-500 mt-1">从 1093 道食谱中精选高分好菜，点击直接查看做法与营养</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('library')}
+                    className="jelly-pill px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 transition active:scale-95 cursor-pointer"
+                  >
+                    查看全部 {meals.length} 道食谱 →
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  {curatedMeals.map((meal) => (
+                    <MealCard
+                      key={meal.id}
+                      meal={meal}
+                      categoryMeta={categoryMeta}
+                      onOpen={setSelectedMeal}
+                      onAdd={table.add}
+                      added={tableItemIds.has(meal.id)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </>
         )}
 
@@ -480,6 +549,7 @@ export default function App() {
           fatTotal={table.fatTotal}
           onRemove={table.remove}
           onClear={table.clear}
+          onNavigate={navigate}
         />
       )}
 
@@ -500,6 +570,8 @@ export default function App() {
       )}
       {/* 首次进入公告弹窗：同一浏览器会话只弹出一次 */}
       <AnnouncementModal />
+      {/* 顶栏唤起的赞助弹窗 */}
+      <SponsorModal open={showHeaderSponsor} onClose={() => setShowHeaderSponsor(false)} />
     </div>
   )
 }

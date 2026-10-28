@@ -8,6 +8,7 @@
  * 约定：本文件是唯一允许访问食谱数据的模块，组件与 hooks 一律经它取数。
  */
 
+import { isRiceDish } from '../lib/nutrition'
 import type { Category, CategoryMeta, Meal, MealType, PlanSlot } from '../types'
 
 /** 数据文件地址（public/data/meals.json，静态托管，SW 网络优先缓存） */
@@ -123,18 +124,28 @@ export async function fetchDailyPlan(
   // 按 mealType 抽餐：早餐抽早餐菜、午餐抽午餐菜，避免早餐抽到照烧鸡腿饭
   // used 记录已抽中的菜，后续餐次的候选池将其排除，保证三餐互不重复
   const used = new Set<string>()
-  const byType = (type: MealType) =>
-    all.filter(
+  let hasRiceDish = false
+  const pickForSlot = (type: MealType): Meal | undefined => {
+    const pool = all.filter(
       (item: Meal) =>
         item.mealType.includes(type) &&
         !used.has(item.id) &&
-        (!category || item.category === category)
+        (!category || item.category === category) &&
+        (!hasRiceDish || !isRiceDish(item))
     )
-  const [breakfast] = pickRandom(byType('breakfast'), 1, rand)
-  breakfast && used.add(breakfast.id)
-  const [lunch] = pickRandom(byType('lunch'), 1, rand)
-  lunch && used.add(lunch.id)
-  const [dinner] = pickRandom(byType('dinner'), 1, rand)
+    const [picked] = pickRandom(pool, 1, rand)
+    if (picked) {
+      used.add(picked.id)
+      if (isRiceDish(picked)) {
+        hasRiceDish = true
+      }
+    }
+    return picked
+  }
+
+  const breakfast = pickForSlot('breakfast')
+  const lunch = pickForSlot('lunch')
+  const dinner = pickForSlot('dinner')
   return [
     { slot: '早餐', meals: breakfast ? [clone(breakfast)] : [] },
     { slot: '午餐', meals: lunch ? [clone(lunch)] : [] },
@@ -149,50 +160,50 @@ const CATEGORY_META: Record<Category, CategoryMeta> = {
   'fat-loss': {
     label: '减脂餐',
     emoji: '🥗',
-    gradient: 'from-emerald-400/50 via-teal-400/40 to-cyan-400/30',
-    chip: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
+    gradient: 'from-emerald-100/90 via-teal-50 to-white',
+    chip: 'border-emerald-500/25 bg-emerald-50 text-emerald-700 font-semibold',
   },
   'muscle-gain': {
     label: '增肌餐',
     emoji: '💪',
-    gradient: 'from-orange-500/50 via-rose-500/40 to-pink-500/30',
-    chip: 'border-orange-400/25 bg-orange-400/10 text-orange-300',
+    gradient: 'from-rose-100/90 via-orange-50 to-white',
+    chip: 'border-rose-500/25 bg-rose-50 text-rose-700 font-semibold',
   },
   maintain: {
     label: '维持餐',
     emoji: '⚖️',
-    gradient: 'from-sky-400/50 via-indigo-400/40 to-violet-400/30',
-    chip: 'border-sky-400/25 bg-sky-400/10 text-sky-300',
+    gradient: 'from-sky-100/90 via-blue-50 to-white',
+    chip: 'border-sky-500/25 bg-sky-50 text-sky-700 font-semibold',
   },
   nutrition: {
     label: '营养餐',
     emoji: '🥦',
-    gradient: 'from-violet-400/50 via-fuchsia-400/40 to-purple-400/30',
-    chip: 'border-violet-400/25 bg-violet-400/10 text-violet-300',
+    gradient: 'from-violet-100/90 via-purple-50 to-white',
+    chip: 'border-violet-500/25 bg-violet-50 text-violet-700 font-semibold',
   },
   home: {
     label: '家常菜',
     emoji: '🍳',
-    gradient: 'from-amber-400/50 via-orange-400/40 to-rose-400/30',
-    chip: 'border-amber-400/25 bg-amber-400/10 text-amber-300',
+    gradient: 'from-amber-100/90 via-orange-50 to-white',
+    chip: 'border-amber-500/25 bg-amber-50 text-amber-800 font-semibold',
   },
   therapy: {
     label: '食疗食补',
     emoji: '🍵',
-    gradient: 'from-red-400/50 via-rose-400/40 to-pink-400/30',
-    chip: 'border-red-400/25 bg-red-400/10 text-red-300',
+    gradient: 'from-red-100/90 via-rose-50 to-white',
+    chip: 'border-red-500/25 bg-red-50 text-red-700 font-semibold',
   },
   bakery: {
     label: '烘焙',
     emoji: '🧁',
-    gradient: 'from-yellow-400/50 via-amber-400/40 to-orange-400/30',
-    chip: 'border-yellow-400/25 bg-yellow-400/10 text-yellow-300',
+    gradient: 'from-yellow-100/90 via-amber-50 to-white',
+    chip: 'border-yellow-500/25 bg-yellow-50 text-yellow-800 font-semibold',
   },
   snack: {
     label: '小吃',
     emoji: '🍡',
-    gradient: 'from-fuchsia-400/50 via-pink-400/40 to-rose-400/30',
-    chip: 'border-fuchsia-400/25 bg-fuchsia-400/10 text-fuchsia-300',
+    gradient: 'from-fuchsia-100/90 via-pink-50 to-white',
+    chip: 'border-fuchsia-500/25 bg-fuchsia-50 text-fuchsia-700 font-semibold',
   },
 }
 
