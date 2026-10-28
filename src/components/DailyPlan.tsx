@@ -19,12 +19,12 @@ interface DailyPlanProps {
   onReplaceDish?: (slot: MealType, mealId: string) => void
 }
 
-// 三餐时段对应的图标
 const SLOT_ICONS: Record<PlanSlot['slot'], string> = { 早餐: '🌅', 午餐: '☀️', 晚餐: '🌙' }
-
-// 三餐卡左侧强调色：橙 / 紫 / 橙，呼应方案 B 双色体系
-const SLOT_ACCENTS = ['border-l-tangerine/70', 'border-l-grape/70', 'border-l-tangerine/70']
-
+const SLOT_BADGES: Record<PlanSlot['slot'], string> = {
+  早餐: 'bg-blue-50 text-blue-600 border border-blue-200/60',
+  午餐: 'bg-indigo-50 text-indigo-600 border border-indigo-200/60',
+  晚餐: 'bg-rose-50 text-rose-600 border border-rose-200/60',
+}
 /**
  * 今日三餐搭配（结果区）：早餐 / 午餐 / 晚餐三餐卡 + 全天合计热量
  * 纯展示组件：搭配数据与回调全部来自 props（生成逻辑在 useDailyPlanner hook）
@@ -71,57 +71,63 @@ export default function DailyPlan({
                 <div
                   key={item.slot}
                   style={{ animationDelay: `${i * 90}ms` }}
-                  className={`animate-fade-up rounded-2xl border border-l-2 border-white/8 bg-white/4 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-grape/40 hover:shadow-[0_12px_36px_-12px_rgba(139,124,246,0.3)] ${SLOT_ACCENTS[i % 3]}`}
+                  className="liquid-card p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* 顶部：餐次 + 分类徽章 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-snow">
-                      {SLOT_ICONS[item.slot]} {item.slot}
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <span className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                      <span>{SLOT_ICONS[item.slot]}</span>
+                      <span>{item.slot}</span>
                     </span>
-                    {meta && (
-                      <span className={`rounded-full border px-2 py-0.5 text-xs ${meta.chip}`}>
-                        {meta.label}
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${SLOT_BADGES[item.slot]}`}>
+                        {subtotal * people} kcal
                       </span>
-                    )}
+                      {meta && (
+                        <span className={`rounded-full border px-2 py-0.5 text-xs ${meta.chip}`}>
+                          {meta.label}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* 该餐的多道菜：每道菜一行（份量换算 + 原始 kcal + 加入餐桌），点击打开做法详情 */}
                   {item.meals.length === 0 ? (
                     <p className="mt-3 text-xs text-mist">该餐暂无匹配菜谱，试试调整筛选或换一批</p>
                   ) : (
-                    <ul className="mt-2 divide-y divide-white/5">
+                    <ul className="mt-3 space-y-2.5">
                       {item.meals.map((meal) => {
                         const added = addedIds?.has(meal.id) ?? false
                         return (
                           <li
                             key={meal.id}
-                            className={`relative flex items-center gap-3 rounded-lg py-2.5 transition-colors duration-200 ${
-                              onOpen ? 'cursor-pointer hover:bg-white/5' : ''
+                            className={`relative flex items-center gap-3 rounded-2xl p-2.5 bg-white/70 border border-white/90 shadow-xs transition-colors duration-200 hover:bg-white ${
+                              onOpen ? 'cursor-pointer' : ''
                             }`}
                           >
-                            {/* 拉伸按钮：覆盖整行，li 保持 listitem 语义（axe aria-allowed-role / list） */}
+                            {/* 拉伸按钮：覆盖整行 */}
                             {onOpen && (
                               <button
                                 type="button"
                                 aria-label={`查看做法：${meal.name}`}
                                 onClick={() => onOpen(meal)}
-                                className="absolute inset-0 z-[1] cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-grape"
+                                className="absolute inset-0 z-[1] cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
                               />
                             )}
-                            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/5 text-xl">
+                            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-100/90 text-2xl shadow-inner">
                               {meal.emoji}
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-medium text-snow/90">
+                              <span className="block truncate text-xs sm:text-sm font-bold text-slate-900">
                                 {meal.name}
                               </span>
-                              <span className="block text-xs text-mist">{portionLabel(meal)}</span>
+                              <span className="block text-[11px] text-slate-400 mt-0.5">{portionLabel(meal)}</span>
                             </span>
-                            <span className="shrink-0 text-sm font-semibold text-tangerine">
+                            <span className="shrink-0 text-xs font-black text-slate-800 font-display">
                               {meal.kcal} kcal
                             </span>
-                            <div className="relative z-10 flex items-center gap-1.5">
-                              {/* 单道换菜：独立在候选池中重抽该餐菜品 */}
+                            <div className="relative z-10 flex items-center gap-1.5 ml-1">
+                              {/* 单道换菜 */}
                               {onReplaceDish && (
                                 <button
                                   type="button"
@@ -133,12 +139,12 @@ export default function DailyPlan({
                                       item.slot === '早餐' ? 'breakfast' : item.slot === '午餐' ? 'lunch' : 'dinner'
                                     onReplaceDish(mealType, meal.id)
                                   }}
-                                  className="grid size-7 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-xs text-mist transition-all hover:border-grape/50 hover:bg-grape/10 hover:text-snow active:scale-90"
+                                  className="grid size-7 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-xs text-slate-500 transition-all hover:border-blue-400 hover:text-blue-600 active:scale-90 shadow-xs cursor-pointer"
                                 >
-                                  🎲
+                                  🔄
                                 </button>
                               )}
-                              {/* 加入餐桌：z 高于拉伸按钮，点击不会触发详情弹窗 */}
+                              {/* 加入餐桌 */}
                               {onAdd && (
                                 <button
                                   type="button"
@@ -147,10 +153,10 @@ export default function DailyPlan({
                                     e.stopPropagation()
                                     onAdd(meal)
                                   }}
-                                  className={`grid size-7 shrink-0 place-items-center rounded-full border text-sm font-bold transition-all active:scale-90 ${
+                                  className={`grid size-7 shrink-0 place-items-center rounded-full text-xs font-black transition-all active:scale-90 shadow-xs cursor-pointer ${
                                     added
-                                      ? 'border-tangerine/40 bg-tangerine/15 text-tangerine'
-                                      : 'border-white/15 bg-white/5 text-mist hover:border-grape/50 hover:text-snow'
+                                      ? 'bg-emerald-500 text-white'
+                                      : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-900 hover:text-white'
                                   }`}
                                 >
                                   {added ? '✓' : '+'}
@@ -164,12 +170,12 @@ export default function DailyPlan({
                   )}
 
                   {/* 该餐小计（按人份换算，保留单份标注） */}
-                  <div className="mt-1 flex items-center justify-between border-t border-white/5 pt-2.5">
-                    <span className="text-xs text-mist">小计</span>
-                    <span className="text-sm font-bold text-snow">
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs text-slate-400">
+                    <span>小计</span>
+                    <span className="font-extrabold text-slate-800">
                       {subtotal * people} kcal
                       {people > 1 && (
-                        <span className="ml-1 text-xs font-normal text-mist">（单份 {subtotal} kcal）</span>
+                        <span className="ml-1 text-[11px] font-normal text-slate-400">（单份 {subtotal} kcal）</span>
                       )}
                     </span>
                   </div>
@@ -178,22 +184,31 @@ export default function DailyPlan({
             })}
       </div>
 
-      {/* 全天合计热量（按人份换算） */}
+      {/* 全天合计热量 */}
       <Reveal delay={150}>
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/4 px-6 py-4 backdrop-blur-xl">
-          <p className="text-sm text-mist">
-            全天合计热量（约）
-            {people > 1 && <span className="ml-1 text-xs">· {people} 人份</span>}
-          </p>
-          <p className="text-2xl font-black">
-            <span className="text-gradient">{loading ? '--' : totalKcal * people}</span>{' '}
-            <span className="text-base font-semibold text-mist">kcal</span>
+        <div className="liquid-card !rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 mt-6">
+          <div className="flex items-center gap-3 text-xs text-slate-600 font-bold">
+            <span>今日三餐全天合计（{people} 人份）：</span>
+            <strong className="text-xl sm:text-2xl font-black text-slate-900 font-display">
+              {loading ? '--' : totalKcal * people} <span className="text-xs text-slate-400 font-normal">kcal</span>
+            </strong>
             {people > 1 && (
-              <span className="ml-1 align-middle text-xs font-normal text-mist">
-                （单份合计 {totalKcal} kcal）
+              <span className="text-[11px] font-normal text-slate-400">
+                （单份 {totalKcal} kcal）
               </span>
             )}
-          </p>
+          </div>
+          {onAdd && (
+            <button
+              type="button"
+              onClick={() => {
+                plan.forEach((item) => item.meals.forEach((m) => onAdd(m)))
+              }}
+              className="jelly-pill px-4 py-2 text-xs font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 transition active:scale-95 cursor-pointer"
+            >
+              一键将三餐全部打包加入餐桌 →
+            </button>
+          )}
         </div>
       </Reveal>
     </>

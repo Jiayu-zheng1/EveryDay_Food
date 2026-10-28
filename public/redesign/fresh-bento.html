@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 1：多巴胺便当盒 (Fresh Bento)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FBF9F5;
+      --card: #FFFFFF;
+      --ink: #1C1917;
+      --ink-muted: #78716C;
+      --brand-green: #10B981;
+      --brand-orange: #F97316;
+      --brand-amber: #F59E0B;
+      --brand-rose: #F43F5E;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .num { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .bento-card {
+      background: var(--card);
+      border: 1px solid rgba(231, 229, 228, 0.7);
+      border-radius: 1.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 10px 25px -5px rgba(28, 25, 23, 0.04);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bento-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 35px -10px rgba(28, 25, 23, 0.08);
+      border-color: rgba(214, 211, 209, 0.9);
+    }
+    .tag-pill {
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- 顶部轻盈导航 -->
+  <header class="sticky top-0 z-30 bg-[#FBF9F5]/85 backdrop-blur-md border-b border-stone-200/60 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-2 bg-amber-100 rounded-2xl shadow-inner">🍱</span>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight">每日食光</span>
+          <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">1093 道健康菜</span>
+        </div>
+      </div>
+
+      <!-- 居中圆润切页 -->
+      <nav class="hidden md:flex items-center gap-1 bg-stone-100/90 p-1.5 rounded-full border border-stone-200/60 shadow-inner">
+        <a href="#" class="px-4 py-1.5 rounded-full bg-white font-bold text-xs shadow-sm text-stone-900 flex items-center gap-1.5">
+          <span>🥑</span> 今日搭配
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full font-medium text-xs text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5">
+          <span>🎯</span> 健康目标
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full font-medium text-xs text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5">
+          <span>📖</span> 菜谱库
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full font-medium text-xs text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5">
+          <span>🏮</span> 家宴年夜
+        </a>
+        <a href="#" class="px-4 py-1.5 rounded-full font-medium text-xs text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5">
+          <span>🛒</span> 我的餐桌
+          <span class="num text-[10px] bg-amber-400 text-stone-900 px-1.5 py-0.2 rounded-full font-extrabold">3</span>
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button class="bg-stone-900 text-white hover:bg-stone-800 px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-1.5">
+          <span>🧋</span> 请作者喝奶茶
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体区域：Bento Grid 排版 -->
+  <main class="max-w-6xl mx-auto px-6 pt-10 pb-20">
+    <!-- 标语区 -->
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-800 text-xs font-bold mb-4">
+        <span>✨ 减脂 · 增肌 · 营养 · 治愈</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+        <span>热量都为你算好了</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-stone-900 tracking-tight leading-tight">
+        今天吃点好的，<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-amber-600 to-rose-600">既有烟火气，又无负罪感</span>
+      </h1>
+      <p class="text-stone-500 text-sm mt-3">多巴胺轻食实验室 · 告别算卡焦虑，享受轻松下厨每一餐</p>
+    </div>
+
+    <!-- 便当盒主网格 (Bento Grid) -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-5 mb-12">
+      <!-- 大卡：今日推荐（占据 7 列） -->
+      <div class="bento-card md:col-span-7 p-7 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-white via-white to-emerald-50/50">
+        <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none"></div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="tag-pill bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 今日主厨特选 · 减脂餐
+            </span>
+            <span class="num text-2xl font-black text-emerald-600">385 <span class="text-xs font-bold text-stone-400">kcal</span></span>
+          </div>
+          <div class="flex items-center gap-6 mt-4">
+            <div class="text-7xl p-4 bg-emerald-50 rounded-3xl border border-emerald-100/80 shadow-sm">🥗</div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-stone-900">香煎柠檬黑椒鸡胸藜麦碗</h2>
+              <p class="text-stone-500 text-xs mt-1.5 leading-relaxed">
+                低温慢煎锁汁，搭配高纤维三色藜麦与清爽羽衣甘蓝，淋上特调低卡油醋汁，高饱腹低脂首选。
+              </p>
+              <!-- 营养条微小部件 -->
+              <div class="grid grid-cols-3 gap-2 mt-4">
+                <div class="bg-stone-50 p-2 rounded-xl text-center border border-stone-100">
+                  <div class="text-[10px] text-stone-400 font-medium">蛋白质</div>
+                  <div class="num font-extrabold text-stone-800 text-sm">38.5g</div>
+                </div>
+                <div class="bg-stone-50 p-2 rounded-xl text-center border border-stone-100">
+                  <div class="text-[10px] text-stone-400 font-medium">优质碳水</div>
+                  <div class="num font-extrabold text-stone-800 text-sm">29.0g</div>
+                </div>
+                <div class="bg-stone-50 p-2 rounded-xl text-center border border-stone-100">
+                  <div class="text-[10px] text-stone-400 font-medium">健康脂肪</div>
+                  <div class="num font-extrabold text-stone-800 text-sm">8.2g</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+          <span class="text-xs text-stone-400">⏱️ 耗时 15 分钟 · 难度：新手级</span>
+          <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full text-xs font-bold transition shadow-sm hover:shadow-md flex items-center gap-1">
+            <span>+</span> 放入我的餐桌
+          </button>
+        </div>
+      </div>
+
+      <!-- 快速目标计算小卡（占据 5 列） -->
+      <div class="bento-card md:col-span-5 p-7 flex flex-col justify-between bg-gradient-to-br from-amber-50/60 via-white to-orange-50/50">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-bold text-amber-800 mb-2">
+            <span>🎯 智能热量配餐</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-stone-900">想减脂、增肌还是塑形？</h3>
+          <p class="text-stone-500 text-xs mt-1 leading-relaxed">输入你的体态目标，3 秒定制全天三餐热量配比与购买清单。</p>
+
+          <div class="mt-5 space-y-2.5">
+            <div class="flex items-center justify-between bg-white/90 p-3 rounded-2xl border border-stone-200/80 shadow-xs">
+              <span class="text-xs font-bold flex items-center gap-2"><span>🥑</span> 轻松减脂 (500 kcal 缺口)</span>
+              <span class="num text-xs font-extrabold text-emerald-600">1450 kcal/天</span>
+            </div>
+            <div class="flex items-center justify-between bg-white/90 p-3 rounded-2xl border border-stone-200/80 shadow-xs">
+              <span class="text-xs font-bold flex items-center gap-2"><span>🥩</span> 增肌饱腹 (高蛋白配比)</span>
+              <span class="num text-xs font-extrabold text-rose-600">2200 kcal/天</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full mt-5 bg-stone-900 hover:bg-stone-800 text-white py-2.5 rounded-2xl text-xs font-bold transition shadow-sm">
+          开始 1 分钟测算 →
+        </button>
+      </div>
+
+      <!-- 菜谱便当卡 1 -->
+      <div class="bento-card md:col-span-4 p-5 flex flex-col justify-between">
+        <div>
+          <div class="h-40 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-6xl relative mb-4">
+            🍤
+            <span class="absolute top-3 left-3 tag-pill bg-white text-stone-800 shadow-xs">减脂餐</span>
+            <span class="num absolute top-3 right-3 text-xs font-black bg-stone-900 text-white px-2.5 py-0.5 rounded-full">195 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-stone-900 text-base">鲜虾时蔬魔芋面</h4>
+          <p class="text-xs text-stone-500 mt-1 line-clamp-2">魔芋面吸饱虾仁鲜甜，低卡零负担，夜宵嘴馋也能大口吃。</p>
+        </div>
+        <div class="mt-4 flex items-center justify-between pt-3 border-t border-stone-100">
+          <div class="num text-xs text-stone-400">蛋白 21g · 碳水 6g</div>
+          <button class="w-8 h-8 rounded-full bg-stone-100 hover:bg-amber-400 hover:text-stone-900 flex items-center justify-center text-sm font-bold transition">
+            +
+          </button>
+        </div>
+      </div>
+
+      <!-- 菜谱便当卡 2 -->
+      <div class="bento-card md:col-span-4 p-5 flex flex-col justify-between">
+        <div>
+          <div class="h-40 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-6xl relative mb-4">
+            🥩
+            <span class="absolute top-3 left-3 tag-pill bg-white text-stone-800 shadow-xs">增肌餐</span>
+            <span class="num absolute top-3 right-3 text-xs font-black bg-stone-900 text-white px-2.5 py-0.5 rounded-full">520 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-stone-900 text-base">黑椒牛柳滑蛋盖饭</h4>
+          <p class="text-xs text-stone-500 mt-1 line-clamp-2">高蛋白嫩牛肉搭配半熟温润滑蛋，每一口都是满满碳水与蛋白的治愈。</p>
+        </div>
+        <div class="mt-4 flex items-center justify-between pt-3 border-t border-stone-100">
+          <div class="num text-xs text-stone-400">蛋白 42g · 碳水 48g</div>
+          <button class="w-8 h-8 rounded-full bg-stone-100 hover:bg-rose-400 hover:text-stone-900 flex items-center justify-center text-sm font-bold transition">
+            +
+          </button>
+        </div>
+      </div>
+
+      <!-- 菜谱便当卡 3 -->
+      <div class="bento-card md:col-span-4 p-5 flex flex-col justify-between">
+        <div>
+          <div class="h-40 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-6xl relative mb-4">
+            🍅
+            <span class="absolute top-3 left-3 tag-pill bg-white text-stone-800 shadow-xs">家常菜</span>
+            <span class="num absolute top-3 right-3 text-xs font-black bg-stone-900 text-white px-2.5 py-0.5 rounded-full">280 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-stone-900 text-base">浓汁番茄炖牛腩</h4>
+          <p class="text-xs text-stone-500 mt-1 line-clamp-2">自然番茄熬出浓郁汤底，牛腩酥烂多汁，酸甜开胃拌饭绝配。</p>
+        </div>
+        <div class="mt-4 flex items-center justify-between pt-3 border-t border-stone-100">
+          <div class="num text-xs text-stone-400">蛋白 31g · 脂肪 12g</div>
+          <button class="w-8 h-8 rounded-full bg-stone-100 hover:bg-orange-400 hover:text-stone-900 flex items-center justify-center text-sm font-bold transition">
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

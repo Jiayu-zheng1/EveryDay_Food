@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 5：液态果冻玻璃全功能主页 (Liquid Vision Home)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F1F5F9; /* 冰川轻雾灰蓝 */
+      color: #0F172A;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .num { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* 方案 5 核心：液态果冻玻璃卡片 (VisionOS Glass) */
+    .liquid-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 1.75rem;
+      box-shadow: 0 10px 32px -4px rgba(148, 163, 184, 0.15), 0 1px 2px 0 rgba(255, 255, 255, 0.8) inset;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .liquid-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 20px 40px -8px rgba(148, 163, 184, 0.25), 0 1px 2px 0 rgba(255, 255, 255, 1) inset;
+    }
+
+    /* 水滴果冻微胶囊 (Jelly Pill) */
+    .jelly-pill {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(100, 116, 139, 0.06);
+    }
+    
+    .jelly-btn {
+      background: #0F172A;
+      color: #FFFFFF;
+      border-radius: 9999px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+    }
+    .jelly-btn:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+    }
+    .jelly-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative pb-28">
+  <!-- 柔和漂浮渐变光斑层（极柔和的晨曦蓝、微红、柠檬黄环境反射） -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-[36rem] h-[36rem] bg-sky-200/45 rounded-full blur-[110px]"></div>
+    <div class="absolute top-1/4 -right-40 w-[32rem] h-[32rem] bg-indigo-200/35 rounded-full blur-[120px]"></div>
+    <div class="absolute top-2/3 -left-20 w-[30rem] h-[30rem] bg-amber-100/50 rounded-full blur-[100px]"></div>
+    <div class="absolute -bottom-32 right-1/4 w-[34rem] h-[34rem] bg-rose-200/35 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- 1. 浮动液态顶栏 (Floating Island Nav) -->
+  <header class="sticky top-4 z-40 max-w-6xl mx-auto px-4">
+    <div class="liquid-card px-6 py-3 flex items-center justify-between !rounded-full shadow-lg">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-1 bg-white/90 rounded-full shadow-xs">🥗</span>
+        <div>
+          <span class="font-extrabold text-base tracking-tight text-slate-900">每日食光</span>
+          <span class="ml-2 hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 whitespace-nowrap">
+            1093 道热量全算好
+          </span>
+        </div>
+      </div>
+
+      <!-- 模块导航 -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-100/70 p-1 rounded-full border border-white/60">
+        <a href="#daily" class="px-4 py-1.5 rounded-full bg-white text-slate-900 font-extrabold text-xs shadow-xs flex items-center gap-1.5">
+          <span>🥑</span> 今日搭配
+        </a>
+        <a href="#goals" class="px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 font-bold text-xs transition flex items-center gap-1.5">
+          <span>🎯</span> 健康目标
+        </a>
+        <a href="#library" class="px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 font-bold text-xs transition flex items-center gap-1.5">
+          <span>📖</span> 菜谱库
+        </a>
+        <a href="#newyear" class="px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 font-bold text-xs transition flex items-center gap-1.5">
+          <span>🏮</span> 家宴年夜
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md hover:shadow-lg transition flex items-center gap-1.5">
+          <span>🧋</span> 请作者喝奶茶
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="max-w-6xl mx-auto px-5 pt-8 space-y-12">
+    <!-- 2. Hero 智能全景看板 (Hero Bento Dashboard) -->
+    <section class="space-y-6">
+      <div class="text-center max-w-2xl mx-auto pt-4">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/80 border border-white shadow-xs text-xs font-bold text-slate-700 mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          减脂 · 增肌 · 营养 · 治愈 · 告别做饭焦虑
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          今天吃什么？<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-500">
+            热量、营养与做法全替你算好了
+          </span>
+        </h1>
+        <p class="text-slate-500 text-xs md:text-sm mt-3 leading-relaxed">
+          八大菜系 1093 道健康食谱 · 每一份蛋白质、脂肪、碳水精准透明，照着做就好
+        </p>
+      </div>
+
+      <!-- 核心全功能 Bento 网格看板 -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+        <!-- 模块 A：今日灵感特选（7 列大卡） -->
+        <div class="liquid-card md:col-span-7 p-7 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-white/90 via-white/70 to-blue-50/40">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="jelly-pill px-3 py-1 text-xs font-extrabold text-blue-700 flex items-center gap-1.5">
+                <span>✨</span> 今日灵感主推 · 减脂高蛋白
+              </span>
+              <div class="text-right">
+                <span class="num text-3xl font-black text-slate-900">340</span>
+                <span class="text-xs font-bold text-slate-400 ml-0.5">kcal</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+              <div class="sm:col-span-5 h-44 rounded-2xl bg-gradient-to-br from-blue-50/80 to-indigo-50/40 border border-white flex items-center justify-center text-7xl shadow-inner">
+                🥑
+              </div>
+              <div class="sm:col-span-7">
+                <h3 class="text-xl font-extrabold text-slate-900">牛油果低温浸慢煎三文鱼</h3>
+                <p class="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+                  富含天然 Omega-3 不饱和脂肪酸，搭配丝滑牛油果泥，焦香酥脆与浓郁滑润的双重奏。
+                </p>
+
+                <!-- 果冻三小微指标 -->
+                <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+                  <div class="jelly-pill p-2">
+                    <div class="text-[10px] text-slate-400 font-bold">高蛋白</div>
+                    <div class="num text-xs font-black text-slate-800 mt-0.5">36.5g</div>
+                  </div>
+                  <div class="jelly-pill p-2">
+                    <div class="text-[10px] text-slate-400 font-bold">优质碳水</div>
+                    <div class="num text-xs font-black text-slate-800 mt-0.5">8.2g</div>
+                  </div>
+                  <div class="jelly-pill p-2">
+                    <div class="text-[10px] text-slate-400 font-bold">健康脂肪</div>
+                    <div class="num text-xs font-black text-slate-800 mt-0.5">14.0g</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-400">⏱️ 耗时 15 分钟 · 适合单人自炊</span>
+            <button class="jelly-btn px-5 py-2 text-xs flex items-center gap-1.5">
+              <span>+</span> 放入我的餐桌
+            </button>
+          </div>
+        </div>
+
+        <!-- 模块 B：快捷目标测算微卡（5 列） -->
+        <div class="liquid-card md:col-span-5 p-7 flex flex-col justify-between bg-gradient-to-br from-white/90 via-white/70 to-indigo-50/40">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="jelly-pill px-3 py-1 text-xs font-extrabold text-indigo-700">
+                🎯 智能目标规划
+              </span>
+              <span class="text-xs text-slate-400 font-bold">BMR / TDEE</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-900 mt-1">专属热量缺口测算</h3>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+              输入身高体重，算法自动按 4:4:2 黄金配比生成全天三餐热量分配。
+            </p>
+
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center justify-between p-3 rounded-2xl bg-white/70 border border-white">
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span>🥑</span> 科学减脂推荐
+                </span>
+                <span class="num text-xs font-black text-emerald-600">1420 kcal / 天</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-2xl bg-white/70 border border-white">
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span>🥩</span> 高蛋白增肌
+                </span>
+                <span class="num text-xs font-black text-rose-600">2250 kcal / 天</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="w-full mt-5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-2.5 rounded-2xl text-xs shadow-md hover:shadow-lg transition">
+            1 分钟配置我的健康目标 →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 今日三餐搭配工作台 (Daily Meal Planner) -->
+    <section id="daily" class="space-y-5">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-extrabold text-blue-600 uppercase tracking-wider">
+            <span>🌅 DAILY PLANNER</span>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-black text-slate-900 mt-1">
+            今日三餐智能搭配
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">早、中、晚荤素营养科学配比，支持单菜置换与一键换一换</p>
+        </div>
+
+        <!-- 控制器：人数调节 + 生成按钮 -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- 人数选择果冻胶囊 -->
+          <div class="jelly-pill px-3 py-1.5 flex items-center gap-3 text-xs font-bold text-slate-700">
+            <span>用餐人数:</span>
+            <div class="flex items-center gap-2">
+              <button class="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-black">-</button>
+              <span class="num font-black text-sm text-blue-600">1 人份</span>
+              <button class="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-black">+</button>
+            </div>
+          </div>
+
+          <!-- 换一换与主按钮 -->
+          <button class="jelly-pill px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5 transition">
+            <span>🎲</span> 随机换一批
+          </button>
+          <button class="jelly-btn px-5 py-2 text-xs flex items-center gap-1.5">
+            <span>✨</span> 重新生成搭配
+          </button>
+        </div>
+      </div>
+
+      <!-- 三餐卡片三联 (早餐 / 午餐 / 晚餐) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- 早餐卡 -->
+        <div class="liquid-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                <span>🌅</span> 早餐 · 元气唤醒
+              </span>
+              <span class="num text-xs font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                320 kcal
+              </span>
+            </div>
+
+            <div class="space-y-3 mt-4">
+              <div class="p-3 rounded-2xl bg-white/70 border border-white flex items-center justify-between group hover:bg-white transition">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">🥣</span>
+                  <div>
+                    <h4 class="text-xs font-extrabold text-slate-900">鲜虾秋葵滑蛋燕麦粥</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">高纤维慢碳 · 220 kcal</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="text-slate-400 hover:text-blue-600 text-xs p-1" title="换这道菜">🔄</button>
+                  <button class="text-slate-400 hover:text-emerald-600 text-xs p-1" title="加入餐桌">+</button>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-2xl bg-white/70 border border-white flex items-center justify-between group hover:bg-white transition">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">🥛</span>
+                  <div>
+                    <h4 class="text-xs font-extrabold text-slate-900">无糖高钙温豆浆</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">优质植物蛋白 · 100 kcal</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="text-slate-400 hover:text-blue-600 text-xs p-1" title="换这道菜">🔄</button>
+                  <button class="text-slate-400 hover:text-emerald-600 text-xs p-1" title="加入餐桌">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <span>蛋白质 24g · 碳水 32g</span>
+            <span class="font-bold text-slate-600">已配好 2 道</span>
+          </div>
+        </div>
+
+        <!-- 午餐卡 -->
+        <div class="liquid-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                <span>☀️</span> 午餐 · 充能饱腹
+              </span>
+              <span class="num text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                580 kcal
+              </span>
+            </div>
+
+            <div class="space-y-3 mt-4">
+              <div class="p-3 rounded-2xl bg-white/70 border border-white flex items-center justify-between group hover:bg-white transition">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">🥩</span>
+                  <div>
+                    <h4 class="text-xs font-extrabold text-slate-900">黑椒原切嫩牛柳配西蓝花</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">高蛋白硬菜 · 360 kcal</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="text-slate-400 hover:text-blue-600 text-xs p-1" title="换这道菜">🔄</button>
+                  <button class="text-slate-400 hover:text-emerald-600 text-xs p-1" title="加入餐桌">+</button>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-2xl bg-white/70 border border-white flex items-center justify-between group hover:bg-white transition">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">🍚</span>
+                  <div>
+                    <h4 class="text-xs font-extrabold text-slate-900">五彩糙米杂粮饭</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">慢升糖主食 · 220 kcal</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="text-slate-400 hover:text-blue-600 text-xs p-1" title="换这道菜">🔄</button>
+                  <button class="text-slate-400 hover:text-emerald-600 text-xs p-1" title="加入餐桌">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <span>蛋白质 42g · 碳水 54g</span>
+            <span class="font-bold text-slate-600">已配好 2 道</span>
+          </div>
+        </div>
+
+        <!-- 晚餐卡 -->
+        <div class="liquid-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                <span>🌙</span> 晚餐 · 轻盈低负
+              </span>
+              <span class="num text-xs font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+                390 kcal
+              </span>
+            </div>
+
+            <div class="space-y-3 mt-4">
+              <div class="p-3 rounded-2xl bg-white/70 border border-white flex items-center justify-between group hover:bg-white transition">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">🐟</span>
+                  <div>
+                    <h4 class="text-xs font-extrabold text-slate-900">清蒸青葱鲈鱼柳</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">鲜美低脂 · 260 kcal</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="text-slate-400 hover:text-blue-600 text-xs p-1" title="换这道菜">🔄</button>
+                  <button class="text-slate-400 hover:text-emerald-600 text-xs p-1" title="加入餐桌">+</button>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-2xl bg-white/70 border border-white flex items-center justify-between group hover:bg-white transition">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">🥬</span>
+                  <div>
+                    <h4 class="text-xs font-extrabold text-slate-900">白灼芥兰配甜豉油</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">清肠维生素 · 130 kcal</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button class="text-slate-400 hover:text-blue-600 text-xs p-1" title="换这道菜">🔄</button>
+                  <button class="text-slate-400 hover:text-emerald-600 text-xs p-1" title="加入餐桌">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <span>蛋白质 34g · 碳水 16g</span>
+            <span class="font-bold text-slate-600">已配好 2 道</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全天总计横幅 -->
+      <div class="jelly-pill px-6 py-3 flex flex-wrap items-center justify-between text-xs">
+        <div class="flex items-center gap-4 text-slate-600 font-bold">
+          <span>全天三餐合计: <strong class="num text-sm text-slate-900">1290 kcal</strong></span>
+          <span class="text-slate-300">|</span>
+          <span>蛋白质: <strong class="num text-slate-800">100.5g</strong></span>
+          <span class="text-slate-300">|</span>
+          <span>优质碳水: <strong class="num text-slate-800">102g</strong></span>
+          <span class="text-slate-300">|</span>
+          <span>脂肪: <strong class="num text-slate-800">32g</strong></span>
+        </div>
+        <button class="text-blue-600 font-extrabold hover:underline">
+          一键将三餐全部打包加入餐桌清单 →
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. 王牌功能矩阵 (Feature Hub Matrix) -->
+    <section class="space-y-4">
+      <div>
+        <h2 class="text-xl md:text-2xl font-black text-slate-900">
+          四大核心厨房模块
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">全站所有王牌功能，随时一键直达</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- 功能 1：菜谱库 -->
+        <a href="#library" class="liquid-card p-5 block group">
+          <span class="text-3xl p-2.5 bg-blue-50/80 rounded-2xl inline-block border border-white">📖</span>
+          <h3 class="font-extrabold text-sm text-slate-900 mt-3 group-hover:text-blue-600 transition">1093 道食谱库</h3>
+          <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+            八大菜系、早中晚餐次、热量高低多维检索。
+          </p>
+          <span class="text-[11px] font-bold text-blue-600 mt-3 inline-block">逛菜谱 →</span>
+        </a>
+
+        <!-- 功能 2：健康目标 -->
+        <a href="#goals" class="liquid-card p-5 block group">
+          <span class="text-3xl p-2.5 bg-indigo-50/80 rounded-2xl inline-block border border-white">🎯</span>
+          <h3 class="font-extrabold text-sm text-slate-900 mt-3 group-hover:text-indigo-600 transition">健康目标测算</h3>
+          <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+            测算 BMI / TDEE，按黄金比例生成智能搭配。
+          </p>
+          <span class="text-[11px] font-bold text-indigo-600 mt-3 inline-block">定目标 →</span>
+        </a>
+
+        <!-- 功能 3：家宴年夜饭 -->
+        <a href="#newyear" class="liquid-card p-5 block group">
+          <span class="text-3xl p-2.5 bg-rose-50/80 rounded-2xl inline-block border border-white">🏮</span>
+          <h3 class="font-extrabold text-sm text-slate-900 mt-3 group-hover:text-rose-600 transition">家宴聚餐生成</h3>
+          <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+            四菜一汤、阖家欢聚、硬菜凉菜一键配齐。
+          </p>
+          <span class="text-[11px] font-bold text-rose-600 mt-3 inline-block">去配宴 →</span>
+        </a>
+
+        <!-- 功能 4：餐桌清单 -->
+        <a href="#table" class="liquid-card p-5 block group">
+          <span class="text-3xl p-2.5 bg-emerald-50/80 rounded-2xl inline-block border border-white">🛒</span>
+          <h3 class="font-extrabold text-sm text-slate-900 mt-3 group-hover:text-emerald-600 transition">智能购物清单</h3>
+          <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+            调料食材智能合并去重，超市货架打卡。
+          </p>
+          <span class="text-[11px] font-bold text-emerald-600 mt-3 inline-block">看餐桌 →</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- 5. 热门食谱发现轻瀑布流 (Curated Recipe Stream) -->
+    <section id="library" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900">大家都在做的热门好菜</h2>
+          <p class="text-xs text-slate-500 mt-0.5">从 1093 道菜谱中精选高分食谱，点击直接查看做法与用量</p>
+        </div>
+        <a href="#library" class="jelly-pill px-4 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-900">
+          查看全部 1093 道食谱 →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="liquid-card p-4">
+          <div class="h-32 rounded-2xl bg-gradient-to-br from-white to-blue-50/60 border border-white flex items-center justify-center text-5xl mb-3 relative">
+            🍤
+            <span class="jelly-pill absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold text-emerald-600">减脂</span>
+            <span class="num absolute bottom-2 right-2 text-[10px] font-bold text-slate-500">195 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-slate-900">鲜虾时蔬魔芋面</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">高蛋白 · 饱腹低卡</p>
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
+            <span class="num text-[11px] text-slate-500">P: 21g</span>
+            <button class="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">+</button>
+          </div>
+        </div>
+
+        <div class="liquid-card p-4">
+          <div class="h-32 rounded-2xl bg-gradient-to-br from-white to-rose-50/60 border border-white flex items-center justify-center text-5xl mb-3 relative">
+            🥩
+            <span class="jelly-pill absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold text-rose-600">增肌</span>
+            <span class="num absolute bottom-2 right-2 text-[10px] font-bold text-slate-500">520 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-slate-900">黑椒牛柳滑蛋盖饭</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">原切牛肉 · 鲜嫩锁汁</p>
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
+            <span class="num text-[11px] text-slate-500">P: 42g</span>
+            <button class="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">+</button>
+          </div>
+        </div>
+
+        <div class="liquid-card p-4">
+          <div class="h-32 rounded-2xl bg-gradient-to-br from-white to-amber-50/60 border border-white flex items-center justify-center text-5xl mb-3 relative">
+            🍲
+            <span class="jelly-pill absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold text-amber-600">家常</span>
+            <span class="num absolute bottom-2 right-2 text-[10px] font-bold text-slate-500">280 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-slate-900">浓汁番茄炖牛腩</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">自然酸甜 · 酥烂多汁</p>
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
+            <span class="num text-[11px] text-slate-500">P: 31g</span>
+            <button class="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">+</button>
+          </div>
+        </div>
+
+        <div class="liquid-card p-4">
+          <div class="h-32 rounded-2xl bg-gradient-to-br from-white to-indigo-50/60 border border-white flex items-center justify-center text-5xl mb-3 relative">
+            🐟
+            <span class="jelly-pill absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold text-blue-600">营养</span>
+            <span class="num absolute bottom-2 right-2 text-[10px] font-bold text-slate-500">310 kcal</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-slate-900">金汤柠檬巴沙鱼</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">无刺嫩滑 · 开胃酸爽</p>
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
+            <span class="num text-[11px] text-slate-500">P: 29g</span>
+            <button class="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">+</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. 底部常驻悬浮灵动餐桌岛 (Dynamic Island Table Bar) -->
+  <div class="fixed inset-x-0 bottom-5 z-40 flex justify-center px-4 pointer-events-none">
+    <div class="liquid-card px-5 py-3 pointer-events-auto !rounded-full flex items-center gap-4 shadow-xl border border-white">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="text-xs font-extrabold text-slate-800">我的餐桌</span>
+        <span class="num text-xs font-black bg-blue-600 text-white px-2 py-0.5 rounded-full">3 道菜</span>
+      </div>
+      <div class="h-4 w-px bg-slate-200"></div>
+      <div class="num text-xs font-bold text-slate-600">
+        🔥 <span class="font-black text-slate-900">1,290</span> kcal
+      </div>
+      <button class="jelly-btn px-4 py-1.5 text-xs">
+        查看菜品与清单 →
+      </button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 2：波普潮酷新粗野 (Pop Neo-Brutalism)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Noto+Sans+SC:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #FEF9C3; /* 活力奶黄 */
+      color: #18181B;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    .display-num { font-family: 'Space Grotesk', sans-serif; }
+    /* 新粗野核心边框与硬阴影 */
+    .brutal-card {
+      background: #FFFFFF;
+      border: 3px solid #18181B;
+      border-radius: 1.25rem;
+      box-shadow: 6px 6px 0px #18181B;
+      transition: all 0.15s ease-in-out;
+    }
+    .brutal-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 8px 8px 0px #18181B;
+    }
+    .brutal-btn {
+      border: 2.5px solid #18181B;
+      border-radius: 9999px;
+      box-shadow: 3.5px 3.5px 0px #18181B;
+      font-weight: 900;
+      transition: all 0.1s ease;
+      cursor: pointer;
+    }
+    .brutal-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4.5px 4.5px 0px #18181B;
+    }
+    .brutal-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #18181B;
+    }
+    .sticker {
+      border: 2px solid #18181B;
+      border-radius: 0.5rem;
+      font-weight: 900;
+      box-shadow: 2px 2px 0px #18181B;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- 潮流黑粗条顶部导航 -->
+  <header class="sticky top-0 z-30 bg-[#FEF9C3] border-b-4 border-black px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl p-1 bg-white border-2 border-black rounded-xl shadow-[3px_3px_0px_#000]">🍳</span>
+        <div>
+          <span class="font-black text-2xl tracking-tighter">每日食光 !</span>
+          <span class="sticker ml-2 px-2 py-0.5 bg-emerald-300 text-black text-xs -rotate-2">1093 道食谱</span>
+        </div>
+      </div>
+
+      <!-- 潮牌药丸导航 -->
+      <nav class="hidden md:flex items-center gap-2">
+        <a href="#" class="brutal-btn px-4 py-2 bg-orange-400 text-black text-xs flex items-center gap-1.5">
+          <span>🥑</span> 今日干饭
+        </a>
+        <a href="#" class="brutal-btn px-4 py-2 bg-white hover:bg-yellow-200 text-black text-xs flex items-center gap-1.5">
+          <span>🎯</span> 热量目标
+        </a>
+        <a href="#" class="brutal-btn px-4 py-2 bg-white hover:bg-yellow-200 text-black text-xs flex items-center gap-1.5">
+          <span>📚</span> 菜谱大库
+        </a>
+        <a href="#" class="brutal-btn px-4 py-2 bg-purple-300 text-black text-xs flex items-center gap-1.5">
+          <span>🛒</span> 餐桌 (3)
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button class="brutal-btn bg-pink-400 text-black px-4 py-2 text-xs flex items-center gap-1">
+          <span>🧋</span> 请喝奶茶
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="max-w-6xl mx-auto px-6 pt-12 pb-20">
+    <!-- 标语区 -->
+    <div class="mb-12">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="sticker px-3 py-1 bg-pink-300 text-xs rotate-1">🔥 告别节食焦虑</span>
+        <span class="sticker px-3 py-1 bg-cyan-300 text-xs -rotate-2">✨ 科学干饭才是正义</span>
+        <span class="sticker px-3 py-1 bg-lime-300 text-xs rotate-3">⚡️ 精确到每一克</span>
+      </div>
+      <h1 class="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">
+        今天吃啥？<br>
+        <span class="bg-orange-400 px-3 py-1 border-3 border-black inline-block mt-2 shadow-[4px_4px_0px_#000] rotate-1">卡路里全替你算好了！</span>
+      </h1>
+      <p class="text-black/80 font-bold text-sm mt-4 max-w-xl">
+        涵盖减脂、增肌、维持、家常四大专区。不用拿算盘配餐，每一道菜连葱姜蒜热量都不放过！
+      </p>
+    </div>
+
+    <!-- 潮酷网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <!-- 推荐大卡 -->
+      <div class="brutal-card md:col-span-8 p-7 bg-white relative">
+        <div class="flex items-center justify-between mb-6">
+          <span class="sticker px-3 py-1 bg-emerald-300 text-xs -rotate-2">🥑 减脂推荐 TOP 1</span>
+          <div class="display-num text-3xl font-black bg-black text-yellow-300 px-3 py-1 rounded-lg border-2 border-black shadow-[3px_3px_0px_#facc15]">
+            320 <span class="text-xs text-white">KCAL</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div class="md:col-span-4 h-48 bg-emerald-100 border-3 border-black rounded-2xl flex items-center justify-center text-7xl shadow-[4px_4px_0px_#000]">
+            🥗
+          </div>
+          <div class="md:col-span-8">
+            <h2 class="text-2xl font-black text-black">香煎黑椒鸡胸羽衣甘蓝</h2>
+            <p class="text-xs font-bold text-black/70 mt-2 leading-relaxed">
+              高蛋白低脂扛把子！不柴不腥，橄榄油微煎，肉汁完全锁住，饱腹感持续整整 4 个小时。
+            </p>
+            <!-- 贴纸营养小框 -->
+            <div class="flex flex-wrap gap-2 mt-5">
+              <span class="sticker px-2.5 py-1 bg-yellow-200 text-xs">💪 蛋白质 38g</span>
+              <span class="sticker px-2.5 py-1 bg-blue-200 text-xs">🌾 碳水化合物 12g</span>
+              <span class="sticker px-2.5 py-1 bg-red-200 text-xs">🥑 脂肪 6g</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 pt-5 border-t-3 border-black flex items-center justify-between">
+          <span class="text-xs font-black">⏱ 12分钟出锅 · 厨房小白友好</span>
+          <button class="brutal-btn bg-lime-400 px-5 py-2.5 text-xs text-black">
+            + 丢进餐桌
+          </button>
+        </div>
+      </div>
+
+      <!-- 快速测算卡 -->
+      <div class="brutal-card md:col-span-4 p-7 bg-purple-200 flex flex-col justify-between">
+        <div>
+          <span class="sticker px-3 py-1 bg-white text-xs rotate-2">🎯 智能算法</span>
+          <h3 class="text-2xl font-black mt-3">生成专属一日三餐</h3>
+          <p class="text-xs font-bold text-black/80 mt-2">
+            根据身高体重与目标，AI 自动拼出三餐荤素搭配，直接生成周末买菜清单！
+          </p>
+        </div>
+        <button class="brutal-btn w-full mt-6 bg-yellow-400 py-3 text-xs text-black">
+          立即开始测算 ⚡️
+        </button>
+      </div>
+
+      <!-- 菜品卡 1 -->
+      <div class="brutal-card md:col-span-4 p-5 bg-white">
+        <div class="h-36 bg-orange-100 border-3 border-black rounded-xl flex items-center justify-center text-6xl mb-4 relative shadow-[3px_3px_0px_#000]">
+          🥩
+          <span class="sticker absolute top-2 right-2 bg-yellow-300 text-[10px] px-2 py-0.5">580 kcal</span>
+        </div>
+        <h4 class="font-black text-lg">极品秘制红烧肉</h4>
+        <p class="text-xs font-bold text-black/70 mt-1">肥而不腻、入口即化！经典家常菜灵魂担当。</p>
+        <div class="mt-4 pt-3 border-t-2 border-black flex items-center justify-between">
+          <span class="sticker px-2 py-0.5 bg-red-200 text-[10px]">增肌餐</span>
+          <button class="brutal-btn bg-white hover:bg-yellow-300 px-3 py-1 text-xs">+</button>
+        </div>
+      </div>
+
+      <!-- 菜品卡 2 -->
+      <div class="brutal-card md:col-span-4 p-5 bg-white">
+        <div class="h-36 bg-blue-100 border-3 border-black rounded-xl flex items-center justify-center text-6xl mb-4 relative shadow-[3px_3px_0px_#000]">
+          🐟
+          <span class="sticker absolute top-2 right-2 bg-yellow-300 text-[10px] px-2 py-0.5">280 kcal</span>
+        </div>
+        <h4 class="font-black text-lg">清蒸广式鲈鱼</h4>
+        <p class="text-xs font-bold text-black/70 mt-1">淋上滚烫热油和清甜豉油，嫩滑爽口，低脂高蛋白。</p>
+        <div class="mt-4 pt-3 border-t-2 border-black flex items-center justify-between">
+          <span class="sticker px-2 py-0.5 bg-emerald-200 text-[10px]">减脂餐</span>
+          <button class="brutal-btn bg-white hover:bg-yellow-300 px-3 py-1 text-xs">+</button>
+        </div>
+      </div>
+
+      <!-- 菜品卡 3 -->
+      <div class="brutal-card md:col-span-4 p-5 bg-white">
+        <div class="h-36 bg-pink-100 border-3 border-black rounded-xl flex items-center justify-center text-6xl mb-4 relative shadow-[3px_3px_0px_#000]">
+          🍅
+          <span class="sticker absolute top-2 right-2 bg-yellow-300 text-[10px] px-2 py-0.5">260 kcal</span>
+        </div>
+        <h4 class="font-black text-lg">番茄浓汁滚豆腐</h4>
+        <p class="text-xs font-bold text-black/70 mt-1">植物优质蛋白与番茄红素碰撞，热腾腾的暖胃神菜。</p>
+        <div class="mt-4 pt-3 border-t-2 border-black flex items-center justify-between">
+          <span class="sticker px-2 py-0.5 bg-amber-200 text-[10px]">营养餐</span>
+          <button class="brutal-btn bg-white hover:bg-yellow-300 px-3 py-1 text-xs">+</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

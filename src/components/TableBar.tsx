@@ -38,58 +38,70 @@ export default function TableBar({
     <div
       role="region"
       aria-label="我的餐桌"
-      className="fixed inset-x-0 bottom-20 z-40 flex justify-center px-4"
+      className="fixed inset-x-0 bottom-6 z-40 flex justify-center px-4 pointer-events-none"
     >
-      <div className="glass-card w-full max-w-xl rounded-2xl border-white/10 bg-ink-2/85 px-4 py-3 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          {/* 左侧：标题 + 数量 */}
-          <div className="shrink-0">
-            <p className="text-sm font-bold text-snow">我的餐桌</p>
-            <p className="text-xs text-mist">{items.length} 道</p>
+      <div className="liquid-card !rounded-full w-full max-w-2xl px-5 py-3 pointer-events-auto flex items-center justify-between gap-3 shadow-2xl border border-white/95 backdrop-blur-2xl">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          {/* 状态徽章 */}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+            <p className="text-xs font-black text-slate-900 hidden sm:inline">我的餐桌</p>
+            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-black text-white font-display">
+              {items.length} 道
+            </span>
           </div>
 
-          {/* 中间：已选菜名 chips（横向滚动） */}
-          <div className="flex flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="h-4 w-px bg-slate-200 shrink-0" />
+
+          {/* 中间已选菜品横向滑动 */}
+          <div className="flex flex-1 gap-1.5 overflow-x-auto py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {items.map((meal) => (
               <span
                 key={meal.id}
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/8 px-3 py-1 text-xs text-snow"
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 text-xs font-bold text-slate-800"
               >
-                {meal.name}
+                <span>{meal.name}</span>
                 <button
                   type="button"
                   aria-label={`移除 ${meal.name}`}
                   onClick={() => onRemove(meal.id)}
-                  className="text-mist transition-colors hover:text-tangerine"
+                  className="text-slate-400 hover:text-rose-500 transition-colors"
                 >
                   ✕
                 </button>
               </span>
             ))}
           </div>
+        </div>
 
-          {/* 右侧：合计 + 清空 */}
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            <p className="whitespace-nowrap text-xs text-mist">
-              🔥 {kcalTotal} kcal · 蛋白 {proteinTotal}g · 碳水 {carbsTotal}g · 脂肪 {fatTotal}g
-            </p>
-            <button
-              type="button"
-              onClick={onClear}
-              className="text-xs font-semibold text-tangerine transition-all hover:scale-105 hover:text-tangerine/80"
-            >
-              清空
-            </button>
-          </div>
+        {/* 右侧：热量 + 去清单 */}
+        <div className="flex shrink-0 items-center gap-2.5">
+          <span
+            title={`蛋白质 ${proteinTotal}g · 碳水 ${carbsTotal}g · 脂肪 ${fatTotal}g`}
+            className="text-xs font-bold text-slate-600 whitespace-nowrap font-display hidden md:inline"
+          >
+            🔥 <strong className="font-black text-slate-900">{kcalTotal}</strong> kcal
+            <span className="ml-1 text-[10px] font-semibold text-slate-400">
+              (P:{proteinTotal}g C:{carbsTotal}g F:{fatTotal}g)
+            </span>
+          </span>
 
-          {/* 最右侧：「去我的餐桌」入口（App 传入 onNavigate 时才渲染，向后兼容） */}
+          <button
+            type="button"
+            onClick={onClear}
+            title="清空餐桌"
+            className="text-xs font-semibold text-slate-400 hover:text-rose-500 transition"
+          >
+            清空
+          </button>
+
           {onNavigate && (
             <button
               type="button"
               onClick={() => onNavigate('table')}
-              className="shrink-0 rounded-full bg-tangerine px-4 py-2 text-sm font-bold text-ink shadow-lg shadow-tangerine/25 transition-all hover:scale-105 hover:brightness-110 active:scale-95"
+              className="jelly-btn px-4 py-1.5 text-xs font-bold whitespace-nowrap cursor-pointer"
             >
-              去我的餐桌 →
+              去清单 →
             </button>
           )}
         </div>

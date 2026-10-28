@@ -1,50 +1,42 @@
 import { useEffect, useRef } from 'react'
-import type { MouseEvent } from 'react'
-import type { ModuleKey } from '../types'
+import type { Meal, ModuleKey } from '../types'
 
 /** Hero 区的 props */
 interface HeroProps {
   mealCount: number
   onNavigate: (module: ModuleKey) => void
+  featuredMeal?: Meal
+  onAddMeal?: (meal: Meal) => void
+  onOpenMeal?: (meal: Meal) => void
+  isAdded?: boolean
 }
 
-// 快捷入口卡配置：key 传给 onNavigate 切换全局模块（「今日搭配」即当前页，不再设卡）
-const QUICK_LINKS: Array<{ key: ModuleKey; emoji: string; title: string; desc: string }> = [
-  { key: 'library', emoji: '📚', title: '逛菜谱库', desc: '分类 / 餐次 / 地区多维筛选' },
-  { key: 'goals', emoji: '🎯', title: '健康目标', desc: '计算热量目标，生成智能搭配' },
-  { key: 'newyear', emoji: '🏮', title: '家宴聚餐', desc: '四菜一汤 / 阖家欢聚 / 节庆年夜饭' },
-  { key: 'table', emoji: '🛒', title: '我的餐桌', desc: '已选菜汇总营养，生成购物清单' },
+// 快捷入口卡配置：key 传给 onNavigate 切换全局模块
+const QUICK_LINKS: Array<{ key: ModuleKey; emoji: string; title: string; desc: string; action: string }> = [
+  { key: 'library', emoji: '📖', title: '1093 道食谱库', desc: '八大菜系、早中晚餐次多维检索', action: '逛菜谱 →' },
+  { key: 'goals', emoji: '🎯', title: '健康目标规划', desc: '测算 BMR / TDEE，按黄金比例配餐', action: '定目标 →' },
+  { key: 'newyear', emoji: '🏮', title: '家宴聚餐生成', desc: '四菜一汤、阖家欢聚、硬菜凉菜配齐', action: '去配宴 →' },
+  { key: 'table', emoji: '🛒', title: '智能购物清单', desc: '多菜食材调料自动归并，超市打卡', action: '看餐桌 →' },
 ]
 
-/**
- * Hero 区（精简版）：标题 + 副标题 + CTA 按钮 + 数据标签 + 快捷入口卡 + 跑马灯
- * CTA 按钮带「光晕跟随」效果（鼠标位置驱动亮点）
- * 快捷入口卡通过 onNavigate(moduleKey) 切换全局模块（App 提供，可选）
- * 纯展示组件：食谱数量来自 props，保证对数据数量无耦合
- */
-export default function Hero({ mealCount, onNavigate }: HeroProps) {
-  const primaryRef = useRef<HTMLAnchorElement | null>(null)
-  const titleRef = useRef<HTMLHeadingElement | null>(null) // h1 标题，内含 kinetic 词块
-  const spotRefs = useRef<Array<HTMLDivElement | null>>([]) // 视差光斑（外层包裹 div，动画在子元素上）
+export default function Hero({
+  mealCount,
+  onNavigate,
+  featuredMeal,
+  onAddMeal,
+  onOpenMeal,
+  isAdded = false,
+}: HeroProps) {
+  const titleRef = useRef<HTMLHeadingElement | null>(null)
 
-  // 鼠标在按钮上移动时更新 --gx/--gy，驱动光晕跟随
-  const handlePrimaryMove = (e: MouseEvent<HTMLAnchorElement>) => {
-    const el = primaryRef.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    el.style.setProperty('--gx', `${e.clientX - rect.left}px`)
-    el.style.setProperty('--gy', `${e.clientY - rect.top}px`)
-  }
-
-  // 滚动视差：kinetic 标题词块交错位移 + 光斑按不同速率上移；共用同一个 scroll 监听
+  // 滚动视差：kinetic 标题词块交错位移
   useEffect(() => {
     let raf = 0
     const onScroll = () => {
-      if (raf) return // 同一帧内只处理一次，避免滚动高频触发
+      if (raf) return
       raf = requestAnimationFrame(() => {
         raf = 0
         const y = window.scrollY
-        // 标题词块：滚动越多错位越大，量小克制并封顶，避免挡住下方 CTA
         const words = titleRef.current
           ? Array.from(titleRef.current.querySelectorAll<HTMLElement>('.kinetic-word'))
           : []
@@ -53,11 +45,6 @@ export default function Hero({ mealCount, onNavigate }: HeroProps) {
           const ty = Math.min(y * (0.04 + i * 0.018), 56 + i * 12)
           word.style.transform = `translate3d(${tx}px, ${ty}px, 0)`
         })
-        // 光斑视差：不同系数反向位移（光斑动画在子元素上，外层只做整体平移）
-        const spots = spotRefs.current
-        if (spots[0]) spots[0].style.transform = `translate3d(0, ${y * -0.08}px, 0)`
-        if (spots[1]) spots[1].style.transform = `translate3d(0, ${y * -0.05}px, 0)`
-        if (spots[2]) spots[2].style.transform = `translate3d(0, ${y * -0.03}px, 0)`
       })
     }
     onScroll()
@@ -68,142 +55,234 @@ export default function Hero({ mealCount, onNavigate }: HeroProps) {
     }
   }, [])
 
+  // 默认特选菜兜底数据
+  const displayMeal: {
+    name: string
+    desc: string
+    emoji: string
+    kcal: number
+    protein: number
+    carbs: number
+    fat: number
+  } = featuredMeal
+    ? {
+        name: featuredMeal.name,
+        desc: featuredMeal.desc,
+        emoji: featuredMeal.emoji,
+        kcal: featuredMeal.kcal,
+        protein: featuredMeal.nutrition.protein,
+        carbs: featuredMeal.nutrition.carbs,
+        fat: featuredMeal.nutrition.fat,
+      }
+    : {
+        name: '牛油果低温浸慢煎三文鱼',
+        desc: '富含天然优质 Omega-3 不饱和脂肪酸，搭配丝滑牛油果泥，焦香酥脆与浓郁滑润的双重奏。',
+        emoji: '🥑',
+        kcal: 340,
+        protein: 36.5,
+        carbs: 8.2,
+        fat: 14.0,
+      }
+
   return (
-    <section className="relative overflow-hidden px-5 pb-12 pt-28">
-      {/* 背景光晕：网格纹理 + 噪点 + 三个渐变圆（漂浮 / 呼吸） */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        {/* 细网格纹理，向边缘淡出 */}
-        <div className="bg-grid absolute inset-0" />
-        {/* 噪点颗粒 */}
-        <div className="bg-noise absolute inset-0" />
-        {/* 流动渐变光晕：外层 div 承接滚动视差，内层跑漂浮/呼吸动画 */}
-        <div
-          ref={(el) => { spotRefs.current[0] = el }}
-          className="absolute -left-32 -top-24 will-change-transform"
-        >
-          <div className="size-[28rem] animate-float rounded-full bg-grape/30 blur-[110px]" />
-        </div>
-        <div
-          ref={(el) => { spotRefs.current[1] = el }}
-          className="absolute -right-24 top-10 will-change-transform"
-        >
-          <div className="size-[24rem] animate-float-delayed rounded-full bg-berry/25 blur-[100px]" />
-        </div>
-        <div
-          ref={(el) => { spotRefs.current[2] = el }}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 will-change-transform"
-        >
-          <div className="size-[26rem] animate-pulse-soft rounded-full bg-tangerine/20 blur-[120px]" />
-        </div>
-        <div className="absolute left-1/4 top-1/2 size-40 animate-pulse-soft rounded-full bg-grape/20 blur-[80px]" />
-      </div>
-
+    <section className="relative px-4 pb-8 pt-24 sm:px-6 sm:pt-28">
+      {/* 1. 顶部标语 */}
       <div className="relative mx-auto max-w-3xl text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-grape/30 bg-grape/10 px-4 py-1.5 text-sm text-grape">
-          🥗 减脂 · 💪 增肌 · ⚖️ 维持 · 🥦 营养
-        </span>
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1 text-xs font-bold text-slate-700 shadow-xs backdrop-blur-md">
+          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+          减脂 · 增肌 · 营养 · 治愈 · 告别做饭焦虑
+        </div>
 
-        {/* kinetic 标题：词块交错位移由滚动监听写入 inline transform（字号降一档，压缩高度） */}
-        <h1 ref={titleRef} className="mt-5 text-3xl font-black leading-tight sm:text-5xl">
+        <h1 ref={titleRef} className="mt-4 text-3xl font-black leading-tight sm:text-5xl text-slate-900 tracking-tight">
           <span className="block">
             <span className="kinetic-word">今天</span>
-            <span className="kinetic-word">吃什么，</span>
+            <span className="kinetic-word">吃什么？</span>
           </span>
-          <span className="block">
-            <span className="kinetic-word text-gradient title-glow">替你</span>
-            <span className="kinetic-word text-gradient title-glow">算好了</span>
-            <span className="kinetic-word text-gradient title-glow">卡路里</span>
+          <span className="block mt-1">
+            <span className="kinetic-word text-gradient">热量、营养与做法</span>
+            <span className="kinetic-word text-gradient">全替你算好了</span>
           </span>
         </h1>
 
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-mist sm:text-base">
-          八大分类 {mealCount} 道健康食谱，每份热量与三大营养素清清楚楚。
-          不用再纠结热量计算，照着做就好。
+        <p className="mx-auto mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-500">
+          八大菜系 <strong className="font-extrabold text-slate-800">{mealCount}</strong> 道健康食谱 · 每一份蛋白质、脂肪、碳水精准透明，照着做就好
         </p>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-          {/* 主 CTA：光晕跟随鼠标，指向「生成今日搭配」功能区锚点（#daily） */}
-          <a
-            ref={primaryRef}
-            href="#daily"
-            onMouseMove={handlePrimaryMove}
-            className="glow-follow rounded-full bg-gradient-brand px-7 py-3 font-semibold text-white shadow-xl shadow-berry/25 transition-transform duration-300 hover:scale-105 active:scale-95"
-          >
-            ✨ 生成今日搭配
-          </a>
-          {/* 次 CTA：切到菜谱库模块（原 #meals 锚点已随模块化改造移除） */}
-          <button
-            type="button"
-            onClick={() => onNavigate?.('library')}
-            className="rounded-full border border-white/10 bg-white/5 px-7 py-3 font-semibold text-snow backdrop-blur transition-colors hover:border-grape/40 hover:bg-white/10"
-          >
-            浏览全部食谱
-          </button>
-        </div>
-
-        {/* 数据小标签（数量动态，不写死）：药丸样式精简展示 */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-mist">
-            <strong className="text-base font-black text-snow">{mealCount}</strong> 道食谱
+        {/* 快速指标药丸 */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs">
+          <span className="jelly-pill px-3 py-1 font-bold text-slate-700">
+            🥘 <strong className="text-slate-900">{mealCount}</strong> 道食谱
           </span>
-          <span className="size-1 rounded-full bg-white/20" />
-          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-mist">
-            <strong className="text-base font-black text-snow">8</strong> 大分类
+          <span className="jelly-pill px-3 py-1 font-bold text-slate-700">
+            🥗 8 大分类
           </span>
-          <span className="size-1 rounded-full bg-white/20" />
-          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-mist">
-            <strong className="text-base font-black text-snow">0</strong> 热量焦虑
+          <span className="jelly-pill px-3 py-1 font-bold text-slate-700">
+            ✨ 0 热量焦虑
           </span>
         </div>
       </div>
 
-      {/* 快捷入口卡：一行四卡（移动端两列），点击切换全局模块 */}
-      <div className="relative mx-auto mt-10 max-w-5xl">
+      {/* 2. Bento 全景看板 (Featured + Target Calc) */}
+      <div className="relative mx-auto mt-8 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+          {/* 左侧：今日灵感主推大卡 (7列) */}
+          <div className="liquid-card md:col-span-7 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-white/90 via-white/70 to-blue-50/40">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="jelly-pill px-3 py-1 text-xs font-extrabold text-blue-700 flex items-center gap-1.5">
+                  <span>✨</span> 今日灵感主推
+                </span>
+                <div className="text-right">
+                  <span className="text-2xl sm:text-3xl font-black text-slate-900 font-display">
+                    {displayMeal.kcal}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 ml-0.5">kcal</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+                <button
+                  type="button"
+                  onClick={() => featuredMeal && onOpenMeal?.(featuredMeal)}
+                  className="sm:col-span-5 h-40 sm:h-44 rounded-2xl bg-gradient-to-br from-blue-50/80 to-indigo-50/40 border border-white flex items-center justify-center text-6xl sm:text-7xl shadow-inner transition hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  {displayMeal.emoji}
+                </button>
+                <div className="sm:col-span-7">
+                  <h3
+                    onClick={() => featuredMeal && onOpenMeal?.(featuredMeal)}
+                    className="text-lg sm:text-xl font-extrabold text-slate-900 hover:text-blue-600 transition cursor-pointer"
+                  >
+                    {displayMeal.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+                    {displayMeal.desc}
+                  </p>
+
+                  {/* 三大营养素水滴微指标 */}
+                  <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                    <div className="jelly-pill p-2">
+                      <div className="text-[10px] text-slate-400 font-bold">高蛋白</div>
+                      <div className="text-xs font-black text-slate-800 mt-0.5 font-display">{displayMeal.protein}g</div>
+                    </div>
+                    <div className="jelly-pill p-2">
+                      <div className="text-[10px] text-slate-400 font-bold">优质碳水</div>
+                      <div className="text-xs font-black text-slate-800 mt-0.5 font-display">{displayMeal.carbs}g</div>
+                    </div>
+                    <div className="jelly-pill p-2">
+                      <div className="text-[10px] text-slate-400 font-bold">健康脂肪</div>
+                      <div className="text-xs font-black text-slate-800 mt-0.5 font-display">{displayMeal.fat}g</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs text-slate-400">⏱️ 耗时 15 分钟 · 步骤清爽</span>
+              {featuredMeal && onAddMeal && (
+                <button
+                  type="button"
+                  onClick={() => onAddMeal(featuredMeal)}
+                  className={`px-4 py-2 text-xs font-bold rounded-full transition shadow-xs flex items-center gap-1.5 ${
+                    isAdded
+                      ? 'bg-emerald-500 text-white'
+                      : 'jelly-btn hover:bg-slate-800'
+                  }`}
+                >
+                  <span>{isAdded ? '✓ 已在餐桌' : '+ 放入我的餐桌'}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 右侧：专属热量缺口测算 (5列) */}
+          <div className="liquid-card md:col-span-5 p-6 sm:p-7 flex flex-col justify-between bg-gradient-to-br from-white/90 via-white/70 to-indigo-50/40">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="jelly-pill px-3 py-1 text-xs font-extrabold text-indigo-700">
+                  🎯 智能目标规划
+                </span>
+                <span className="text-xs text-slate-400 font-bold">BMR / TDEE</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">专属热量缺口测算</h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                输入身高体重与自律目标，算法自动按黄金配比生成全天三餐热量分配。
+              </p>
+
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/70 border border-white">
+                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>🥑</span> 科学减脂推荐
+                  </span>
+                  <span className="text-xs font-black text-emerald-600 font-display">1420 kcal / 天</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/70 border border-white">
+                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>🥩</span> 高蛋白增肌
+                  </span>
+                  <span className="text-xs font-black text-rose-600 font-display">2250 kcal / 天</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onNavigate('goals')}
+              className="w-full mt-5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-2.5 rounded-2xl text-xs shadow-md hover:shadow-lg transition active:scale-95"
+            >
+              1 分钟配置我的健康目标 →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. 核心功能 4 卡矩阵 */}
+      <div className="relative mx-auto mt-6 max-w-6xl">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {QUICK_LINKS.map((link) => (
             <button
               key={link.key}
               type="button"
-              onClick={() => onNavigate?.(link.key)}
-              className="glass-card group flex flex-col items-start rounded-2xl p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:border-grape/40 hover:shadow-[0_12px_36px_-12px_rgba(139,124,246,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grape"
+              onClick={() => onNavigate(link.key)}
+              className="liquid-card group flex flex-col items-start rounded-2xl p-4 sm:p-5 text-left transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
             >
               <span className="text-3xl transition-transform duration-300 group-hover:scale-110">
                 {link.emoji}
               </span>
-              <span className="mt-2 font-bold text-snow">{link.title}</span>
-              <span className="mt-1 text-xs leading-relaxed text-mist">{link.desc}</span>
+              <span className="mt-2 text-sm font-extrabold text-slate-900 group-hover:text-blue-600 transition">
+                {link.title}
+              </span>
+              <span className="mt-1 text-xs leading-relaxed text-slate-500">
+                {link.desc}
+              </span>
               <span
                 aria-hidden="true"
-                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-grape transition-transform duration-300 group-hover:translate-x-1"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-blue-600 transition-transform duration-300 group-hover:translate-x-1"
               >
-                去看看 <span className="text-sm leading-none">→</span>
+                {link.action}
               </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* 跑马灯标语条：两段相同内容实现无缝循环（track 整体平移 -50%），字号随精简 Hero 收小；
-          纯装饰（内容与上方副标题重复），整条 aria-hidden 不进无障碍树，避免低对比文本告警 */}
+      {/* 4. 跑马灯标语 */}
       <div
         aria-hidden="true"
-        className="marquee -mx-5 mt-12 border-y border-white/5 py-3"
+        className="marquee -mx-4 sm:-mx-6 mt-10 border-y border-slate-200/60 bg-white/40 py-2.5 backdrop-blur-md"
       >
         <div className="marquee-track">
           {[0, 1].map((dup) => (
-            <div key={dup} aria-hidden={dup === 1} className="flex items-center">
-              <span className="mx-6 text-xl font-black text-white/8 sm:text-2xl">今晚吃什么</span>
-              <span aria-hidden="true" className="mx-6 text-lg font-black text-tangerine/20">✦</span>
-              <span className="mx-6 text-xl font-black text-white/8 sm:text-2xl">
-                {mealCount} 道家常菜
-              </span>
-              <span aria-hidden="true" className="mx-6 text-lg font-black text-tangerine/20">✦</span>
-              <span className="mx-6 text-xl font-black text-white/8 sm:text-2xl">一荤一素一汤</span>
-              <span aria-hidden="true" className="mx-6 text-lg font-black text-tangerine/20">✦</span>
-              <span className="mx-6 text-xl font-black text-white/8 sm:text-2xl">
-                每道菜热量清清楚楚
-              </span>
-              <span aria-hidden="true" className="mx-6 text-lg font-black text-tangerine/20">✦</span>
+            <div key={dup} aria-hidden={dup === 1} className="flex items-center font-bold text-xs text-slate-500">
+              <span className="mx-6 text-slate-900 font-extrabold">今晚吃什么</span>
+              <span className="mx-4 text-amber-500">✦</span>
+              <span className="mx-6 text-slate-700">{mealCount} 道健康家常菜</span>
+              <span className="mx-4 text-amber-500">✦</span>
+              <span className="mx-6 text-slate-900 font-extrabold">一荤一素一汤</span>
+              <span className="mx-4 text-amber-500">✦</span>
+              <span className="mx-6 text-slate-700">每道菜热量清清楚楚</span>
+              <span className="mx-4 text-amber-500">✦</span>
             </div>
           ))}
         </div>

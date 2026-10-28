@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 4：和风日系轻物语 (Warm Zen / Kinfolk)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F6F4EE; /* 日式和纸素色 */
+      color: #2D2926;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .serif-title {
+      font-family: 'Noto Serif SC', "Songti SC", serif;
+      letter-spacing: -0.01em;
+    }
+    .num { font-family: 'Plus Jakarta Sans', sans-serif; }
+    /* 日式极细线框卡片 */
+    .zen-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(45, 41, 38, 0.08);
+      border-radius: 1rem;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .zen-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px -8px rgba(45, 41, 38, 0.06);
+      border-color: rgba(45, 41, 38, 0.16);
+    }
+    /* 和风红色小印章 */
+    .hanko-stamp {
+      border: 1.5px solid #C23A22;
+      color: #C23A22;
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- 极简留白顶栏 -->
+  <header class="sticky top-0 z-30 bg-[#F6F4EE]/90 backdrop-blur-md border-b border-stone-200 px-6 py-4">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">🍵</span>
+        <div class="flex items-baseline gap-2">
+          <span class="serif-title font-bold text-lg text-stone-900">每日食光</span>
+          <span class="text-[11px] text-stone-400 tracking-widest uppercase">Nichinichi Shoku</span>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-6 text-xs text-stone-600 font-medium">
+        <a href="#" class="text-stone-900 font-bold border-b border-stone-900 pb-0.5">本日献立</a>
+        <a href="#" class="hover:text-stone-900 transition-colors">营养指标</a>
+        <a href="#" class="hover:text-stone-900 transition-colors">食谱札记</a>
+        <a href="#" class="hover:text-stone-900 transition-colors">食桌采购</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-stone-400 font-mono">1,093 RECIPES</span>
+        <button class="border border-stone-300 hover:border-stone-800 bg-white text-stone-800 px-3.5 py-1.5 rounded-full text-xs transition">
+          🧋 赞助作者
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="max-w-5xl mx-auto px-6 pt-12 pb-24">
+    <!-- 日式治愈标语 -->
+    <div class="text-center max-w-xl mx-auto mb-14">
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <span class="hanko-stamp">旬鮮 · 自炊</span>
+        <span class="text-xs text-stone-400 tracking-wider">今日这一餐，好好犒劳自己</span>
+      </div>
+      <h1 class="serif-title text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
+        认真吃饭，是一天里<br><span class="italic font-normal text-stone-600">最安静的治愈时刻</span>
+      </h1>
+      <p class="text-xs text-stone-500 mt-3 leading-relaxed tracking-wide">
+        一汁一菜、低脂慢煎、热量均摊。免去计算烦忧，专注品尝食材本身的鲜甜。
+      </p>
+    </div>
+
+    <!-- 晨光主推卡 -->
+    <div class="zen-card p-8 mb-8 bg-white border border-stone-200/80">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <div class="md:col-span-5 h-64 bg-[#F9F8F5] rounded-xl border border-stone-100 flex flex-col items-center justify-center relative">
+          <span class="text-7xl mb-2">🐟</span>
+          <span class="hanko-stamp absolute top-4 left-4">減脂 · 低鹽</span>
+          <span class="num text-xs text-stone-400 font-mono">PREP: 15 MIN</span>
+        </div>
+
+        <div class="md:col-span-7">
+          <div class="flex items-baseline justify-between mb-2">
+            <span class="text-xs tracking-widest text-stone-400 font-mono">TODAY'S SPECIAL</span>
+            <div class="num text-2xl font-bold text-stone-900">
+              280 <span class="text-xs font-normal text-stone-400">kcal</span>
+            </div>
+          </div>
+
+          <h2 class="serif-title text-2xl font-bold text-stone-900">清蒸青葱鲈鱼柳配白玉豆腐</h2>
+          <p class="text-xs text-stone-500 mt-2 leading-relaxed">
+            取当季鲈鱼嫩肉，辅以慢火微蒸的老豆腐吸收鲜甜鱼汁。出锅淋热葱油与生抽少许，温润清淡，高蛋白易消化。
+          </p>
+
+          <!-- 极简微线框指标 -->
+          <div class="grid grid-cols-3 gap-4 mt-6 py-4 border-y border-stone-100 text-center">
+            <div>
+              <div class="text-[10px] text-stone-400 tracking-wider">蛋白質</div>
+              <div class="num text-base font-semibold text-stone-800 mt-0.5">34.2g</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-stone-400 tracking-wider">炭水</div>
+              <div class="num text-base font-semibold text-stone-800 mt-0.5">4.8g</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-stone-400 tracking-wider">脂質</div>
+              <div class="num text-base font-semibold text-stone-800 mt-0.5">7.1g</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <span class="text-xs text-stone-400">配料：鲈鱼肉 200g / 嫩豆腐 100g / 小葱 2根</span>
+            <button class="bg-stone-900 hover:bg-stone-800 text-white px-5 py-2 rounded-full text-xs transition">
+              收录入食桌 →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 料理卡片三联 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="zen-card p-6 bg-white">
+        <div class="h-40 bg-[#F9F8F5] rounded-lg flex items-center justify-center text-5xl mb-4 relative">
+          🥗
+          <span class="hanko-stamp absolute top-3 left-3">減脂</span>
+          <span class="num absolute bottom-3 right-3 text-xs text-stone-500 font-mono">195 kcal</span>
+        </div>
+        <h3 class="serif-title font-bold text-lg text-stone-900">时蔬甘蓝虾仁温沙拉</h3>
+        <p class="text-xs text-stone-500 mt-1.5 leading-relaxed line-clamp-2">
+          冬日不吃冷生蔬菜，温热慢拌，酸甜芥末油醋汁包裹甜脆大虾。
+        </p>
+        <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
+          <span>蛋白質 24g</span>
+          <button class="hover:text-stone-900 font-bold">+</button>
+        </div>
+      </div>
+
+      <div class="zen-card p-6 bg-white">
+        <div class="h-40 bg-[#F9F8F5] rounded-lg flex items-center justify-center text-5xl mb-4 relative">
+          🍲
+          <span class="hanko-stamp absolute top-3 left-3">養生</span>
+          <span class="num absolute bottom-3 right-3 text-xs text-stone-500 font-mono">310 kcal</span>
+        </div>
+        <h3 class="serif-title font-bold text-lg text-stone-900">白萝卜慢炖牛肋条汤</h3>
+        <p class="text-xs text-stone-500 mt-1.5 leading-relaxed line-clamp-2">
+          冬吃萝卜夏吃姜，慢煲出清甜高汤，牛肉酥软，暖胃发汗。
+        </p>
+        <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
+          <span>蛋白質 31g</span>
+          <button class="hover:text-stone-900 font-bold">+</button>
+        </div>
+      </div>
+
+      <div class="zen-card p-6 bg-white">
+        <div class="h-40 bg-[#F9F8F5] rounded-lg flex items-center justify-center text-5xl mb-4 relative">
+          🍙
+          <span class="hanko-stamp absolute top-3 left-3">增肌</span>
+          <span class="num absolute bottom-3 right-3 text-xs text-stone-500 font-mono">420 kcal</span>
+        </div>
+        <h3 class="serif-title font-bold text-lg text-stone-900">香煎三文鱼海苔饭团</h3>
+        <p class="text-xs text-stone-500 mt-1.5 leading-relaxed line-clamp-2">
+          碎三文鱼肉拌杂粮米，抹上照烧汁双面微焦，便当携行首选。
+        </p>
+        <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
+          <span>蛋白質 28g</span>
+          <button class="hover:text-stone-900 font-bold">+</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,54 +1,53 @@
 @import "tailwindcss";
 
-/* ================= 主题变量（Tailwind v4 通过 @theme 注册为工具类） ================= */
+/* ================= 方案 5：液态果冻玻璃（VisionOS 浅色柔光）主题体系 ================= */
 @theme {
-  /* 深紫黑底 + 琥珀橙/暖紫双色体系 */
-  --color-ink: #0b0a10;        /* 页面底色 */
-  --color-ink-2: #16131d;      /* 卡片表面 */
-  --color-ink-3: #201a2e;      /* 更亮的表面（hover） */
-  --color-snow: #f4f1fb;       /* 主文字 */
-  --color-mist: #9b94ab;       /* 次要文字 */
-  --color-grape: #8b7cf6;      /* 暖紫 */
-  --color-berry: #4a3f7d;      /* 深紫辅助色 */
-  --color-tangerine: #f5a524;  /* 琥珀橙 */
+  /* 冰川轻雾灰蓝底 + 高清透毛玻璃 + 鲜活多巴胺色彩 */
+  --color-ink: #f1f5f9;        /* 页面底色：冰川轻雾灰蓝 Slate-100 */
+  --color-ink-2: rgba(255, 255, 255, 0.72); /* 卡片表面：半透明果冻毛玻璃 */
+  --color-ink-3: rgba(255, 255, 255, 0.88); /* 更亮表面（hover） */
+  --color-snow: #0f172a;       /* 主文字：深石墨 Slate-900 */
+  --color-mist: #64748b;       /* 次要文字：Slate-500 */
+  --color-grape: #3b82f6;      /* 鲜活蓝 Blue-500 */
+  --color-berry: #6366f1;      /* 靛蓝 Indigo-500 */
+  --color-tangerine: #f59e0b;  /* 琥珀橙 Amber-500 */
 
-  /* 系统字体栈，保证中文渲染 */
+  /* 系统字体栈，保证中文渲染与数字感 */
   --font-sans: -apple-system, BlinkMacSystemFont, "Noto Sans SC", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
 
-  /* 标题展示字体（数字感） */
-  --font-display: "Space Grotesk", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+  --font-display: "Plus Jakarta Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", sans-serif;
 
-  /* 自定义动画（keyframes 定义在下方全局区） */
-  --animate-float: float 12s ease-in-out infinite;
-  --animate-float-delayed: float 16s ease-in-out 2s infinite;
-  --animate-pulse-soft: pulse-soft 6s ease-in-out infinite;
+  /* 自定义动画 */
+  --animate-float: float 14s ease-in-out infinite;
+  --animate-float-delayed: float 18s ease-in-out 3s infinite;
+  --animate-pulse-soft: pulse-soft 7s ease-in-out infinite;
   --animate-grad-shift: grad-shift 6s ease-in-out infinite;
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-modal-in: modal-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-overlay-in: overlay-in 0.3s ease both;
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-modal-in: modal-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-overlay-in: overlay-in 0.25s ease both;
 }
 
 /* ================= 全局 keyframes ================= */
 @keyframes float {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50%      { transform: translate3d(40px, -36px, 0) scale(1.1); }
+  50%      { transform: translate3d(30px, -25px, 0) scale(1.06); }
 }
 @keyframes pulse-soft {
-  0%, 100% { opacity: 0.5; }
-  50%      { opacity: 0.9; }
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.75; }
 }
 @keyframes grad-shift {
   0%, 100% { background-position: 0% 50%; }
   50%      { background-position: 100% 50%; }
 }
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes modal-in {
-  from { opacity: 0; transform: translateY(24px) scale(0.94); }
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes overlay-in {
@@ -58,47 +57,49 @@
 
 /* ================= 基础样式 ================= */
 html {
-  scroll-behavior: smooth; /* 锚点平滑滚动（偏移由各 section 的 scroll-mt-24 负责） */
+  scroll-behavior: smooth;
 }
 body {
   background-color: var(--color-ink);
   color: var(--color-snow);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 ::selection {
-  background: rgba(139, 124, 246, 0.35);
+  background: rgba(59, 130, 246, 0.2);
+  color: #0f172a;
 }
 
-/* 深色主题细滚动条 */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #0d0b12; }
-::-webkit-scrollbar-thumb { background: #2e2740; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #453a5e; }
+/* 现代纤细浅灰滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ================= 自定义工具类 ================= */
 
-/* 暖紫→琥珀橙渐变文字 */
+/* 蓝紫微红多巴胺渐变文字 */
 @utility text-gradient {
-  background-image: linear-gradient(100deg, #8b7cf6 0%, #f5a524 100%);
+  background-image: linear-gradient(120deg, #2563eb 0%, #4f46e5 50%, #e11d48 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* 暖紫→琥珀橙渐变背景（流动效果由 animate-grad-shift 提供） */
+/* 品牌背景渐变 */
 @utility bg-gradient-brand {
-  background-image: linear-gradient(120deg, #8b7cf6, #f5a524);
+  background-image: linear-gradient(120deg, #3b82f6 0%, #6366f1 50%, #f59e0b 100%);
   background-size: 200% 200%;
 }
 
-/* ================= 滚动渐入动画（配合 Reveal 组件） ================= */
+/* 滚动渐入动画（配合 Reveal 组件） */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(20px);
   transition:
-    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 .reveal-visible {
@@ -106,52 +107,68 @@ body {
   transform: translateY(0);
 }
 
-/* ================= v2 特效 ================= */
+/* ================= 方案 5：液态果冻玻璃组件 ================= */
 
-/* Hero 细网格纹理（向边缘渐隐） */
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 85% 70% at 50% 28%, black 25%, transparent 78%);
-  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 28%, black 25%, transparent 78%);
+/* 核心玻璃卡片（MealCard / 弹窗 / Bento 盒共用） */
+.glass-card, .liquid-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 32px -4px rgba(148, 163, 184, 0.15), 0 1px 2px 0 rgba(255, 255, 255, 0.8) inset;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card:hover, .liquid-card:hover {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 20px 40px -8px rgba(148, 163, 184, 0.22), 0 1px 2px 0 rgba(255, 255, 255, 1) inset;
 }
 
-/* Hero 噪点颗粒（feTurbulence 生成的 SVG 纹理） */
-.bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.05;
+/* 水滴果冻微胶囊 (Jelly Pill) */
+.jelly-pill {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(100, 116, 139, 0.06);
 }
 
-/* 渐变标题辉光（filter drop-shadow 作用于渐变文字像素） */
+/* 果冻实体交互按钮 (Jelly Button) */
+.jelly-btn {
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+}
+.jelly-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+}
+.jelly-btn:active {
+  transform: scale(0.97);
+}
+
+/* 渐变标题微辉光 */
 .title-glow {
-  filter: drop-shadow(0 0 22px rgba(245, 165, 36, 0.3));
+  filter: drop-shadow(0 2px 14px rgba(59, 130, 246, 0.25));
 }
 
-/* CTA 光晕跟随：--gx/--gy 由 JS 在 mousemove 时写入 */
-.glow-follow {
-  position: relative;
-  overflow: hidden;
-}
-.glow-follow::after {
-  content: '';
-  position: absolute;
+/* 全屏鼠标环境微高光 */
+.cursor-light {
+  position: fixed;
   inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background: radial-gradient(
-    120px circle at var(--gx, 50%) var(--gy, 50%),
-    rgba(245, 165, 36, 0.3),
+    600px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(59, 130, 246, 0.05),
     transparent 65%
   );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-.glow-follow:hover::after {
-  opacity: 1;
 }
 
-/* 卡片顶部渐变光条：hover 时从左到右循环扫过 */
+/* 卡片顶部高光微反光条 */
 .light-sweep {
   opacity: 0;
   transform: translateX(-200%);
@@ -161,41 +178,11 @@ body {
   animation: light-sweep 1.2s ease-in-out infinite;
 }
 @keyframes light-sweep {
-  0% {
-    transform: translateX(-200%);
-  }
-  60%,
-  100% {
-    transform: translateX(500%);
-  }
+  0% { transform: translateX(-200%); }
+  60%, 100% { transform: translateX(500%); }
 }
 
-/* ================= v3 沉浸式暗色层（方案 B） ================= */
-
-/* 玻璃卡片基类（MealCard / 弹窗 / 大卡共用） */
-.glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
-}
-
-/* 全屏鼠标跟随光源层（App.jsx 固定层 + mousemove 写 --mx/--my） */
-.cursor-light {
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  background: radial-gradient(
-    600px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(245, 165, 36, 0.07),
-    transparent 60%
-  );
-  mix-blend-mode: screen;
-}
-
-/* 跑马灯标语条（内容复制 2 份实现无缝循环） */
+/* 跑马灯标语条 */
 .marquee {
   overflow: hidden;
   white-space: nowrap;
@@ -203,15 +190,32 @@ body {
 .marquee-track {
   display: flex;
   width: max-content;
-  animation: marquee-scroll 28s linear infinite;
+  animation: marquee-scroll 32s linear infinite;
 }
 @keyframes marquee-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
 
-/* kinetic 标题词块（位移由 JS 写 inline transform） */
+/* kinetic 标题词块 */
 .kinetic-word {
   display: inline-block;
   will-change: transform;
+}
+
+/* ================= 浅色主题兼容微调（适配各子模块原有白透明边框） ================= */
+.border-white\/10 {
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+.border-white\/8, .border-white\/5 {
+  border-color: rgba(226, 232, 240, 0.6) !important;
+}
+.border-white\/15 {
+  border-color: rgba(203, 213, 225, 0.8) !important;
+}
+.bg-white\/5, .bg-white\/4 {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+}
+.bg-white\/8, .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
 }

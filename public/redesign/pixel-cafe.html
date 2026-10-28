@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 6：动森像素料理屋 (Cozy 8-Bit Pixel Cafe)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+SC:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #E8E4D5; /* 动森暖木复古底 */
+      color: #38302E;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    .pixel-font { font-family: 'Press Start 2P', monospace; }
+    /* 复古掌机与像素卡片 */
+    .pixel-card {
+      background: #FAF8F0;
+      border: 3px solid #38302E;
+      border-radius: 12px;
+      box-shadow: 4px 4px 0px #38302E;
+      transition: all 0.1s ease;
+    }
+    .pixel-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #38302E;
+    }
+    .pixel-btn {
+      background: #78C2AD;
+      border: 3px solid #38302E;
+      border-radius: 8px;
+      box-shadow: 3px 3px 0px #38302E;
+      font-weight: 900;
+      transition: all 0.05s ease;
+      cursor: pointer;
+    }
+    .pixel-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #38302E;
+    }
+    .pixel-bar {
+      border: 2px solid #38302E;
+      border-radius: 4px;
+      height: 12px;
+      background: #D8D2C2;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- 动森风格顶栏 -->
+  <header class="sticky top-0 z-30 bg-[#E8E4D5] border-b-3 border-[#38302E] px-6 py-3">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl p-1 bg-[#FAF8F0] border-2 border-[#38302E] rounded-lg">🍳</span>
+        <div>
+          <span class="font-black text-xl tracking-tight text-[#38302E]">每日食光 · 料理屋</span>
+          <span class="pixel-font text-[9px] ml-2 bg-[#78C2AD] text-white px-2 py-0.5 border border-[#38302E] rounded">LV.99 CHEF</span>
+        </div>
+      </div>
+
+      <!-- 游戏化道具栏导航 -->
+      <nav class="hidden md:flex items-center gap-2">
+        <button class="pixel-btn bg-[#F3969A] text-white px-3 py-1.5 text-xs flex items-center gap-1">
+          <span>🍙</span> 今日食谱
+        </button>
+        <button class="pixel-btn bg-[#FAF8F0] text-[#38302E] px-3 py-1.5 text-xs flex items-center gap-1">
+          <span>🎯</span> 体力目标
+        </button>
+        <button class="pixel-btn bg-[#FAF8F0] text-[#38302E] px-3 py-1.5 text-xs flex items-center gap-1">
+          <span>📖</span> 图鉴 (1093)
+        </button>
+        <button class="pixel-btn bg-[#FFCE67] text-[#38302E] px-3 py-1.5 text-xs flex items-center gap-1">
+          <span>🎒</span> 背包 (3)
+        </button>
+      </nav>
+
+      <button class="pixel-btn bg-[#6CC3D5] text-white px-3.5 py-1.5 text-xs">
+        🧋 赞助奶茶
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="max-w-5xl mx-auto px-6 pt-10 pb-24">
+    <!-- 像素对话框标语 -->
+    <div class="pixel-card p-6 mb-10 bg-[#FAF8F0] relative">
+      <div class="flex items-start gap-4">
+        <div class="w-14 h-14 bg-[#FFCE67] border-2 border-[#38302E] rounded-lg flex items-center justify-center text-3xl shrink-0">
+          🐱
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-sm bg-[#78C2AD] text-white px-2 py-0.5 rounded border border-[#38302E]">主厨狸克说：</span>
+            <span class="pixel-font text-[10px] text-[#38302E]/60">QUEST #01: EAT WELL TODAY</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-black text-[#38302E] mt-2">
+            “今天想补充哪种能量？卡路里数值都算好了喵！”
+          </h1>
+          <p class="text-xs font-bold text-[#38302E]/70 mt-1">
+            烹饪美味家常菜，自动升级你的体态点数，无压力通关每日健康饮食！
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 游戏主菜谱大卡 -->
+    <div class="pixel-card p-7 mb-8">
+      <div class="flex items-center justify-between border-b-2 border-[#38302E] pb-3 mb-6">
+        <div class="flex items-center gap-2">
+          <span class="bg-[#F3969A] text-white text-xs px-2.5 py-1 font-black rounded border border-[#38302E]">
+            ★ SSR 极品料理
+          </span>
+          <span class="font-black text-xs text-[#38302E]">香煎脆皮鸡胸藜麦饭</span>
+        </div>
+        <div class="pixel-font text-sm font-black bg-[#FFCE67] text-[#38302E] px-2.5 py-1 border-2 border-[#38302E] rounded">
+          +365 KCAL
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div class="md:col-span-4 h-48 bg-[#EFEAD8] border-2 border-[#38302E] rounded-lg flex items-center justify-center text-7xl relative shadow-inner">
+          🍗
+          <span class="pixel-font absolute bottom-2 left-2 text-[9px] bg-[#38302E] text-white px-1.5 py-0.5 rounded">
+            COOK: 12M
+          </span>
+        </div>
+
+        <div class="md:col-span-8">
+          <p class="text-xs font-bold text-[#38302E]/80 leading-relaxed">
+            【属性加成】摄入后立即获得高饱腹 BUFF，减少垃圾食品摄入概率 90%！肉质饱满金黄，黑椒碎调味浓烈。
+          </p>
+
+          <!-- 游戏血条/蓝条/耐力条 -->
+          <div class="space-y-3 mt-4">
+            <div>
+              <div class="flex justify-between text-xs font-black mb-1">
+                <span class="text-[#F3969A]">❤️ 蛋白质恢复 (HP)</span>
+                <span class="pixel-font text-[10px]">38 / 50g</span>
+              </div>
+              <div class="pixel-bar">
+                <div class="h-full bg-[#F3969A] w-[76%]"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-black mb-1">
+                <span class="text-[#78C2AD]">⚡️ 能量碳水 (STA)</span>
+                <span class="pixel-font text-[10px]">26 / 45g</span>
+              </div>
+              <div class="pixel-bar">
+                <div class="h-full bg-[#78C2AD] w-[58%]"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between pt-3 border-t-2 border-[#38302E]">
+            <span class="pixel-font text-[10px] text-[#38302E]/60">EXP GAINED: +120 PTS</span>
+            <button class="pixel-btn bg-[#FFCE67] text-[#38302E] px-4 py-2 text-xs">
+              + 放入餐桌背包
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 料理卡片三联 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="pixel-card p-5">
+        <div class="h-32 bg-[#EFEAD8] border-2 border-[#38302E] rounded flex items-center justify-center text-5xl mb-3 relative">
+          🦐
+          <span class="pixel-font absolute top-2 right-2 text-[9px] bg-[#FAF8F0] border border-[#38302E] px-1">190KCAL</span>
+        </div>
+        <h4 class="font-black text-sm text-[#38302E]">鲜虾海苔魔芋捞面</h4>
+        <div class="mt-3 flex items-center justify-between">
+          <span class="text-[10px] font-bold bg-[#78C2AD] text-white px-2 py-0.5 rounded border border-[#38302E]">减脂专精</span>
+          <button class="pixel-btn bg-[#FAF8F0] px-2.5 py-1 text-xs">+</button>
+        </div>
+      </div>
+
+      <div class="pixel-card p-5">
+        <div class="h-32 bg-[#EFEAD8] border-2 border-[#38302E] rounded flex items-center justify-center text-5xl mb-3 relative">
+          🥩
+          <span class="pixel-font absolute top-2 right-2 text-[9px] bg-[#FAF8F0] border border-[#38302E] px-1">540KCAL</span>
+        </div>
+        <h4 class="font-black text-sm text-[#38302E]">照烧汁嫩煎牛排肉</h4>
+        <div class="mt-3 flex items-center justify-between">
+          <span class="text-[10px] font-bold bg-[#F3969A] text-white px-2 py-0.5 rounded border border-[#38302E]">增肌专精</span>
+          <button class="pixel-btn bg-[#FAF8F0] px-2.5 py-1 text-xs">+</button>
+        </div>
+      </div>
+
+      <div class="pixel-card p-5">
+        <div class="h-32 bg-[#EFEAD8] border-2 border-[#38302E] rounded flex items-center justify-center text-5xl mb-3 relative">
+          🍲
+          <span class="pixel-font absolute top-2 right-2 text-[9px] bg-[#FAF8F0] border border-[#38302E] px-1">290KCAL</span>
+        </div>
+        <h4 class="font-black text-sm text-[#38302E]">慢火香菇玉米滑鸡煲</h4>
+        <div class="mt-3 flex items-center justify-between">
+          <span class="text-[10px] font-bold bg-[#FFCE67] text-[#38302E] px-2 py-0.5 rounded border border-[#38302E]">营养专精</span>
+          <button class="pixel-btn bg-[#FAF8F0] px-2.5 py-1 text-xs">+</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

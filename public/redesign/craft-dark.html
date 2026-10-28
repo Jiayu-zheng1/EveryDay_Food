@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日食光 · 方案 3：黑曜石先锋极简 (Obsidian Craft Dark)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #09090B;
+      color: #FAFAFA;
+      font-family: 'Geist', 'Noto Sans SC', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* 精密网格底纹 */
+    .bg-dot-grid {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    /* 黑曜石晶体卡片 */
+    .craft-card {
+      background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(18, 18, 20, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.25rem;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .craft-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    }
+    .craft-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+    }
+    .mono-num {
+      font-family: 'Geist', monospace;
+      font-feature-settings: 'tnum';
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-dot-grid">
+  <!-- 精密顶部栏 -->
+  <header class="sticky top-0 z-30 bg-[#09090B]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-lg shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+          🍱
+        </div>
+        <div>
+          <span class="font-bold text-base tracking-tight text-white">每日食光</span>
+          <span class="ml-2 font-mono text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-400 border border-white/10">v2.4 · 1093 recipes</span>
+        </div>
+      </div>
+
+      <!-- Raycast 风格分段控制器 -->
+      <nav class="hidden md:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-white/10 shadow-inner">
+        <a href="#" class="px-3.5 py-1.5 rounded-lg bg-zinc-800 text-white font-medium text-xs shadow-sm flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 今日搭配
+        </a>
+        <a href="#" class="px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
+          健康目标
+        </a>
+        <a href="#" class="px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
+          菜谱库
+        </a>
+        <a href="#" class="px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-medium text-xs transition-colors flex items-center gap-1.5">
+          我的餐桌
+          <span class="mono-num text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 rounded border border-emerald-500/30">3</span>
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button class="bg-white/10 hover:bg-white/15 border border-white/10 text-white px-3.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5">
+          <span>🧋</span> 支持作者
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="max-w-6xl mx-auto px-6 pt-12 pb-20">
+    <!-- 标语区 -->
+    <div class="max-w-2xl mb-12">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        PRECISION NUTRITION & RECIPES
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+        精确到每一卡，<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 via-zinc-400 to-emerald-400">重构你的健康日常饮食</span>
+      </h1>
+      <p class="text-zinc-400 text-sm mt-3">
+        黑曜石先锋极简设计 · 摒弃粗粝渐变，专为追求生活质感与营养控制的极客打造。
+      </p>
+    </div>
+
+    <!-- 精雕网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+      <!-- 主推特选（8列） -->
+      <div class="craft-card md:col-span-8 p-7">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+              减脂首选
+            </span>
+            <span class="text-zinc-500 text-xs font-mono">RECIPE #041</span>
+          </div>
+          <div class="text-right">
+            <span class="mono-num text-3xl font-bold text-white">380</span>
+            <span class="text-xs text-zinc-500 font-mono ml-1">KCAL</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div class="md:col-span-4 h-44 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-7xl shadow-inner">
+            🥗
+          </div>
+          <div class="md:col-span-8">
+            <h2 class="text-2xl font-bold text-white">香煎柠檬鸡胸肉佐羽衣甘蓝</h2>
+            <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
+              黑胡椒低温慢煎保留肉汁，优质天然蛋白质搭配抗氧化羽衣甘蓝，满足全天饱腹需求。
+            </p>
+
+            <!-- 精密进度条小组件 -->
+            <div class="space-y-2 mt-5">
+              <div>
+                <div class="flex justify-between text-[11px] font-mono text-zinc-400 mb-1">
+                  <span>蛋白质 (38g)</span>
+                  <span class="text-emerald-400">76% 目标达成</span>
+                </div>
+                <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-emerald-500 rounded-full w-[76%]"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px] font-mono text-zinc-400 mb-1">
+                  <span>碳水化合物 (18g)</span>
+                  <span class="text-zinc-400">22% 目标达成</span>
+                </div>
+                <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-zinc-400 rounded-full w-[22%]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-7 pt-4 border-t border-white/5 flex items-center justify-between">
+          <span class="text-xs text-zinc-500 font-mono">15 MINS · EASY PREP</span>
+          <button class="bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+            <span>+</span> 加入餐桌
+          </button>
+        </div>
+      </div>
+
+      <!-- 快捷小卡（4列） -->
+      <div class="craft-card md:col-span-4 p-7 flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-mono text-zinc-500">QUICK PLANNER</span>
+          <h3 class="text-xl font-bold text-white mt-1">智能热量计算</h3>
+          <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
+            设定全天热量缺口，算法将自动平衡三大营养素并在 1093 道食谱中寻优。
+          </p>
+
+          <div class="mt-6 p-4 rounded-xl bg-zinc-900/60 border border-white/5 space-y-3 font-mono text-xs">
+            <div class="flex justify-between">
+              <span class="text-zinc-400">基础代谢 BMR</span>
+              <span class="text-white">1650 kcal</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-zinc-400">建议摄入 TDEE</span>
+              <span class="text-emerald-400">1420 kcal</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full mt-6 bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white py-2.5 rounded-xl text-xs font-medium transition">
+          开始目标配置 →
+        </button>
+      </div>
+
+      <!-- 食物卡 1 -->
+      <div class="craft-card md:col-span-4 p-5">
+        <div class="h-36 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-5xl mb-4 relative">
+          🐟
+          <span class="mono-num absolute top-2 right-2 text-[11px] bg-zinc-800 border border-white/10 text-zinc-300 px-2 py-0.5 rounded">280 kcal</span>
+        </div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">减脂</span>
+          <span class="text-[10px] text-zinc-500">粤菜 · 蒸</span>
+        </div>
+        <h4 class="font-bold text-white text-base">清蒸豉油鲈鱼</h4>
+        <p class="text-xs text-zinc-400 mt-1 line-clamp-2">优质白肉低脂高蛋白，葱姜滚热油鲜香四溢。</p>
+        <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+          <span class="mono-num text-zinc-500">P: 34g · F: 7g</span>
+          <button class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-white/10 text-xs">+</button>
+        </div>
+      </div>
+
+      <!-- 食物卡 2 -->
+      <div class="craft-card md:col-span-4 p-5">
+        <div class="h-36 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-5xl mb-4 relative">
+          🥩
+          <span class="mono-num absolute top-2 right-2 text-[11px] bg-zinc-800 border border-white/10 text-zinc-300 px-2 py-0.5 rounded">620 kcal</span>
+        </div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">增肌</span>
+          <span class="text-[10px] text-zinc-500">鲁菜 · 烧</span>
+        </div>
+        <h4 class="font-bold text-white text-base">家常红烧排骨</h4>
+        <p class="text-xs text-zinc-400 mt-1 line-clamp-2">慢火焖炖酱香浓郁，肉质酥烂脱骨，高碳高蛋白之选。</p>
+        <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+          <span class="mono-num text-zinc-500">P: 46g · C: 12g</span>
+          <button class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-white/10 text-xs">+</button>
+        </div>
+      </div>
+
+      <!-- 食物卡 3 -->
+      <div class="craft-card md:col-span-4 p-5">
+        <div class="h-36 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-5xl mb-4 relative">
+          🍅
+          <span class="mono-num absolute top-2 right-2 text-[11px] bg-zinc-800 border border-white/10 text-zinc-300 px-2 py-0.5 rounded">270 kcal</span>
+        </div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">营养</span>
+          <span class="text-[10px] text-zinc-500">家常 · 炖</span>
+        </div>
+        <h4 class="font-bold text-white text-base">番茄慢炖豆腐煲</h4>
+        <p class="text-xs text-zinc-400 mt-1 line-clamp-2">天然酸甜番茄汁浸透老豆腐，温润开胃，植物蛋白丰富。</p>
+        <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+          <span class="mono-num text-zinc-500">P: 22g · F: 9g</span>
+          <button class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-white/10 text-xs">+</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
