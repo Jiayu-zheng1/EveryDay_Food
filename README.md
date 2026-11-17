@@ -1,6 +1,6 @@
 # 🍜 每日食光 · EveryDay Food
 
-深夜食堂风格的中文食谱站：1093 道家常菜和健康食谱，热量、营养、做法都替你算好、整理好了。纯前端 SPA，线上在 [meirishiguang.com](https://meirishiguang.com)。
+冰川雾蓝底色的液态果冻玻璃风格中文食谱站：1093 道家常菜和健康食谱，热量、营养、做法都替你算好、整理好了。纯前端 SPA，线上在 [meirishiguang.com](https://meirishiguang.com)。
 
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
@@ -21,28 +21,30 @@
 ## 功能
 
 - **1093 道食谱**：减脂 / 增肌 / 维持 / 营养四大类各 56–57 道，另有 672 道家常菜、51 道食疗、50 道烘焙、94 道小吃，每道都带食材、做法和营养数据。
-- **筛选和搜索**：分类、餐次（早 / 午 / 晚）、菜系（川 / 湘 / 粤 / 鄂 / 鲁 / 苏浙 / 北方 / 徽 / 闽 / 东北 / 滇 / 陕 / 新疆）、做法、口味都能组合着筛，也能按菜名和食材搜关键词，按热量或蛋白质排序。
-- **热量计算器**：填年龄、身高、体重，算 BMI、基础代谢、每日目标热量和三大营养素克数；输入不对会提示而不是给 NaN，结果存在本地，刷新不丢。
-- **每日三餐搭配**：按餐次从全库抽菜，同一天内刷新结果不变；计算器里也能一键生成今天的搭配。
-- **年夜饭生成器**：凉菜 / 硬菜 / 热菜 / 汤 / 主食 / 甜品各抽几道凑一桌，哪道不顺眼就单换哪道，配好直接加进家庭餐桌。
-- **家庭餐桌**：想吃的菜都加进来，实时汇总热量和营养，一键生成购物清单——「黄瓜 100 克 + 半根」会自动合并成 200 克，调味品单独归一类。
-- **做法弹窗**：点卡片看食材、分步做法、每份和每 100g 的营养，弹窗里也能直接加菜。
-- **PWA**：能装到桌面 / 手机，离线也能打开。
-- 深色玻璃拟态 UI，滚动动画、鼠标光效都有，效果直接看线上。
+- **首页 Bento 驾驶舱**：今日灵感主推大卡（配三大营养素微指标）、专属热量缺口速览、四大厨房入口矩阵与热门好菜卡片，一屏看清今天该干什么。
+- **今日三餐搭配**：人数（1–6 人）与每餐菜数（早 1–3、午 1–4、晚 1–4）可调，按人份换算份量与热量；同一餐里哪道不顺眼就单换哪道，整份搭配能一键打包进餐桌。
+- **饭类约束**：炒饭 / 盖饭 / 焖饭 / 烩饭 / 饭团等米饭主食全天至多出现 1 道，生成、单换、智能搭配三条链路都拦住了。
+- **健康目标**：填年龄、性别、身高、体重、活动量和目标，算 BMI、基础代谢、每日目标热量与三大营养素克数；输入不合法会提示而不是给 NaN，结果存在本地，刷新不丢，并能一键生成智能三餐搭配、按四大分类浏览目标菜谱。
+- **菜谱库**：分类、餐次（早 / 午 / 晚）、菜系（川 / 湘 / 粤 / 鄂 / 鲁 / 苏浙 / 北方 / 徽 / 闽 / 东北 / 滇 / 陕 / 新疆 / 家常）、做法（20 种）、口味（16 种）组合筛选，高级条件收在抽屉里；关键词直接搜菜名、简介和食材（「冰箱搜菜」），也能按热量升降序或蛋白质排序，滚到底自动加载下一批。
+- **家宴聚餐**：四菜一汤 / 六菜一汤 / 十全十美三种规格，凉菜、硬菜、热菜、汤、主食、甜品分池抽取，整桌重抽或单道换菜，菜系筛选会优先命中，配好直接进家庭餐桌。
+- **我的餐桌**：实时汇总热量和营养，一键生成购物清单——「黄瓜 100 克 + 半根」自动合并成 200 克，调料单独归一类；清单按货架分组（肉禽蛋品 / 水产海鲜 / 蔬菜菌菇 …），支持复制纯文本、复制 Markdown、导出 `.md`，逐项打卡进度存在本地。
+- **做法弹窗**：点卡片看食材、分步做法、每份和每 100g 的营养；「专注下厨」模式全屏大字、Screen Wake Lock 防息屏，还能从步骤文字里自动识别时长开计时器。
+- **PWA**：能装到桌面 / 手机，离线也能打开，断网有提示。
+- **视觉**：VisionOS 风的液态果冻玻璃浅色主题——冰川灰蓝底、超透光毛玻璃卡片、水滴胶囊按钮，配鼠标跟随光源、滚动进度条和入场动画。
 
 ## 截图
 
-| 首页 · 今日搭配 | 菜谱库 · 筛选 |
+| 首页 · Bento 驾驶舱 | 菜谱库 · 筛选 |
 | :---: | :---: |
-| ![首页 · 今日搭配](docs/screenshots/home-dailyplan.webp) | ![菜谱库 · 筛选](docs/screenshots/recipe-library.webp) |
+| ![首页 · Bento 驾驶舱](docs/screenshots/home-dailyplan.webp) | ![菜谱库 · 筛选](docs/screenshots/recipe-library.webp) |
 
-| 年夜饭生成器 | 我的餐桌 · 购物清单 |
+| 家宴聚餐 · 多规格 | 我的餐桌 · 购物清单 |
 | :---: | :---: |
-| ![年夜饭生成器](docs/screenshots/newyear-dinner.webp) | ![我的餐桌 · 购物清单](docs/screenshots/my-table.webp) |
+| ![家宴聚餐](docs/screenshots/newyear-dinner.webp) | ![我的餐桌 · 购物清单](docs/screenshots/my-table.webp) |
 
 ## 技术栈
 
-React 18 + TypeScript（strict）+ Vite 6 + Tailwind CSS v4 + Vitest。食谱数据在构建时从 `src/data/*.ts` 导出成 JSON（约 830KB），运行时 fetch 加载、内存缓存，不打包进 JS bundle。
+React 18 + TypeScript（strict）+ Vite 6 + Tailwind CSS v4 + Vitest。食谱数据在构建时从 `src/data/*.ts` 导出成 JSON（约 884KB），运行时 fetch 加载、内存缓存，不打包进 JS bundle。视觉层是 Tailwind v4 `@theme` 主题变量加自定义工具类：`.liquid-card` 毛玻璃卡片、`.jelly-pill` 水滴胶囊。
 
 ## 本地跑起来
 
@@ -52,18 +54,19 @@ cd EveryDay_Food
 npm install
 
 npm run dev      # 开发服务器，默认 http://localhost:5173
-npm test         # 44 个单元测试
+npm test         # 64 个单元测试
 npm run build    # 生产构建，输出到 dist/
 npm run preview  # 本地预览生产包
 ```
 
 ## 测试
 
-`npm test` 跑 44 个 Vitest 用例，都是 node 环境的纯函数测试，不碰 DOM 和网络：
+`npm test` 跑 64 个 Vitest 用例（3 个文件，node 环境纯函数测试，不碰 DOM 和网络）：
 
 - 营养计算：BMI / BMR / TDEE / 目标热量与宏量克数，含除零和边界
-- 智能搭配：超时防挂起 + 结果合理性回归
-- 购物清单：跨单位合并（黄瓜 100 克 + 半根 → 200 克）、分数半量、调味品分离
+- 三餐搭配：超时防挂起、结果合理性回归，饭类全天至多 1 道（生成 / 单换 / 智能搭配）
+- 购物清单：同单位合并（黄瓜 100 克 + 半根 → 200 克）、多食材行解析、单位换算、Markdown 导出
+- 家庭餐桌：本地持久化与营养汇总
 - 表单校验：年龄 / 身高 / 体重边界
 - 数据自洽：全量断言每道菜宏量与热量吻合
 
@@ -116,17 +119,19 @@ npx wrangler pages deploy dist --project-name everyday-food
 
 | 菜系 | 数量 | | 菜系 | 数量 |
 | --- | --- | --- | --- | --- |
-| 家常 | 493 | | 湘菜 | 54 |
-| 北方 | 78 | | 鲁菜 | 11 |
-| 粤菜 | 79 | | 鄂菜 | 9 |
+| 家常 | 498 | | 湘菜 | 55 |
+| 北方 | 80 | | 鲁菜 | 11 |
+| 粤菜 | 86 | | 鄂菜 | 9 |
 | 川菜 | 53 | | 闽菜 | 42 |
-| 徽菜 | 49 | | 滇菜 | 45 |
+| 徽菜 | 50 | | 滇菜 | 45 |
 | 东北菜 | 40 | | 陕菜 | 40 |
 | 苏浙 | 42 | | 新疆 | 42 |
 
 ### 字段
 
-每道菜 13 个字段：`id`（唯一）、`name`、`category`（分类）、`cuisine`（菜系）、`emoji`（图标）、`kcal`（每份热量）、`desc`（简介）、`ingredients`（食材）、`steps`（3–6 步做法）、`nutrition`（每份蛋白 / 碳水 / 脂肪）、`per100g`（每 100g 营养）、`servingSize`（份量）、`mealType`（早 / 午 / 晚餐次，全库非空，三餐搭配按它抽取）。
+每道菜 13 个核心字段：`id`（唯一）、`name`、`category`（分类）、`cuisine`（菜系）、`emoji`（图标）、`kcal`（每份热量）、`desc`（简介）、`ingredients`（食材）、`steps`（3–6 步做法）、`nutrition`（每份蛋白 / 碳水 / 脂肪）、`per100g`（每 100g 营养）、`servingSize`（份量）、`mealType`（早 / 午 / 晚餐次，数组，一道菜可跨多餐）。
+
+另有可选标签：`methods`（做法，1078 道有值）、`flavors`（口味，全库覆盖），菜谱库的做法 / 口味筛选按它们匹配。
 
 分类 key：`fat-loss` / `muscle-gain` / `maintain` / `nutrition` / `home` / `therapy` / `bakery` / `snack`
 菜系 key：`chuan` / `xiang` / `yue` / `e` / `lu` / `suzhe` / `bei` / `hui` / `min` / `dongbei` / `dian` / `shan` / `xinjiang` / `generic`
@@ -140,13 +145,13 @@ npx wrangler pages deploy dist --project-name everyday-food
 ├── public/                       # 静态资源：manifest / sw / _redirects / _headers / data/meals.json
 ├── scripts/export-data.mjs       # 数据导出脚本
 ├── src/
-│   ├── api/                      # 数据访问层
-│   ├── components/               # UI 组件
-│   ├── data/                     # 1093 道食谱数据（分批 TS 文件）
-│   ├── hooks/                    # 自定义 hooks
-│   ├── lib/                      # 营养算法 / 购物清单解析
-│   ├── App.tsx                   # 入口 + hash 路由
-│   └── index.css                 # Tailwind v4 主题
+│   ├── api/                      # 数据访问层（fetch / 缓存 / 分类元信息）
+│   ├── components/               # UI 组件（驾驶舱 / 菜谱库 / 健康目标 / 家宴 / 餐桌 / 弹窗）
+│   ├── data/                     # 1093 道食谱数据（分类 / 菜系 / 家常菜分批 TS 文件）
+│   ├── hooks/                    # 自定义 hooks（数据加载 / 三餐搭配 / 营养计算 / 餐桌持久化）
+│   ├── lib/                      # 纯函数：营养算法 / 购物清单解析 / 做法口味枚举
+│   ├── App.tsx                   # 入口 + hash 路由（#home / #goals / #library / #newyear / #table）
+│   └── index.css                 # Tailwind v4 主题与液态玻璃工具类
 └── docs/screenshots/             # README 截图
 ```
 
