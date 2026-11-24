@@ -7,10 +7,13 @@
  *   - category-extra-*.js（moreFatLoss / moreMuscleGain / moreMaintain / moreNutrition）：四大分类二次扩充（共 108 道）
  *   - home-meals/a~f.js（homeDishesA~F）：家常菜六批（每批 50 道，共 300 道）
  *   - therapy-meals.ts / bakery-meals.ts / snack-meals.ts（therapyMeals / bakeryMeals / snackMeals）：食疗食补 / 烘焙 / 小吃（各 50 道，共 150 道）
+ *   - snack-extra-a/b.ts / bakery-extra-a/b.ts（snackExtraA/B / bakeryExtraA/B）：小吃 48 道 + 烘焙 34 道，共 82 道
+ *   - howtocook-import.json（howtocookMeals）：HowToCook 解析导入 225 道，脚本见 scripts/import-howtocook.mjs
+ *   - classics-extra.ts / original-extra.ts（classicsExtra / originalExtra）：公共领域古籍整理 50 道 + 原创菜谱 50 道
  *   - lxj-home-a~c.ts / lxj-extra.ts（lxjHomeA~C / lxjExtra）：收录《老乡鸡菜品溯源报告》整理菜品（家常菜 118 / 小吃 18 / 食疗食补 1 / 营养餐 1，共 138 道）
  *   - cuisine-hui.ts / cuisine-min.ts / cuisine-dongbei.ts（huiMeals / minMeals / dongbeiMeals）：徽菜 / 闽菜 / 东北菜（各 40 道，共 120 道）
  *   - cuisine-dian.ts / cuisine-shan.ts / cuisine-xinjiang.ts / cuisine-xiang2.ts（dianMeals / shanMeals / xinjiangMeals / xiang2Meals）：滇菜 / 陕菜 / 新疆菜 / 湘菜加深（各 40 道，共 160 道）
- * 全库合计 1093 道
+ * 全库合计 1500 道
  *
  * schema: {
  *   id: string,                    // 唯一标识（全库唯一）
@@ -48,6 +51,13 @@ import { moreNutrition } from './category-extra-nutrition'
 import { therapyMeals } from './therapy-meals'
 import { bakeryMeals } from './bakery-meals'
 import { snackMeals } from './snack-meals'
+import { bakeryExtraA } from './bakery-extra-a'
+import { bakeryExtraB } from './bakery-extra-b'
+import { snackExtraA } from './snack-extra-a'
+import { snackExtraB } from './snack-extra-b'
+import { howtocookMeals } from './howtocook-import'
+import { classicsExtra } from './classics-extra'
+import { originalExtra } from './original-extra'
 import { lxjHomeA } from './lxj-home-a'
 import { lxjHomeB } from './lxj-home-b'
 import { lxjHomeC } from './lxj-home-c'
@@ -986,6 +996,16 @@ export const meals = [
   ...therapyMeals,
   ...bakeryMeals,
   ...snackMeals,
+  /* ---------------- 小吃 / 烘焙补充（snack-extra-a/b.ts 48 道，bakery-extra-a/b.ts 34 道） ---------------- */
+  ...snackExtraA,
+  ...snackExtraB,
+  ...bakeryExtraA,
+  ...bakeryExtraB,
+  /* ---------------- HowToCook 导入（npm run import:howtocook 生成） ---------------- */
+  ...howtocookMeals,
+  /* ---------------- 公共领域古籍整理 + 原创菜谱（各 50 道） ---------------- */
+  ...classicsExtra,
+  ...originalExtra,
   /* ---------------- 老乡鸡收录（lxj-home-a~c.ts 118 道 / lxj-extra.ts 20 道，共 138 道） ---------------- */
   ...lxjHomeA,
   ...lxjHomeB,

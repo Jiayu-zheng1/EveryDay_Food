@@ -61,6 +61,10 @@ export interface Meal {
   methods?: string[]
   /** 口味标签（可选，取值必须来自 src/lib/tags.ts 的 FLAVORS，如 '辣' / '清淡' / '甜'） */
   flavors?: string[]
+  /** 外部菜谱来源（导入菜谱用；自有菜谱不填） */
+  source?: { name: string; url?: string; license: string }
+  /** 营养数据质量；estimate 表示按食材与份量估算，尚未逐道复核 */
+  nutritionQuality?: 'estimated' | 'verified'
 }
 
 /** 分类展示元信息：标签 / 图标 / 卡片渐变色 / 分类徽章配色 */

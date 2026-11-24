@@ -83,7 +83,7 @@ export default function Header({ activeModule, tableCount, onNavigate, onOpenSpo
           </span>
           <span className="font-extrabold tracking-tight text-slate-900">每日食光</span>
           <span className="hidden sm:inline-block rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-500/20 whitespace-nowrap">
-            1093 道热量全算好
+            1500 道热量全算好
           </span>
         </a>
 

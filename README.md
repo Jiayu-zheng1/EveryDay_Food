@@ -1,6 +1,6 @@
 # 🍜 每日食光 · EveryDay Food
 
-冰川雾蓝底色的液态果冻玻璃风格中文食谱站：1093 道家常菜和健康食谱，热量、营养、做法都替你算好、整理好了。纯前端 SPA，线上在 [meirishiguang.com](https://meirishiguang.com)。
+冰川雾蓝底色的液态果冻玻璃风格中文食谱站：1500 道家常菜和健康食谱，热量、营养、做法都替你算好、整理好了。纯前端 SPA，线上在 [meirishiguang.com](https://meirishiguang.com)。
 
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
@@ -20,7 +20,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Jiayu-zheng1/EveryDay_Food?style=social&label=Fork)](https://github.com/Jiayu-zheng1/EveryDay_Food)
 ## 功能
 
-- **1093 道食谱**：减脂 / 增肌 / 维持 / 营养四大类各 56–57 道，另有 672 道家常菜、51 道食疗、50 道烘焙、94 道小吃，每道都带食材、做法和营养数据。
+- **1500 道食谱**：减脂 / 增肌 / 维持 / 营养四大类各 56–57 道，另有 902 道家常菜、58 道食疗、96 道烘焙、218 道小吃，每道都带食材、做法和营养数据。
 - **首页 Bento 驾驶舱**：今日灵感主推大卡（配三大营养素微指标）、专属热量缺口速览、四大厨房入口矩阵与热门好菜卡片，一屏看清今天该干什么。
 - **今日三餐搭配**：人数（1–6 人）与每餐菜数（早 1–3、午 1–4、晚 1–4）可调，按人份换算份量与热量；同一餐里哪道不顺眼就单换哪道，整份搭配能一键打包进餐桌。
 - **饭类约束**：炒饭 / 盖饭 / 焖饭 / 烩饭 / 饭团等米饭主食全天至多出现 1 道，生成、单换、智能搭配三条链路都拦住了。
@@ -44,7 +44,7 @@
 
 ## 技术栈
 
-React 18 + TypeScript（strict）+ Vite 6 + Tailwind CSS v4 + Vitest。食谱数据在构建时从 `src/data/*.ts` 导出成 JSON（约 884KB），运行时 fetch 加载、内存缓存，不打包进 JS bundle。视觉层是 Tailwind v4 `@theme` 主题变量加自定义工具类：`.liquid-card` 毛玻璃卡片、`.jelly-pill` 水滴胶囊。
+React 18 + TypeScript（strict）+ Vite 6 + Tailwind CSS v4 + Vitest。食谱数据在构建时从 `src/data/*.ts` 导出成 JSON（约 946KB），运行时 fetch 加载、内存缓存，不打包进 JS bundle。视觉层是 Tailwind v4 `@theme` 主题变量加自定义工具类：`.liquid-card` 毛玻璃卡片、`.jelly-pill` 水滴胶囊。
 
 ## 本地跑起来
 
@@ -97,7 +97,9 @@ npx wrangler pages deploy dist --project-name everyday-food
 
 ## 数据
 
-数据源是 `src/data/*.ts`，构建时由 `scripts/export-data.mjs` 导出成 `public/data/meals.json`（1093 道，约 884KB），运行时由 `src/api/meals.ts` fetch 加载并缓存。
+数据源是 `src/data/*.ts`，构建时由 `scripts/export-data.mjs` 导出成 `public/data/meals.json`（1500 道，约 1.35MB），运行时由 `src/api/meals.ts` fetch 加载并缓存。
+
+部分小吃与烘焙做法参考 [HowToCook](https://github.com/Anduin2017/HowToCook)（Unlicense，公共领域）后，按本项目字段、份量与营养口径重写；另有 225 道菜谱通过 `npm run import:howtocook` 从 HowToCook 解析导入。新增 50 道公共领域古籍菜与 50 道原创菜，古籍只取菜名与源流，做法为本项目新写。所有导入/新写菜谱均标记 `nutritionQuality: 'estimated'`，页面会显示估算提示。
 
 ### 分类数量
 
@@ -107,11 +109,11 @@ npx wrangler pages deploy dist --project-name everyday-food
 | 增肌餐 | 56 |
 | 维持餐 | 56 |
 | 营养餐 | 57 |
-| 家常菜 | 672 |
-| 食疗食补 | 51 |
-| 烘焙 | 50 |
-| 小吃 | 94 |
-| **合计** | **1093** |
+| 家常菜 | 902 |
+| 食疗食补 | 58 |
+| 烘焙 | 96 |
+| 小吃 | 218 |
+| **合计** | **1500** |
 
 家常菜里 138 道（118 家常 + 18 小吃 + 1 食疗 + 1 营养）整理自《老乡鸡菜品溯源报告》，按家庭份量重写。
 
@@ -147,7 +149,7 @@ npx wrangler pages deploy dist --project-name everyday-food
 ├── src/
 │   ├── api/                      # 数据访问层（fetch / 缓存 / 分类元信息）
 │   ├── components/               # UI 组件（驾驶舱 / 菜谱库 / 健康目标 / 家宴 / 餐桌 / 弹窗）
-│   ├── data/                     # 1093 道食谱数据（分类 / 菜系 / 家常菜分批 TS 文件）
+│   ├── data/                     # 1500 道食谱数据（分类 / 菜系 / 家常菜分批 TS 文件）
 │   ├── hooks/                    # 自定义 hooks（数据加载 / 三餐搭配 / 营养计算 / 餐桌持久化）
 │   ├── lib/                      # 纯函数：营养算法 / 购物清单解析 / 做法口味枚举
 │   ├── App.tsx                   # 入口 + hash 路由（#home / #goals / #library / #newyear / #table）
@@ -155,9 +157,17 @@ npx wrangler pages deploy dist --project-name everyday-food
 └── docs/screenshots/             # README 截图
 ```
 
+## 许可
+
+- **项目代码与自有菜谱数据**：MIT License。
+- **`src/data/howtocook-import.json`**：改编自 HowToCook，原文为 Unlicense（公共领域，无署名与 share-alike 义务）。
+- **`src/data/classics-extra.ts` 中的古籍菜名与源流**：来自《随园食单》《调鼎集》等公共领域作品；现代做法为本项目新写。
+
+本项目只使用公共领域/Unlicense 来源的菜谱；不包含 CC BY-SA 等带署名或共享义务的数据。
+
 ## 🧋 支持与赞助作者
 
-独立开发与长期数据整理不易。为了让大家能吃得健康、做饭省心，本项目收录并整理了 **1093 道食谱**，逐一核算热量与三大营养素，手写购物清单智能合并与防息屏烹饪模式，并持续保持纯净无广告的开源体验。
+独立开发与长期数据整理不易。为了让大家能吃得健康、做饭省心，本项目收录并整理了 **1500 道食谱**，逐一核算热量与三大营养素，手写购物清单智能合并与防息屏烹饪模式，并持续保持纯净无广告的开源体验。
 
 如果你觉得「每日食光」对你的日常生活有所帮助，或者为你解决了一点点“今天吃什么”的日常烦恼，欢迎请作者喝杯奶茶 🧋 或加个鸡腿 🍗，非常感谢你的认可与温暖支持！每一份心意都是项目持续维护和优化迭代的最大动力 ❤️
 
