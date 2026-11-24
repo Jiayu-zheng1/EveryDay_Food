@@ -13,7 +13,7 @@ interface HeroProps {
 
 // 快捷入口卡配置：key 传给 onNavigate 切换全局模块
 const QUICK_LINKS: Array<{ key: ModuleKey; emoji: string; title: string; desc: string; action: string }> = [
-  { key: 'library', emoji: '📖', title: '1093 道食谱库', desc: '八大菜系、早中晚餐次多维检索', action: '逛菜谱 →' },
+  { key: 'library', emoji: '📖', title: '1500 道食谱库', desc: '八大菜系、早中晚餐次多维检索', action: '逛菜谱 →' },
   { key: 'goals', emoji: '🎯', title: '健康目标规划', desc: '测算 BMR / TDEE，按黄金比例配餐', action: '定目标 →' },
   { key: 'newyear', emoji: '🏮', title: '家宴聚餐生成', desc: '四菜一汤、阖家欢聚、硬菜凉菜配齐', action: '去配宴 →' },
   { key: 'table', emoji: '🛒', title: '智能购物清单', desc: '多菜食材调料自动归并，超市打卡', action: '看餐桌 →' },

@@ -404,6 +404,12 @@ export default function MealModal({
                 <span className="font-semibold text-snow">{nutriTotalKcal * servings} kcal</span>
                 {servings > 1 ? `（已按 ${servings} 人份换算）` : '，与每份总热量基本一致（含纤维等未计入部分）'}
               </p>
+              {meal.nutritionQuality === 'estimated' && (
+                <p className="pt-2 text-[11px] leading-relaxed text-mist">
+                  营养为按食材与份量估算，仅供参考；导入菜谱正在逐道复核。
+                  {meal.source ? ` 来源：${meal.source.name}（${meal.source.license}）。` : ''}
+                </p>
+              )}
             </div>
           </section>
         </div>

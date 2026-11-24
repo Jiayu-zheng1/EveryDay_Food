@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/export-data.mjs && vite",
+    "import:howtocook": "node scripts/import-howtocook.mjs",
     "build": "node scripts/export-data.mjs && tsc -b && vite build",
     "test": "vitest run",
     "preview": "vite preview"

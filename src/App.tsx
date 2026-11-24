@@ -296,7 +296,7 @@ export default function App() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-xl md:text-2xl font-black text-slate-900">大家都在做的热门好菜</h3>
-                    <p className="text-xs text-slate-500 mt-1">从 1093 道食谱中精选高分好菜，点击直接查看做法与营养</p>
+                    <p className="text-xs text-slate-500 mt-1">从 1500 道食谱中精选高分好菜，点击直接查看做法与营养</p>
                   </div>
                   <button
                     type="button"
